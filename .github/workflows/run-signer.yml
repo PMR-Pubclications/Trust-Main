@@ -1,0 +1,17 @@
+name: Run Signer
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  run-signer:
+    runs-on: ubuntu-latest
+    env:
+      SIGNING_PRIVATE_KEY: ${{ secrets.SIGNING_PRIVATE_KEY }}
+    steps:
+      - uses: actions/checkout@v3
+      - name: Run Node Signer
+        run: node server.js
