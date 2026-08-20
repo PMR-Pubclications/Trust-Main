@@ -5,13 +5,14 @@ set -e
 
 echo "[INFO] Starting trust repository audit and verification..."
 
-# Example: Check if required configuration files exist
-if [ ! -f "authorized-whitelist.json" ]; then
-  echo "[ERROR] Missing authorized-whitelist.json!"
+# Check if required whitelist file exists
+if [ ! -f "White-List-File.json" ]; then
+  echo "[ERROR] Missing White-List-File.json!"
   exit 1
 fi
 
-# Run your Node.js verification or signing script
-node sign-script.js
+# Run NFT signature verification
+echo "[INFO] Running NFT signature verification..."
+node nftsignature.js
 
 echo "[INFO] Trust check script completed successfully."
