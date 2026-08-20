@@ -1,0 +1,13 @@
+{
+  "record_id": "tc_2026_08_20_001",
+  "employee_id": "cpa_user_77",
+  "employee_name": "Jane Doe",
+  "role_id": "role_cpa_admin",
+  "clock_in": "2026-08-20T08:00:00Z",
+  "clock_out": "2026-08-20T16:30:00Z",
+  "regular_hours": 8.0,
+  "overtime_hours": 0.5,
+  "console_station_id": "TERMINAL_03",
+  "verified_by_system": true,
+  "cryptographic_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}
