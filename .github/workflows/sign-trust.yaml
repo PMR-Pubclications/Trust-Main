@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  execute-bash-script:
+  execute-trust-verification:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -17,7 +17,10 @@ jobs:
         with:
           node-version: '18'
 
-      - name: Make script executable and run it
+      - name: Detect version
+        run: node .github/workflows/detect-version.js
+
+      - name: Make script executable and run trust check
         env:
           SIGNING_PRIVATE_KEY: ${{ secrets.SIGNING_PRIVATE_KEY }}
         run: |
