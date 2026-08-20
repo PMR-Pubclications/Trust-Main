@@ -1,0 +1,20 @@
+{
+  "effective_date": "2026-01-01",
+  "currency": "USD",
+  "roles": [
+    {
+      "role_id": "role_forensic_analyst",
+      "title": "Forensic Consultant / Analyst",
+      "base_hourly_rate": 75.00,
+      "overtime_multiplier": 1.5,
+      "authorized_stations": ["TERMINAL_01", "TERMINAL_02"]
+    },
+    {
+      "role_id": "role_cpa_admin",
+      "title": "CPA / Financial Administrator",
+      "base_hourly_rate": 60.00,
+      "overtime_multiplier": 1.5,
+      "authorized_stations": ["TERMINAL_03"]
+    }
+  ]
+}
