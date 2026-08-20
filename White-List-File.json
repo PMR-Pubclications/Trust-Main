@@ -1,0 +1,15 @@
+{
+  "max_single_transaction_limit": 5000.00,
+  "approved_destinations": [
+    {
+      "name": "Primary Operating Account",
+      "identifier": "US123456789_BANK",
+      "allow_withdrawals": true
+    },
+    {
+      "name": "Designated Vendor Payout",
+      "identifier": "US987654321_BANK",
+      "allow_withdrawals": true
+    }
+  ]
+}
