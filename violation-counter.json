@@ -1,0 +1,16 @@
+// Inside your securityViolation function from the previous script:
+let violationRecord = { strike_count: 1 };
+const counterFile = './violation-counter.json';
+
+if (fs.existsSync(counterFile)) {
+  violationRecord = JSON.parse(fs.readFileSync(counterFile, 'utf8'));
+  violationRecord.strike_count += 1;
+}
+
+fs.writeFileSync(counterFile, JSON.stringify(violationRecord, null, 2));
+
+// Check if threshold has been reached (e.g., 5 strikes)
+if (violationRecord.strike_count >= 5) {
+  console.error("[CRITICAL ALERT] Threshold of 5 violations reached. Initiating automated legal escalation package.");
+  triggerLawEnforcementEscalation(violationRecord.strike_count);
+}
