@@ -1,0 +1,6 @@
+{
+  "name": "trust-repository",
+  "version": "1.0.0",
+  "description": "Automated trust and verification framework",
+  "private": true
+}
