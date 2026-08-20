@@ -1,29 +1,19 @@
-const express = require('express');
-const crypto = require('crypto');
-
-const app = express();
-app.use(express.json());
-
-// Pull private key securely from the environment
-const PRIVATE_KEY_PEM = process.env.SIGNING_PRIVATE_KEY;
-
-app.post('/api/v1/profile/sign', (req, res) => {
-  try {
-    const { profileData } = req.body;
-    if (!profileData) return res.status(400).json({ error: "Missing payload" });
-
-    // Format key if needed and sign
-    const privateKey = crypto.createPrivateKey(PRIVATE_KEY_PEM);
-    const dataBuffer = Buffer.from(JSON.stringify(profileData));
-    
-    const signature = crypto.sign(null, dataBuffer, privateKey).toString('base64');
-
-    res.json({
-      status: "signed",
-      payload: profileData,
-      signature: signature
-    });
-  } catch (err) {
-    res.status(500).json({ error: "Signing failed", details: err.message });
-  }
-});
+{
+  "name": "Asset #9042",
+  "description": "Digital physical design component.",
+  "image": "ipfs://QmYourImageHashHere",
+  "attributes": [
+    {
+      "trait_type": "Creator",
+      "value": "Anatolie Anatoliciva"
+    },
+    {
+      "trait_type": "Copyright",
+      "value": "Copyright 2026. All rights reserved."
+    },
+    {
+      "trait_type": "Public_Key",
+      "value": "97271d8e73e5480d95c6c09becbbcf73"
+    }
+  ]
+}
