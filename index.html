@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!--
+      ----------------------------------------------------------------------------
+      Project: Trust & Automated Governance Framework
+      File: index.html
+      
+      Author: Anatolie Anatoliciva
+      Title: Forensic Consultant & Engineer
+      Location: Vancouver, Washington
+      Copyright (c) 2026 PMR Publications. All rights reserved.
+      
+      Description: Two-layer graphical dashboard with high-contrast separation
+      ----------------------------------------------------------------------------
+    -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trust Framework Control Center</title>
+    <style>
+        :root {
+            --bg-deep: #020617;          /* Absolute background canvas */
+            --panel-main: #0f172a;       /* Distinct container box color */
+            --card-surface: #1e293b;     /* High-contrast working card surface */
+            --border-line: #475569;      /* Crisp, highly visible border lines */
+            --text-primary: #f8fafc;     /* Bright white text */
+            --text-secondary: #94a3b8;   /* Clear muted labels */
+            --accent-green: #16a34a;     /* Action green */
+            --accent-hover: #22c55e;     /* Hover green */
+            --accent-red: #dc2626;       /* Danger red */
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-deep);
+            color: var(--text-primary);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        .layer {
+            display: none;
+            width: 100vw;
+            height: 100vh;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .layer.active {
+            display: flex;
+        }
+
+        /* Layer 1: Sign-In Box */
+        .auth-container {
+            background-color: var(--panel-main);
+            border: 2px solid var(--border-line);
+            padding: 40px;
+            border-radius: 10px;
+            width: 400px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.8);
+        }
+
+        .auth-container h2 {
+            margin-top: 0;
+            margin-bottom: 25px;
+            font-size: 24px;
+            text-align: center;
+            color: var(--text-primary);
+            border-bottom: 2px solid var(--border-line);
+            padding-bottom: 12px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 14px;
+            background-color: var(--bg-deep);
+            border: 2px solid var(--border-line);
+            color: var(--text-primary);
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 15px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px;
+            background-color: var(--accent-green);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 15px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            background-color: var(--accent-hover);
+        }
+
+        /* Layer 2: Operational Workspace */
+        .workspace-container {
+            width: 96vw;
+            height: 92vh;
+            background-color: var(--panel-main);
+            border: 2px solid var(--border-line);
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.8);
+        }
+
+        .workspace-header {
+            padding: 18px 30px;
+            background-color: var(--bg-deep);
+            border-bottom: 2px solid var(--border-line);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 16px;
+        }
+
+        .workspace-body {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            padding: 30px;
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+
+        .card {
+            background-color: var(--card-surface);
+            border: 2px solid var(--border-line);
+            border-radius: 8px;
+            padding: 25px;
+        }
+
+        .card h3 {
+            margin-top: 0;
+            font-size: 18px;
+            border-bottom: 2px solid var(--border-line);
+            padding-bottom: 12px;
+            color: var(--text-primary);
+        }
+
+        .console-output {
+            background-color: var(--bg-deep);
+            border: 2px solid var(--border-line);
+            padding: 15px;
+            font-family: monospace;
+            font-size: 13px;
+            height: 180px;
+            overflow-y: auto;
+            color: #38bdf8;
+            border-radius: 6px;
+            margin-top: 10px;
+        }
+
+        .btn-danger {
+            background-color: var(--accent-red);
+        }
+        .btn-danger:hover {
+            background-color: #ef4444;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- LAYER 1: SIGN-IN SCREEN -->
+    <div id="layer-1" class="layer active">
+        <div class="auth-container">
+            <h2>Terminal Authentication</h2>
+            <div class="form-group">
+                <label for="oper-id">Operator ID</label>
+                <input type="text" id="oper-id" value="cpa_user_77">
+            </div>
+            <div class="form-group">
+                <label for="station-select">Assigned Station</label>
+                <select id="station-select">
+                    <option value="TERMINAL_01">Terminal 01 (Forensic)</option>
+                    <option value="TERMINAL_03" selected>Terminal 03 (CPA Admin)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="passcode">Secure Passcode / Key</label>
+                <input type="password" id="passcode" value="••••••••">
+            </div>
+            <button class="btn" onclick="app.transitionToLayer2()">Sign In & Initialize Workspace</button>
+        </div>
+    </div>
+
+    <!-- LAYER 2: OPERATIONAL WORKSPACE -->
+    <div id="layer-2" class="layer">
+        <div class="workspace-container">
+            <div class="workspace-header">
+                <div><strong>Trust Governance Dashboard</strong> | Operator: <span id="lbl-operator">cpa_user_77</span> (<span id="lbl-station">TERMINAL_03</span>)</div>
+                <button class="btn btn-danger" style="width: auto; padding: 8px 20px; margin: 0;" onclick="app.transitionToLayer1()">Lock / Sign Out</button>
+            </div>
+            <div class="workspace-body">
+                <!-- Timecard & Pay Scale Controls -->
+                <div class="card">
+                    <h3>Time Card & Payroll Engine</h3>
+                    <p style="font-size: 14px; color: var(--text-secondary);">Manage click-to-clock states, base pay grades, and statutory deductions.</p>
+                    <button class="btn" onclick="app.logAction('CLOCK_IN')">Clock In / Start Session</button>
+                    <button class="btn" style="background-color: #64748b;" onclick="app.logAction('CLOCK_OUT')">Clock Out / End Session</button>
+                    <button class="btn" onclick="app.runPayrollCheck()">Run Payroll & Deduction Calculation</button>
+                </div>
+
+                <!-- Hardware & Cobot Trigger Monitor -->
+                <div class="card">
+                    <h3>Hardware Trigger & Camera Relay</h3>
+                    <p style="font-size: 14px; color: var(--text-secondary);">Real-time event monitor linked to physical camera and movement scripts.</p>
+                    <button class="btn" onclick="app.triggerHardwareManual()">Manual Hardware Test Pulse</button>
+                    <div style="margin-top: 15px;">
+                        <label style="font-size: 13px; color: var(--text-secondary); display: block; margin-bottom: 5px;">Live Execution Log:</label>
+                        <div id="console-log" class="console-output">[SYSTEM] Initialized layer 2 workspace. Ready for triggers...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /**
+         * ----------------------------------------------------------------------------
+         * Project: Trust & Automated Governance Framework
+         * Author: Anatolie Anatoliciva
+         * Title: Forensic Consultant & Engineer
+         * Location: Vancouver, Washington
+         * Copyright (c) 2026 PMR Publications. All rights reserved.
+         * ----------------------------------------------------------------------------
+         */
+        const app = {
+            transitionToLayer2() {
+                const operator = document.getElementById('oper-id').value;
+                const station = document.getElementById('station-select').value;
+                
+                document.getElementById('lbl-operator').innerText = operator;
+                document.getElementById('lbl-station').innerText = station;
+
+                document.getElementById('layer-1').classList.remove('active');
+                document.getElementById('layer-2').classList.add('active');
+                this.log(`[AUTH] Operator ${operator} authenticated successfully on ${station}.`);
+            },
+
+            transitionToLayer1() {
+                document.getElementById('layer-2').classList.remove('active');
+                document.getElementById('layer-1').classList.add('active');
+                this.log("[AUTH] Terminal locked. Awaiting credentials.");
+            },
+
+            logAction(actionType) {
+                const timestamp = new Date().toISOString();
+                this.log(`[TIMECARD] Action registered -> ${actionType} at ${timestamp}`);
+            },
+
+            runPayrollCheck() {
+                this.log("[PAYROLL] Executing calculation: Base rate matched, FICA (6.2%) + Medicare (1.45%) computed.");
+                this.log("[PAYROLL] Net pay generated successfully. Ready for repository commit.");
+            },
+
+            triggerHardwareManual() {
+                this.log("[HARDWARE] Manual test signal sent. Orienting camera/hardware array to target.");
+            },
+
+            log(message) {
+                const consoleBox = document.getElementById('console-log');
+                consoleBox.innerHTML += `<br>` + message;
+                consoleBox.scrollTop = consoleBox.scrollHeight;
+            }
+        };
+    </script>
+</body>
+</html>
