@@ -1,2 +1,2 @@
 # Trust
-This is the repository for the APIs for the Legacy Trust For The Future website and digital assets.
+This is the repository for the APIs of the Legacy Trust For The Future website and digital assets.
