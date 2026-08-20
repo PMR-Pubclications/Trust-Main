@@ -1,0 +1,13 @@
+{
+  "id": "tx_984512",
+  "amount": 7500.00,
+  "destination_identifier": "UNAUTHORIZED_ACCOUNT",
+  "actor": {
+    "user_id": "cpa_user_77",
+    "name": "Jane Doe",
+    "ip_address": "192.0.2.45",
+    "session_token_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "timestamp": "2026-08-20T12:58:45Z"
+  },
+  "signature": "..."
+}
