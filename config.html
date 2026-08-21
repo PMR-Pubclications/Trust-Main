@@ -1,0 +1,64 @@
+        // Inside configApp in config.html
+        async saveConfigurationToGitHub() {
+            const owner = document.getElementById('cfg-owner').value.trim();
+            const repo = document.getElementById('cfg-repo').value.trim();
+            const endpoint = document.getElementById('cfg-endpoint').value.trim();
+            const token = document.getElementById('cfg-token').value.trim();
+
+            if (!owner || !repo || !token) {
+                alert('Owner, Repository, and Access Token are required to commit config to server.');
+                return;
+            }
+
+            // Cache token locally for API auth during the push
+            localStorage.setItem('secure_access_token', btoa(token));
+
+            const configPayload = {
+                station_id: "TERMINAL_03",
+                repository_owner: owner,
+                repository_name: repo,
+                api_gateway_endpoint: endpoint,
+                last_updated_utc: new Date().toISOString(),
+                updated_by: "Anatolie Anatoliciva"
+            };
+
+            const filePath = `config/terminal_settings.json`;
+            const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${filePath}`;
+
+            document.getElementById('cfg-status').innerText = '[STATUS] Committing configuration to GitHub server...';
+
+            try {
+                // Check for existing file SHA
+                let sha = null;
+                const getRes = await fetch(apiUrl, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (getRes.ok) {
+                    sha = (await getRes.json()).sha;
+                }
+
+                // Push configuration file to repository
+                const putRes = await fetch(apiUrl, {
+                    method: 'PUT',
+                    headers: { 
+                        'Authorization': `Bearer ${token}`, 
+                        'Content-Type': 'application/json' 
+                    },
+                    body: JSON.stringify({
+                        message: `Update terminal configuration settings`,
+                        content: btoa(JSON.stringify(configPayload, null, 2)),
+                        ...(sha && { sha })
+                    })
+                });
+
+                if (putRes.ok) {
+                    document.getElementById('cfg-status').innerText = '[SUCCESS] Configuration committed to GitHub server.';
+                    alert('Terminal configuration successfully pushed to the GitHub repository!');
+                } else {
+                    const err = await putRes.json();
+                    throw new Error(err.message);
+                }
+            } catch (err) {
+                document.getElementById('cfg-status').innerText = `[ERROR] ${err.message}`;
+            }
+        }
