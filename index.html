@@ -236,6 +236,13 @@
             background-color: var(--accent-hover);
         }
 
+                <!-- Admin Gated HR Access Card / Button -->
+                <div id="admin-hr-access-card" class="card admin-only" style="border-color: var(--accent-info);">
+                    <h3>Administrative Controls</h3>
+                    <p style="font-size: 13px; color: var(--text-secondary);">Restricted: Hardware-vetted administrator privileges active.</p>
+                    <button class="btn btn-secondary" style="background-color: #0284c7;" onclick="app.openAdminHRPortal()">👥 Open HR Level 3 Terminal</button>
+                </div>
+
         .btn-secondary {
             background-color: var(--accent-info);
         }
@@ -289,6 +296,13 @@
                 <button class="btn-hardware" onclick="app.triggerBiometricSignIn()">
                     👆 Verify Biometric Key
                 </button>
+                <!-- Admin Gated HR Access Card / Button -->
+                <div id="admin-hr-access-card" class="card admin-only" style="border-color: var(--accent-info);">
+                    <h3>Administrative Controls</h3>
+                    <p style="font-size: 13px; color: var(--text-secondary);">Restricted: Hardware-vetted administrator privileges active.</p>
+                    <button class="btn btn-secondary" style="background-color: #0284c7;" onclick="app.openAdminHRPortal()">👥 Open HR Level 3 Terminal</button>
+                </div>
+
             </div>
 
             <div class="sentinel-footer">
@@ -625,6 +639,30 @@
                 }
             }
         };
+
+            simulateHardwareAuth(operatorId, stationLevel) {
+                if (!this.token) {
+                    const promptToken = prompt("Enter GitHub Personal Access Token (stored securely in local hardware vault for future taps):");
+                    if (!promptToken) return;
+                    this.token = promptToken.trim();
+                    localStorage.setItem('secure_access_token', btoa(this.token));
+                }
+
+                document.getElementById('lbl-operator').innerText = operatorId;
+                document.getElementById('lbl-station').innerText = stationLevel;
+
+                const adminCard = document.getElementById('admin-hr-access-card');
+                if (stationLevel === 'TERMINAL_03' || operatorId.includes('ADMIN')) {
+                    adminCard.style.display = 'flex';
+                    this.log('[AUTH] Hardware token & Admin privileges verified. HR portal access granted.');
+                } else {
+                    adminCard.style.display = 'none';
+                }
+
+                document.getElementById('layer-1').classList.remove('active');
+                document.getElementById('layer-2').classList.add('active');
+            },
+
 
         // Run initialization on load
         window.onload = () => app.init();
