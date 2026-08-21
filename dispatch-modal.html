@@ -1,0 +1,35 @@
+<!-- MULTI-AGENCY SECURE EVIDENCE DISPATCH PANEL -->
+<div class="card" style="border-color: var(--accent-info); margin-top: 20px;">
+    <h3>🛡️ Secure Multi-Agency Evidence Dispatch</h3>
+    <p style="font-size: 13px; color: var(--text-secondary);">Route court-admissible, LSU-resistant forensic reports to authorized recipients while maintaining an independent cryptographic chain-of-custody archive.</p>
+    
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 15px;">
+        <div class="form-group">
+            <label for="dispatch-district">Operational District / Precinct</label>
+            <input type="text" id="dispatch-district" value="Vancouver PD - Precinct 2" placeholder="e.g., Precinct 2 / Sector 4">
+        </div>
+        <div class="form-group">
+            <label for="dispatch-courthouse">County Courthouse / Prosecuting Attorney Gateway</label>
+            <input type="email" id="dispatch-courthouse" value="clerk.prosecution@clark.wa.gov" placeholder="court.clerk@county.gov">
+        </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 5px;">
+        <div class="form-group">
+            <label for="dispatch-lab">Forensics Lab Secure Server Endpoint</label>
+            <input type="text" id="dispatch-lab" value="forensics.lab@vancouverpolice.internal" placeholder="lab.endpoint@agency.gov">
+        </div>
+        <div class="form-group">
+            <label for="dispatch-officer-archive">Officer / Independent Archival Email (Self-Preservation)</label>
+            <input type="email" id="dispatch-officer-archive" placeholder="officer.secure.archive@proton.me">
+        </div>
+    </div>
+
+    <button class="btn" style="background-color: var(--accent-green); margin-top: 10px;" onclick="evidenceDispatchEngine.executeSecureDispatch()">
+        🚀 Dispatch Report to All Three Authorized Destinations
+    </button>
+
+    <div id="dispatch-console" class="console-output" style="margin-top: 12px; font-family: monospace; font-size: 11px; color: #38bdf8;">
+        [DISPATCH GATEWAY] Ready for multi-agency routing configuration.
+    </div>
+</div>
