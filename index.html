@@ -15,7 +15,7 @@
       ----------------------------------------------------------------------------
     -->
 
-<script>
+<script id="service worker">
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('/sw.js')
@@ -24,6 +24,36 @@
     });
   }
 </script>
+<script id="encrypted" type="module">
+  import { 
+    generateAesKey, 
+    encryptData, 
+    decryptData, 
+    exportCryptoKey, 
+    importCryptoKey 
+  } from './cryptoUtils.js';
+
+  async function runDemo() {
+    // 1. Generate key
+    const key = await generateAesKey();
+
+    // 2. Encrypt string
+    const secretMessage = "Confidential data payload";
+    const { cipherText, iv } = await encryptData(secretMessage, key);
+    console.log("Encrypted Bytes:", new Uint8Array(cipherText));
+
+    // 3. Export key to JWK and re-import
+    const exportedJwk = await exportCryptoKey(key, 'jwk');
+    const importedKey = await importCryptoKey(exportedJwk, 'jwk');
+
+    // 4. Decrypt string using imported key
+    const originalText = await decryptData(cipherText, importedKey, iv);
+    console.log("Decrypted Text:", originalText);
+  }
+
+  runDemo();
+</script>
+
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
