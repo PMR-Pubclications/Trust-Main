@@ -54,7 +54,40 @@ app.post('/api/onboard', (req, res) => {
                 generated_key_preview: privateKey.split('\n')[1] + '...' // Return preview snippet only for security
             });
         });
+// assets/js/main.js
+import { generateSecurityHeaders } from './generate-headers.js';
+import { generateKey } from './cryptoUtils.js';
 
+async function initApp() {
+  console.log("App Initializing...");
+  
+  const headers = generateSecurityHeaders();
+  console.log("Security Headers Configured:", headers);
+
+  const key = await generateKey();
+  console.log("Encryption Key Generated successfully.");
+}
+
+// assets/js/cryptoUtils.js
+export async function generateKey() {
+  return await crypto.subtle.generateKey(
+    { name: "AES-GCM", length: 256 },
+    true,
+    ["encrypt", "decrypt"]
+  );
+}
+
+// assets/js/generate-headers.js
+export function generateSecurityHeaders() {
+  return {
+    "Content-Security-Policy": "default-src 'self'",
+    "X-Content-Type-Options": "nosniff",
+    "X-Frame-Options": "DENY"
+  };
+}
+
+
+initApp()
     } catch (err) {
         res.status(500).json({ error: 'Key generation failed: ' + err.message });
     }
@@ -63,3 +96,6 @@ app.post('/api/onboard', (req, res) => {
 app.listen(3000, () => {
     console.log('Governance onboarding server running on port 3000');
 });
+
+
+
