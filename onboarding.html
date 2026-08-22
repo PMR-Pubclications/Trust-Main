@@ -183,6 +183,168 @@
                 responseBox.innerText = `[ERROR] ${err.message}`;
             }
         }
-    </script>
+
+<!-- HR Fingerprint & Biometric Registration Card -->
+<div class="card" style="border-color: var(--accent-info); margin-top: 20px;">
+    <h3 style="font-size: 16px; color: var(--text-primary); border-bottom: 2px solid var(--border-line); padding-bottom: 10px;">
+        👆 Personnel Biometric & Fingerprint Enrollment Layer
+    </h3>
+    <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 15px;">
+        Register hardware-vetted biometric credentials (Fingerprint/Passkey) for personnel access control. Records are saved locally and synced directly to the GitHub repository.
+    </p>
+
+    <div class="form-group">
+        <label for="personnel-id">Personnel Identifier / Badge Number</label>
+        <input type="text" id="personnel-id" placeholder="e.g., EMP-2026-042">
+    </div>
+
+    <div class="form-group">
+        <label for="personnel-name">Full Legal Name</label>
+        <input type="text" id="personnel-name" placeholder="e.g., Anthony Antolic">
+    </div>
+
+    <button class="btn btn-secondary" onclick="biometricEnrollment.registerFingerprint()">
+        🔒 Scan Fingerprint & Enroll Credential
+    </button>
+
+    <div id="enrollment-console" style="margin-top: 15px; font-family: monospace; font-size: 11px; color: #38bdf8; background: var(--bg-deep); padding: 10px; border-radius: 6px; border: 1px solid var(--border-line); display: none;">
+        [BIOMETRIC] System ready for hardware enrollment...
+    </div>
+</div>
+
+
+    const biometricEnrollment = {
+        async registerFingerprint() {
+            const personnelId = document.getElementById('personnel-id').value.trim();
+            const personnelName = document.getElementById('personnel-name').value.trim();
+            const consoleBox = document.getElementById('enrollment-console');
+
+            if (!personnelId || !personnelName) {
+                alert('Please enter both Personnel ID and Full Legal Name before scanning biometrics.');
+                return;
+            }
+
+            consoleBox.style.display = 'block';
+            consoleBox.innerText = `[1/3] Prompting hardware biometric sensor for [${personnelName}]...`;
+
+            try {
+                // Check if WebAuthn (Fingerprint/Passkey hardware) is supported
+                if (!window.PublicKeyCredential) {
+                    throw new Error('WebAuthn biometric hardware API is not supported on this browser/device.');
+                }
+
+                // Generate a random challenge for cryptographic binding
+                const challenge = new Uint8Array(32);
+                window.crypto.getRandomValues(challenge);
+
+                const publicKeyCredentialCreationOptions = {
+                    challenge: challenge,
+                    rp: {
+                        name: "Trust Governance Framework HR",
+                        id: window.location.hostname,
+                    },
+                    user: {
+                        id: Uint8Array.from(personnelId, c => c.charCodeAt(0)),
+                        name: personnelId,
+                        displayName: personnelName,
+                    },
+                    pubKeyCredParams: [{ alg: -7, type: "public-key" }], // ES256
+                    timeout: 60000,
+                    attestation: "direct",
+                    authenticatorSelection: {
+                        authenticatorAttachment: "platform", // Uses built-in fingerprint/TouchID/Windows Hello
+                        userVerification: "required",
+                        residentKey: "preferred"
+                    }
+                };
+
+                // Trigger hardware biometric prompt (Fingerprint reader)
+                const credential = await navigator.credentials.create({
+                    publicKey: publicKeyCredentialCreationOptions
+                });
+
+                consoleBox.innerText += `\n[2/3] Biometric credential successfully captured. Serializing payload...`;
+
+                // Extract credential details safely
+                const credentialIdB64 = btoa(String.fromCharCode(...new Uint8Array(credential.rawId)));
+                const timestamp = new Date().toISOString();
+
+                const biometricRecord = {
+                    personnel_id: personnelId,
+                    name: personnelName,
+                    credential_id: credentialIdB64,
+                    enrollment_type: "hardware_biometric_fingerprint",
+                    timestamp: timestamp,
+                    status: "ACTIVE_VERIFIED"
+                };
+
+                // 1. Save Locally (localStorage)
+                const localKey = `hr_bio_${personnelId}`;
+                localStorage.setItem(localKey, JSON.stringify(biometricRecord));
+
+                consoleBox.innerText += `\n[3/3] Saved locally. Committing record to GitHub repository...`;
+
+                // 2. Commit to GitHub Repository
+                await this.commitToGitHub(biometricRecord);
+
+                consoleBox.innerText += `\n[SUCCESS] Biometric fingerprint record registered and synced across local and cloud databases.`;
+                alert(`Fingerprint successfully enrolled for ${personnelName}!`);
+
+            } catch (err) {
+                consoleBox.innerText += `\n[ERROR] Enrollment failed: ${err.message}`;
+                console.error(err);
+            }
+        },
+
+        async commitToGitHub(record) {
+            const owner = localStorage.getItem('cfg_owner') || 'Tole1775';
+            const repo = localStorage.getItem('cfg_repo') || 'Trust';
+            const token = localStorage.getItem('secure_access_token') ? atob(localStorage.getItem('secure_access_token')) : '';
+
+            if (!token) {
+                throw new Error('GitHub secure access token missing. Configure repository credentials first.');
+            }
+
+            const filePath = `database/hr/biometrics_${record.personnel_id}.json`;
+            const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${filePath}`;
+            const fileContentB64 = btoa(JSON.stringify(record, null, 2));
+
+            // Check if file already exists to get its SHA (required for GitHub updates)
+            let fileSha = null;
+            try {
+                const checkRes = await fetch(apiUrl, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (checkRes.ok) {
+                    const fileData = await checkRes.json();
+                    fileSha = fileData.sha;
+                }
+            } catch (e) {
+                // File likely doesn't exist yet, which is fine for new records
+            }
+
+            const commitPayload = {
+                message: `HR: Enroll biometric fingerprint record for ${record.personnel_id}`,
+                content: fileContentB64,
+                sha: fileSha
+            };
+
+            const putRes = await fetch(apiUrl, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(commitPayload)
+            });
+
+            if (!putRes.ok) {
+                const errData = await putRes.json();
+                throw new Error(`GitHub Commit Failed: ${errData.message}`);
+            }
+        }
+    };
+</script>
+
 </body>
 </html>
