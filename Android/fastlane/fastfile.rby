@@ -1,0 +1,16 @@
+default_platform(:android)
+
+platform :android do
+  desc "Build and upload release bundle to Google Play Internal Track"
+  lane :deploy do
+    gradle(
+      task: "bundle",
+      build_type: "Release"
+    )
+    upload_to_play_store(
+      track: "internal",
+      aab: "../app/build/outputs/bundle/release/app-release.aab",
+      json_key_data: ENV["GCP_SERVICE_ACCOUNT_JSON"]
+    )
+  end
+end
