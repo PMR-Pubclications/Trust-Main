@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Framework Onboarding | Trust & Automated Governance</title>
+    <style>
+        :root {
+            --bg-deep: #020617;
+            --panel-main: #0f172a;
+            --card-surface: #1e293b;
+            --border-line: #475569;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --accent-green: #16a34a;
+            --accent-hover: #22c55e;
+            --accent-info: #0284c7;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-deep);
+            color: var(--text-primary);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .onboard-container {
+            width: 100%;
+            max-width: 550px;
+            background-color: var(--panel-main);
+            border: 2px solid var(--border-line);
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.8);
+            box-sizing: border-box;
+        }
+
+        h1 {
+            font-size: 20px;
+            margin-top: 0;
+            margin-bottom: 5px;
+            color: var(--text-primary);
+        }
+
+        .subtitle {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 25px;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        label {
+            display: block;
+            font-size: 13px;
+            font-weight: bold;
+            margin-bottom: 6px;
+            color: var(--text-secondary);
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--bg-deep);
+            border: 2px solid var(--border-line);
+            color: var(--text-primary);
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+
+        input:focus {
+            border-color: var(--accent-info);
+            outline: none;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px;
+            background-color: var(--accent-green);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 14px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: background-color 0.2s;
+        }
+
+        .btn:hover {
+            background-color: var(--accent-hover);
+        }
+
+        #response-box {
+            margin-top: 20px;
+            padding: 12px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 12px;
+            display: none;
+        }
+        .success { background-color: #064e3b; border: 1px solid #34d399; color: #34d399; }
+        .error { background-color: #7f1d1d; border: 1px solid #f87171; color: #f87171; }
+    </style>
+</head>
+<body>
+
+    <div class="onboard-container">
+        <h1>Framework Onboarding</h1>
+        <div class="subtitle">Initialize repository parameters and generate secure cryptographic credentials.</div>
+
+        <form id="onboard-form" onsubmit="submitOnboarding(event)">
+            <div class="form-group">
+                <label for="owner_name">GitHub Owner / Handle</label>
+                <input type="text" id="owner_name" required placeholder="e.g., Tole1775">
+            </div>
+
+            <div class="form-group">
+                <label for="repo_name">Repository Name</label>
+                <input type="text" id="repo_name" required placeholder="e.g., Trust">
+            </div>
+
+            <div class="form-group">
+                <label for="organization">Organization / Entity</label>
+                <input type="text" id="organization" value="PMR Publications">
+            </div>
+
+            <div class="form-group">
+                <label for="contact_email">Administrative Contact Email</label>
+                <input type="email" id="contact_email" placeholder="Optional contact email">
+            </div>
+
+            <button type="submit" class="btn">🔑 Generate Key & Save Profile</button>
+        </form>
+
+        <div id="response-box"></div>
+    </div>
+
+    <script>
+        async function submitOnboarding(event) {
+            event.preventDefault();
+
+            const payload = {
+                owner_name: document.getElementById('owner_name').value.trim(),
+                repo_name: document.getElementById('repo_name').value.trim(),
+                organization: document.getElementById('organization').value.trim(),
+                contact_email: document.getElementById('contact_email').value.trim()
+            };
+
+            const responseBox = document.getElementById('response-box');
+            responseBox.style.display = 'block';
+            responseBox.className = '';
+            responseBox.innerText = '[PROCESSING] Generating private key and writing to database...';
+
+            try {
+                const res = await fetch('http://localhost:3000/api/onboard', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await res.json();
+
+                if (!res.ok) throw new Error(data.error || 'Server error occurred.');
+
+                responseBox.className = 'success';
+                responseBox.innerHTML = `<strong>SUCCESS:</strong> ${data.message}<br><br>Profile ID: ${data.profile_id}<br>Key Preview: <code>${data.generated_key_preview}</code>`;
+                
+                // Save config locally for subsequent portal use
+                localStorage.setItem('cfg_owner', payload.owner_name);
+                localStorage.setItem('cfg_repo', payload.repo_name);
+
+            } catch (err) {
+                responseBox.className = 'error';
+                responseBox.innerText = `[ERROR] ${err.message}`;
+            }
+        }
+    </script>
+</body>
+</html>
