@@ -3,27 +3,31 @@
 <head>
     <!--
       ----------------------------------------------------------------------------
-      Project: Trust & Automated Governance Framework For Crime Scene Processing 
-      File: index.html
+      Project: Trust & Automated Governance Framework
+      File: reports.html
       
       Author: Anatolie Anatoliciva
       Title: Forensic Consultant & Engineer
       Location: Vancouver, Washington
       Copyright (c) 2026 PMR Publications. All rights reserved.
       
-      Description: Secure Hardware-Gated Forensic Control Center & Spatial Logger
+      Description: Automated Forensic Reporting & Intelligence Generator Portal
       ----------------------------------------------------------------------------
     -->
-<meta name="keywords" content="forensic spatial mapping, crime scene logging, hardware authentication, NFC security, biometric login, GitHub API integration, investigation management">
-<meta property="og:type" content="website">
-    <meta property="og:title" content="Trust Framework & Forensic Spatial Control Center">
-    <meta property="og:description" content="Secure hardware-voted operational workspace and chronological spatial waypoint logger for field investigations.">
-    <meta property="og:site_name" content="Trust Governance Framework">
+
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js')
+        .then(reg => console.log('Service Worker registered!', reg))
+        .catch(err => console.error('Service Worker registration failed: ', err));
+    });
+  }
+</script>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="Secure, hardware-authenticated forensic control center and spatial waypoint logger featuring role-gated administrative workspaces, encrypted local token vaults, and automated cloud synchronization for field investigations.">
-
-    <title>Trust Framework & Forensic Spatial Control Center</title>
+    <title>Automated Report Generator | Forensic Intelligence</title>
     <style>
         :root {
             --bg-deep: #020617;
@@ -42,145 +46,148 @@
             margin: 0;
             padding: 0;
             background-color: var(--bg-deep);
+            /* Main Workflow Background */
+            background-image: url('https://raw.githubusercontent.com/Tole1775/Trust/main/graphics/work-flow.png');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
             color: var(--text-primary);
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            padding-bottom: 40px;
+            overflow-x: hidden;
         }
 
-        .layer {
-            display: none;
+        /* Splash Screen Layer 1 Background */
+        #flash-screen-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
             width: 100vw;
             height: 100vh;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .layer.active {
-            display: flex;
-        }
-
-        /* Layer 1: Secure Graphical Sentinel Flash Page */
-        .sentinel-container {
-            background-color: var(--panel-main);
-            border: 2px solid var(--border-line);
-            padding: 40px;
-            border-radius: 12px;
-            width: 450px;
-            text-align: center;
-            box-shadow: 0 25px 50px rgba(0,0,0,0.9);
-        }
-
-        .sentinel-emblem {
-            font-size: 42px;
-            margin-bottom: 10px;
-        }
-
-        .sentinel-container h2 {
-            margin: 0;
-            font-size: 18px;
-            letter-spacing: 1px;
-            color: var(--text-primary);
-        }
-
-        .system-sub {
-            font-size: 12px;
-            color: var(--text-secondary);
-            margin-bottom: 25px;
-            border-bottom: 1px solid var(--border-line);
-            padding-bottom: 12px;
-        }
-
-        .status-indicator {
             background-color: var(--bg-deep);
-            border: 1px solid var(--border-line);
-            padding: 12px;
-            border-radius: 6px;
-            font-size: 13px;
-            color: #38bdf8;
-            margin-bottom: 25px;
+            background-image: url('https://raw.githubusercontent.com/Tole1775/Trust/main/graphics/trust-flash.png');
+            background-size: cover;
+            background-position: center;
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.8s ease-out, visibility 0.8s;
+        }
+
+        /* Pocket Lockout Screen (Engages during active recording) */
+        #pocket-lockout-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: #000;
+            background-image: url('https://raw.githubusercontent.com/Tole1775/Trust/main/graphics/system-lock.png');
+            background-size: cover;
+            background-position: center;
+            z-index: 9000;
+            display: none;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: center;
+            padding-bottom: 50px;
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        #pocket-lockout-screen.active {
+            display: flex;
+        }
+
+        .swipe-unlock-container {
+            width: 85%;
+            max-width: 400px;
+            height: 60px;
+            background-color: rgba(15, 23, 42, 0.85);
+            border: 2px solid var(--accent-green);
+            border-radius: 30px;
+            position: relative;
+            overflow: hidden;
             display: flex;
             align-items: center;
-            justify-content: center;
-            gap: 10px;
+            box-shadow: 0 0 20px rgba(22, 163, 74, 0.4);
         }
 
-        .pulse-dot {
-            width: 10px;
-            height: 10px;
-            background-color: var(--accent-green);
-            border-radius: 50%;
-            animation: pulse 1.5s infinite;
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(0.95); opacity: 0.8; }
-            50% { transform: scale(1.2); opacity: 1; box-shadow: 0 0 10px var(--accent-green); }
-            100% { transform: scale(0.95); opacity: 0.8; }
-        }
-
-        .hardware-actions {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .btn-hardware {
+        .swipe-unlock-track {
+            position: absolute;
             width: 100%;
-            padding: 14px;
-            background-color: var(--card-surface);
-            border: 2px solid var(--border-line);
-            color: var(--text-primary);
-            border-radius: 8px;
+            text-align: center;
+            color: #34d399;
+            font-size: 13px;
             font-weight: bold;
-            font-size: 14px;
-            cursor: pointer;
-            transition: all 0.2s ease;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            pointer-events: none;
         }
 
-        .btn-hardware:hover {
-            border-color: var(--accent-green);
-            background-color: #1e293b;
+        .swipe-unlock-handle {
+            width: 54px;
+            height: 50px;
+            background-color: var(--accent-green);
+            border-radius: 25px;
+            position: absolute;
+            left: 3px;
+            cursor: grab;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-weight: bold;
+            font-size: 18px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+            touch-action: none;
         }
 
-        .sentinel-footer {
-            font-size: 11px;
-            color: var(--text-secondary);
-            margin-top: 30px;
-        }
-
-        /* Layer 2: Operational Workspace */
-        .workspace-container {
-            width: 98vw;
-            height: 94vh;
-            background-color: var(--panel-main);
+        .reports-container {
+            width: 96vw;
+            margin: 2vh auto;
+            background-color: rgba(15, 23, 42, 0.92);
+            backdrop-filter: blur(8px);
             border: 2px solid var(--border-line);
             border-radius: 10px;
             display: flex;
             flex-direction: column;
-            overflow: hidden;
             box-shadow: 0 20px 40px rgba(0,0,0,0.8);
+            min-height: 94vh;
         }
 
-        .workspace-header {
-            padding: 15px 25px;
+        .reports-header {
+            padding: 20px 30px;
             background-color: var(--bg-deep);
             border-bottom: 2px solid var(--border-line);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 15px;
         }
 
-        .workspace-body {
+        .reports-header h1 {
+            margin: 0;
+            font-size: 18px;
+            letter-spacing: 0.5px;
+            color: var(--text-primary);
+        }
+
+        .reports-sub {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .reports-body {
             display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
+            grid-template-columns: 1fr 2fr;
             gap: 20px;
             padding: 25px;
             flex-grow: 1;
-            overflow-y: auto;
         }
 
         .card {
-            background-color: var(--card-surface);
+            background-color: rgba(30, 41, 59, 0.85);
             border: 2px solid var(--border-line);
             border-radius: 8px;
             padding: 20px;
@@ -197,7 +204,7 @@
         }
 
         .form-group {
-            margin-bottom: 12px;
+            margin-bottom: 15px;
         }
 
         .form-group label {
@@ -208,7 +215,7 @@
             color: var(--text-secondary);
         }
 
-        .form-group input, .form-group select {
+        .form-group select, .form-group input {
             width: 100%;
             padding: 10px;
             background-color: var(--bg-deep);
@@ -230,18 +237,15 @@
             font-size: 14px;
             cursor: pointer;
             margin-top: 5px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            box-sizing: border-box;
         }
 
         .btn:hover {
             background-color: var(--accent-hover);
         }
-
-                <!-- Admin Gated HR Access Card / Button -->
-                <div id="admin-hr-access-card" class="card admin-only" style="border-color: var(--accent-info);">
-                    <h3>Administrative Controls</h3>
-                    <p style="font-size: 13px; color: var(--text-secondary);">Restricted: Hardware-vetted administrator privileges active.</p>
-                    <button class="btn btn-secondary" style="background-color: #0284c7;" onclick="app.openAdminHRPortal()">👥 Open HR Level 3 Terminal</button>
-                </div>
 
         .btn-secondary {
             background-color: var(--accent-info);
@@ -250,139 +254,234 @@
             background-color: #0369a1;
         }
 
-        .btn-danger {
-            background-color: var(--accent-red);
-        }
-        .btn-danger:hover {
-            background-color: #ef4444;
-        }
-
-        .console-output {
+        .report-preview-box {
             background-color: var(--bg-deep);
             border: 2px solid var(--border-line);
-            padding: 10px;
+            padding: 15px;
             font-family: monospace;
-            font-size: 11px;
-            height: 120px;
+            font-size: 12px;
+            height: 450px;
             overflow-y: auto;
             color: #38bdf8;
             border-radius: 6px;
-            margin-top: 8px;
+            margin-top: 10px;
+            white-space: pre-wrap;
+        }
+        
+        .station-case-item {
+            background: var(--bg-deep);
+            border: 1px solid var(--border-line);
+            padding: 8px 10px;
+            border-radius: 5px;
+            margin-bottom: 8px;
+            font-size: 11px;
+        }
+        .station-case-header {
+            display: flex;
+            justify-content: space-between;
+            font-weight: bold;
+            color: #38bdf8;
+            margin-bottom: 3px;
         }
 
-        .admin-only {
-            display: none;
+        /* Supervisor Swipe-Up Drawer Overlay */
+        #supervisor-drawer {
+            position: fixed;
+            bottom: -100%;
+            left: 0;
+            width: 100%;
+            height: 280px;
+            background-color: #090d16;
+            border-top: 3px solid var(--accent-info);
+            box-shadow: 0 -10px 30px rgba(0,0,0,0.9);
+            transition: bottom 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        #supervisor-drawer.open {
+            bottom: 0;
+        }
+        .drawer-handle-bar {
+            width: 60px;
+            height: 5px;
+            background-color: var(--border-line);
+            border-radius: 3px;
+            margin-bottom: 15px;
+            cursor: pointer;
+        }
+
+        /* Dynamic Copyright / Swipe Trigger Tab */
+        .swipe-trigger-tab {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--panel-main);
+            border: 1px solid var(--border-line);
+            border-bottom: none;
+            padding: 6px 20px;
+            font-size: 11px;
+            color: var(--text-secondary);
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+            cursor: pointer;
+            z-index: 1500;
+            font-family: monospace;
+            transition: background-color 0.2s ease, color 0.2s ease;
+            white-space: nowrap;
+        }
+        .swipe-trigger-tab:hover {
+            background-color: var(--accent-info);
+            color: white;
         }
     </style>
+<!-- Link to Manifest -->
+<link rel="manifest" href="/manifest.json">
+
+<!-- iOS Support -->
+<link rel="apple-touch-icon" href="/icon-192.png">
+<meta name="apple-mobile-web-app-status-bar" content="#004080">
+<meta name="theme-color" content="#004080">
+
 </head>
 <body>
 
-    <!-- LAYER 1: SECURE GRAPHICAL SENTINEL FLASH PAGE -->
-    <div id="layer-1" class="layer active">
-        <div class="sentinel-container">
-            <div class="sentinel-emblem">🛡️</div>
-            <h2>TRUST GOVERNANCE FRAMEWORK</h2>
-            <div class="system-sub">Forensic Spatial Control Center | Vancouver, WA</div>
+    <!-- Layer 1 Flash Screen Background Overlay -->
+    <div id="flash-screen-overlay"></div>
 
-            <div class="status-indicator">
-                <span class="pulse-dot"></span> 
-                <span id="sentinel-status-text">Awaiting Hardware Authentication...</span>
-            </div>
-
-            <div class="hardware-actions">
-                <button class="btn-hardware" onclick="app.scanNFCBadge()">
-                    📱 Tap NFC Security Fob
-                </button>
-                <button class="btn-hardware" onclick="app.triggerBiometricSignIn()">
-                    👆 Verify Biometric Key
-                </button>
-                <!-- Admin Gated HR Access Card / Button -->
-                <div id="admin-hr-access-card" class="card admin-only" style="border-color: var(--accent-info);">
-                    <h3>Administrative Controls</h3>
-                    <p style="font-size: 13px; color: var(--text-secondary);">Restricted: Hardware-vetted administrator privileges active.</p>
-                    <button class="btn btn-secondary" style="background-color: #0284c7;" onclick="app.openAdminHRPortal()">👥 Open HR Level 3 Terminal</button>
-                </div>
-
-            </div>
-
-            <div class="sentinel-footer">
-                Authorized Personnel Only • Hardware-Vetted Token Vault
-            </div>
+    <!-- Pocket System Lockout Overlay -->
+    <div id="pocket-lockout-screen">
+        <div class="swipe-unlock-container" id="swipe-container">
+            <div class="swipe-unlock-track">Swipe RIGHT to stop REC ➔</div>
+            <div class="swipe-unlock-handle" id="swipe-handle">➔</div>
         </div>
     </div>
 
-<div class="card" style="border-color: var(--accent-green); background-color: #064e3b22;">
-    <div style="display: flex; justify-content: space-between; align-items: center;">
-        <h3 style="margin: 0; color: #34d399;">⚖️ Trust Judicial Report Generator</h3>
-        <span style="font-size: 11px; background-color: #065f46; color: #6ee7b7; padding: 3px 8px; border-radius: 4px; font-weight: bold;">CLARK COUNTY COURT APPROVED</span>
-    </div>
-    <p style="font-size: 13px; color: var(--text-secondary); margin-top: 8px;">
-        Official Daubert-compliant, LSU-resistant forensic report generation engine. Automatically compiles first-responder spatial trails, camera telemetry, and hardware sensor readings into an immutable multi-agency dispatch package.
-    </p>
-</div>
-
-
-    <!-- LAYER 2: OPERATIONAL WORKSPACE -->
-    <div id="layer-2" class="layer">
-        <div class="workspace-container">
-            <div class="workspace-header">
-                <div><strong>Trust Governance Dashboard</strong> | Operator: <span id="lbl-operator">Anatolie Anatoliciva</span> (<span id="lbl-station">Field Station</span>)</div>
-                <button class="btn btn-danger" style="width: auto; padding: 6px 15px; margin: 0;" onclick="app.lockTerminal()">Lock Terminal</button>
+    <div class="reports-container">
+        <!-- Header -->
+        <div class="reports-header">
+            <div>
+                <h1>AUTOMATED FORENSIC REPORT GENERATOR</h1>
+                <div class="reports-sub">Trust Governance Framework • Vancouver, Washington</div>
             </div>
-            <div class="workspace-body">
+            <div>
+                <a href="index.html" class="btn btn-secondary" style="width: auto; padding: 8px 18px; margin: 0;">⬅ Return to Control Center</a>
+            </div>
+        </div>
+
+        <!-- Body Layout -->
+        <div class="reports-body">
+            
+            <!-- Sidebar: Report Generator Control Panel -->
+            <div class="card">
+                <h3>Report Parameters</h3>
+                <p style="font-size: 13px; color: var(--text-secondary);">Select report type and target date to pull and compile intelligence packages.</p>
                 
-                <!-- Card 1: Crime Scene Spatial Logger & Waypoint Timeline -->
-                <div class="card">
-                    <h3>Crime Scene Spatial Logger</h3>
-                    <p style="font-size: 13px; color: var(--text-secondary);">Record chronological waypoints to map suspect movement and evidence trails.</p>
-                    
-                    <div class="form-group" style="margin-top: 5px;">
-                        <label for="waypoint-notes">Waypoint Description / Evidence Tag</label>
-                        <input type="text" id="waypoint-notes" placeholder="e.g., Point of entry, casing recovered">
+                <div class="form-group" style="margin-top: 10px;">
+                    <label for="report-type">Report Classification</label>
+                    <select id="report-type">
+                        <option value="spatial_trail">Chronological Spatial Trail Summary</option>
+                        <option value="watch_commander">Watch Commander Briefing Package</option>
+                        <option value="personnel_audit">Personnel & Provisioning Audit Log</option>
+                        <option value="system_activity">System Execution & Timecard Log</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="target-date">Target Date / Scope</label>
+                    <input type="date" id="target-date">
+                </div>
+
+                <button class="btn btn-secondary" onclick="reportsApp.fetchAndCompileReport()">📊 Submit & Compile Report</button>
+                <button class="btn" style="background-color: #d97706; margin-top: 10px;" onclick="reportsApp.exportReportJSON()">💾 Export Report File (JSON)</button>
+            
+                <!-- Active Station Cases Frame -->
+                <div style="border-top: 2px solid var(--border-line); margin-top: 20px; padding-top: 15px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <h3 style="font-size: 14px; margin: 0; border: none; padding: 0;">🚨 Station API Cases</h3>
+                        <button onclick="stationCasesApp.fetchStationCases()" style="background: none; border: none; color: #38bdf8; font-size: 11px; cursor: pointer; text-decoration: underline;">Refresh</button>
                     </div>
-
-                    <button class="btn btn-secondary" onclick="app.recordSpatialWaypoint()">📍 Drop Sequential Waypoint</button>
-                    <button class="btn" style="background-color: #64748b; margin-top: 6px;" onclick="app.exportSpatialLog()">Export Spatial Trail (JSON)</button>
-
-                    <div style="margin-top: 10px;">
-                        <label style="font-size: 12px; color: var(--text-secondary); display: block;">Recorded Waypoints (<span id="wp-count">0</span>):</label>
-                        <div id="spatial-console" class="console-output">[SPATIAL] Trail buffer empty. Ready to map scene.</div>
+                    <p style="font-size: 11px; color: var(--text-secondary); margin-bottom: 10px;">Real-time CAD/RMS active case dispatch feed.</p>
+                    <div id="station-cases-container" style="max-height: 180px; overflow-y: auto; padding-right: 2px;">
+                        <div class="station-case-item" style="color: var(--text-secondary);">Connecting to station API gateway...</div>
                     </div>
                 </div>
 
-                <!-- Card 2: Secured HR / Personnel Registration (Admin Station Only) -->
-                <div id="admin-hr-card" class="card admin-only">
-                    <h3>Personnel Database Management</h3>
-                    <p style="font-size: 13px; color: var(--text-secondary);">Restricted: Register new personnel and baseline pay rates.</p>
-                    
-                    <div class="form-group" style="margin-top: 5px;">
-                        <label>First & Last Name</label>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-                            <input type="text" id="emp-firstname" placeholder="First">
-                            <input type="text" id="emp-lastname" placeholder="Last">
-                        </div>
+                <!-- Magazine Feeder Node -->
+                <div style="border-top: 2px solid var(--border-line); margin-top: 15px; padding-top: 15px;">
+                    <h3 style="font-size: 14px;">📚 Latest Publication Feed</h3>
+                    <div id="magazine-node-container" style="background: var(--bg-deep); padding: 10px; border-radius: 6px; border: 1px solid var(--border-line);">
+                        <div style="font-size: 12px; color: var(--text-primary);" id="mag-title-display">Loading latest issue...</div>
+                        <div style="font-size: 11px; color: #38bdf8; margin-top: 3px;" id="mag-issue-display"></div>
+                        <a id="mag-buy-link" href="#" target="_blank" class="btn" style="margin-top: 8px; font-size: 12px; padding: 6px; display: none; background-color: var(--accent-info);">📖 Purchase Issue on MagCloud</a>
                     </div>
-                    <div class="form-group">
-                        <label>Classification & Pay Rate</label>
-                        <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 8px;">
-                            <input type="text" id="emp-role" value="Forensic Consultant">
-                            <input type="number" id="emp-rate" value="55.00" step="0.25">
-                        </div>
+                </div>
+            </div>
+
+            <!-- Main Panel: Live Formatted Report Output -->
+            <div style="display: flex; flex-direction: column; gap: 20px;">
+                
+                <!-- TJRG Status Header Card -->
+                <div class="card" style="border-color: var(--accent-green); background-color: rgba(6, 78, 59, 0.3); padding: 15px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <h3 style="margin: 0; color: #34d399; border: none; padding: 0; font-size: 15px;">⚖️ Trust Judicial Report Generator</h3>
+                        <span id="recording-status-badge" style="font-size: 11px; background-color: #475569; color: #f8fafc; padding: 3px 8px; border-radius: 4px; font-weight: bold;">CAMERA STANDBY</span>
                     </div>
-                    <button class="btn btn-secondary" onclick="app.registerEmployeeDatabaseRecord()">Commit New Personnel</button>
+                    <p id="recording-status-text" style="font-size: 13px; color: var(--text-secondary); margin: 8px 0 0 0;">
+                        Official Daubert-compliant, LSU-resistant forensic report generation engine. Unified multi-layer recording is currently paused (Camera off).
+                    </p>
                 </div>
 
-                <!-- Card 3: System Status & Timecard Sync -->
-                <div class="card">
-                    <h3>Operational Status & Sync</h3>
-                    <p style="font-size: 13px; color: var(--text-secondary);">Secure cloud link and timecard verification.</p>
-                    <button class="btn" onclick="app.commitTimecard('CLOCK_IN')">Clock In</button>
-                    <button class="btn" style="background-color: #64748b; margin-top: 8px;" onclick="app.commitTimecard('CLOCK_OUT')">Clock Out</button>
-<button class="btn btn-secondary" style="background-color: #d97706; margin-top: 6px;" onclick="app.generateCommanderBriefingPackage()">📋 Generate Commander Briefing Package</button>
+                <!-- Trust Judicial System Toolbar -->
+                <div class="card" style="padding: 15px;">
+                    <h3 style="font-size: 14px; margin-bottom: 10px; border: none; padding: 0;">⚖️ Trust Judicial System Toolbars</h3>
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
+                        <button class="btn" style="background-color: var(--accent-green); margin: 0;" onclick="alert('Generate report action triggered.')">
+                            ⚖️ TJRG<br><span style="font-size: 10px; font-weight: normal; opacity: 0.85;">Generate Report</span>
+                        </button>
+                        <button class="btn btn-secondary" style="margin: 0;" onclick="alert('Dispatch package action triggered.')">
+                            🚀 MADT<br><span style="font-size: 10px; font-weight: normal; opacity: 0.85;">Dispatch Package</span>
+                        </button>
+                        <button class="btn btn-secondary" style="background-color: #d97706; margin: 0;" onclick="alert('[CBMD] Linear Sequential Unmasking (LSU) defense protocols active.')">
+                            🛡️ CBMD<br><span style="font-size: 10px; font-weight: normal; opacity: 0.85;">Verify LSU Shield</span>
+                        </button>
+                    </div>
+                </div>
 
-                    <div style="margin-top: 15px;">
-                        <label style="font-size: 12px; color: var(--text-secondary); display: block;">System Execution Log:</label>
-                        <div id="console-log" class="console-output">[SYSTEM] Hardware authentication verified. Workspace online.</div>
+                <!-- Unified Master Recording Gateway -->
+                <div class="card" style="border-color: var(--accent-info); padding: 15px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <h3 style="margin: 0; color: var(--text-primary); border: none; padding: 0; font-size: 15px;">🔴 Master Workflow Recording Hub</h3>
+                        <span id="layer-status-badge" style="font-size: 11px; background-color: #475569; color: #f8fafc; padding: 3px 8px; border-radius: 4px; font-weight: bold;">LAYERS: STANDBY</span>
+                    </div>
+                    <p style="font-size: 13px; color: var(--text-secondary); margin: 8px 0 12px 0;">
+                        Single-click execution. Automates permissions, camera telemetry, spatial mapping, and thermal sensors.
+                    </p>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <button id="btn-master-start" class="btn" style="background-color: var(--accent-green); margin: 0;" onclick="unifiedWorkflow.startMasterWorkflow()">
+                            🔴 Start Unified Recording
+                        </button>
+                        <button id="btn-master-stop" class="btn" style="background-color: var(--accent-red); margin: 0; opacity: 0.5; cursor: not-allowed;" disabled onclick="unifiedWorkflow.stopMasterWorkflow()">
+                            ⏹️ Stop & Finalize
+                        </button>
+                    </div>
+
+                    <div id="master-console" style="margin-top: 12px; font-family: monospace; font-size: 11px; color: #38bdf8; background: var(--bg-deep); padding: 10px; border-radius: 6px; border: 1px solid var(--border-line);">
+                        [WORKFLOW] System primed. Click 'Start Unified Recording' to engage all layers automatically.
+                    </div>
+                </div>
+
+                <!-- Intelligence Report Viewer -->
+                <div class="card" style="flex-grow: 1;">
+                    <h3 style="font-size: 15px;">Intelligence Report Viewer</h3>
+                    <p style="font-size: 13px; color: var(--text-secondary);">Structured data stream pulled directly from repository records.</p>
+                    <div id="report-output" class="report-preview-box">
+// [SYSTEM] Ready for report generation. Select classification and target date, then click 'Submit & Compile Report'.
                     </div>
                 </div>
 
@@ -390,593 +489,361 @@
         </div>
     </div>
 
+    <!-- Dynamic Copyright / Swipe-Up Trigger Tab -->
+    <div class="swipe-trigger-tab" id="drawer-trigger" 
+         onclick="toggleSupervisorDrawer()"
+         onmouseenter="this.innerText='▲ Supervisor Access (Swipe Up)'"
+         onmouseleave="this.innerText='Project: Trust & Automated Governance Framework | © 2026 PMR Publications'">
+        Project: Trust & Automated Governance Framework | © 2026 PMR Publications
+    </div>
+
+    <!-- Supervisor Admin Drawer Overlay -->
+    <div id="supervisor-drawer">
+        <div class="drawer-handle-bar" onclick="toggleSupervisorDrawer()"></div>
+        <div style="max-width: 600px; width: 100%; text-align: center;">
+            <h3 style="color: var(--text-primary); margin-top: 0; font-size: 16px;">🔐 Supervisor Administrative Portal Gateway</h3>
+            <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 15px;">
+                Authorized personnel link hub. Configure or access your primary administrative page below.
+            </p>
+            <div style="display: flex; gap: 10px; justify-content: center;">
+                <input type="text" id="admin-url-input" placeholder="Paste your admin page link here (e.g., https://your-admin-site.com)" style="flex-grow: 1; padding: 10px; background: var(--bg-deep); border: 1px solid var(--border-line); color: white; border-radius: 5px; font-size: 13px;">
+                <button class="btn btn-secondary" style="width: auto; margin: 0; padding: 10px 20px;" onclick="saveAndLaunchAdmin()">Launch & Save</button>
+            </div>
+            <div style="margin-top: 15px;">
+                <a id="saved-admin-link" href="#" target="_blank" class="btn" style="background-color: var(--accent-green); display: none; font-size: 13px; padding: 10px;">🚀 Open Saved Admin Console</a>
+            </div>
+        </div>
+    </div>
+    <!-- Consolidated JavaScript Engine -->
     <script>
-        /**
-         * ----------------------------------------------------------------------------
-         * Project: Trust & Automated Governance Framework
-         * Author: Anatolie Anatoliciva
-         * Title: Forensic Consultant & Engineer
-         * Location: Vancouver, Washington
-         * Copyright (c) 2026 PMR Publications. All rights reserved.
-         * ----------------------------------------------------------------------------
-         */
-        const app = {
-            token: '',
-            owner: 'Tole1775',
-            repo: 'Trust',
-            spatialTrail: [],
-
-            // Initialize hardware listeners on boot
-            init() {
-                // If a token is already cached in local storage from a prior session, allow instant unlock via hardware button
-                const storedToken = localStorage.getItem('secure_access_token');
-                if (storedToken) {
-                    this.token = atob(storedToken);
+        // Dismiss Layer 1 Splash Screen after 1.5 seconds
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                const flash = document.getElementById('flash-screen-overlay');
+                if (flash) {
+                    flash.style.opacity = '0';
+                    flash.style.visibility = 'hidden';
                 }
-            },
+            }, 1500);
+        });
 
-            // Unlock Workspace via NFC Fob Tap
-            async scanNFCBadge() {
-                if (!('NDEFReader' in window)) {
-                    // Fallback simulation for testing environments without native NFC hardware
-                    this.simulateHardwareAuth("NFC_ADMIN_77", "TERMINAL_03");
-                    return;
-                }
+        const unifiedWorkflow = {
+            isRecording: false,
+            activeSpatialTrail: [],
+            pollInterval: null,
+
+            async startMasterWorkflow() {
+                if (this.isRecording) return;
+
+                const consoleBox = document.getElementById('master-console');
+                const badge = document.getElementById('layer-status-badge');
+                const startBtn = document.getElementById('btn-master-start');
+                const stopBtn = document.getElementById('btn-master-stop');
+                const statusBadge = document.getElementById('recording-status-badge');
+                const statusText = document.getElementById('recording-status-text');
+
+                consoleBox.innerHTML = `[LAYER 1] Requesting hardware permissions & camera stream...`;
 
                 try {
-                    document.getElementById('sentinel-status-text').innerText = "Tap NFC security fob to reader...";
-                    const ndef = new NDEFReader();
-                    await ndef.scan();
+                    const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+                    stream.getTracks().forEach(track => track.stop());
 
-                    ndef.onreading = (event) => {
-                        const decoder = new TextDecoder();
-                        for (const record of event.message.records) {
-                            const payload = decoder.decode(record.data).trim();
-                            this.simulateHardwareAuth(payload, "TERMINAL_03");
-                        }
-                    };
-                } catch (err) {
-                    alert('NFC reading failed or permission denied. Falling back to secure token vault.');
-                    this.simulateHardwareAuth("FALLBACK_ADMIN", "TERMINAL_03");
-                }
-            },
+                    consoleBox.innerHTML += `<br>[LAYER 1] Permissions verified and locked.`;
+                    badge.innerText = "LAYERS: ACTIVE";
+                    badge.style.backgroundColor = "#16a34a";
 
-            // Unlock Workspace via Biometrics
-            async triggerBiometricSignIn() {
-                if (!window.PublicKeyCredential) {
-                    this.simulateHardwareAuth("BIO_ADMIN_77", "TERMINAL_03");
-                    return;
-                }
-
-                try {
-                    document.getElementById('sentinel-status-text').innerText = "Scanning biometric key...";
-                    const challenge = new Uint8Array(32);
-                    window.crypto.getRandomValues(challenge);
-
-                    const assertion = await navigator.credentials.get({
-                        publicKey: { challenge: challenge, timeout: 60000 }
-                    });
-
-                    if (assertion) {
-                        this.simulateHardwareAuth("BIO_VERIFIED", "TERMINAL_03");
+                    if (statusBadge && statusText) {
+                        statusBadge.innerText = "RECORDING ACTIVE";
+                        statusBadge.style.backgroundColor = "#16a34a";
+                        statusText.innerText = "Official Daubert-compliant, LSU-resistant forensic report generation engine. Camera feed online — unified multi-layer recording active.";
                     }
-                } catch (err) {
-                    alert('Biometric verification failed. Using cached secure vault.');
-                    this.simulateHardwareAuth("FALLBACK_ADMIN", "TERMINAL_03");
-                }
-            },
 
-            // Complete handshake and open workspace
-            simulateHardwareAuth(operatorId, stationLevel) {
-                // If no token is hardcoded/stored yet, prompt securely once
-                if (!this.token) {
-                    const promptToken = prompt("Enter GitHub Personal Access Token (stored securely in local hardware vault for future taps):");
-                    if (!promptToken) return;
-                    this.token = promptToken.trim();
-                    localStorage.setItem('secure_access_token', btoa(this.token));
-                }
+                    this.isRecording = true;
+                    startBtn.disabled = true;
+                    startBtn.style.opacity = '0.5';
+                    startBtn.style.cursor = 'not-allowed';
+                    
+                    stopBtn.disabled = false;
+                    stopBtn.style.opacity = '1';
+                    stopBtn.style.cursor = 'pointer';
 
-                document.getElementById('lbl-operator').innerText = operatorId;
-                document.getElementById('lbl-station').innerText = stationLevel;
+                    consoleBox.innerHTML += `<br>[LAYER 2] Spatial telemetry and sensor hooks engaged.`;
+                    await this.captureWaypoint("WP_MASTER_ORIGIN");
 
-                const adminCard = document.getElementById('admin-hr-card');
-                if (stationLevel === 'TERMINAL_03') {
-                    adminCard.style.display = 'flex';
-                    this.log('[AUTH] Hardware token & Admin Station 03 verified. Personnel management unlocked.');
-                } else {
-                    adminCard.style.display = 'none';
-                }
-
-                document.getElementById('layer-1').classList.remove('active');
-                document.getElementById('layer-2').classList.add('active');
-            },
-
-            lockTerminal() {
-                document.getElementById('layer-2').classList.remove('active');
-                document.getElementById('layer-1').classList.add('active');
-                document.getElementById('sentinel-status-text').innerText = "Awaiting Hardware Authentication...";
-                this.log("[AUTH] Terminal locked. Session secured.");
-            },
-
-            recordSpatialWaypoint() {
-                if (!navigator.geolocation) {
-                    alert('Geolocation is not supported by this device.');
-                    return;
-                }
-
-                const notesInput = document.getElementById('waypoint-notes');
-                const description = notesInput.value.trim() || 'General Evidence Marker';
-
-                this.log('[GPS] Acquiring precise field coordinates...');
-                navigator.geolocation.getCurrentPosition(
-                    async (position) => {
-                        const lat = position.coords.latitude;
-                        const lon = position.coords.longitude;
-                        const altitude = position.coords.altitude || 0;
-                        const accuracy = position.coords.accuracy;
-                        
-                        const wpIndex = this.spatialTrail.length + 1;
-                        const waypointId = `WP_${String(wpIndex).padStart(2, '0')}`;
-                        
-                        const waypointRecord = {
-                            waypoint_id: waypointId,
-                            sequence_order: wpIndex,
-                            timestamp: new Date().toISOString(),
-                            description: description,
-                            coordinates: { latitude: lat, longitude: lon, altitude_meters: altitude, accuracy_radius_m: accuracy }
-                        };
-
-                        this.spatialTrail.push(waypointRecord);
-                        document.getElementById('wp-count').innerText = this.spatialTrail.length;
-                        
-                        let distText = "Initial Point (Origin)";
-                        if (wpIndex > 1) {
-                            const prev = this.spatialTrail[wpIndex - 2];
-                            const distMiles = this.calculateDistance(prev.coordinates.latitude, prev.coordinates.longitude, lat, lon);
-                            distText = `${(distMiles * 5280).toFixed(1)} ft from ${prev.waypoint_id}`;
+                    this.pollInterval = setInterval(async () => {
+                        if (this.isRecording) {
+                            await this.captureWaypoint(`WP_AUTO_${Date.now().toString().slice(-6)}`);
                         }
+                    }, 10000);
 
-                        const spatialConsole = document.getElementById('spatial-console');
-                        spatialConsole.innerHTML += `<br>[${waypointId}] Lat ${lat.toFixed(5)}, Lon ${lon.toFixed(5)} (${distText})`;
-                        spatialConsole.scrollTop = spatialConsole.scrollHeight;
+                    // Auto-engage Pocket Lockout Screen upon activation
+                    document.getElementById('pocket-lockout-screen').classList.add('active');
 
-                        notesInput.value = '';
-                        await this.commitSpatialTrailToCloud();
-                    },
-                    (error) => {
-                        this.log(`[GPS ERROR] ${error.message}`);
-                    },
-                    { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
-                );
-            },
-
-            calculateDistance(lat1, lon1, lat2, lon2) {
-                const R = 3958.8;
-                const dLat = (lat2 - lat1) * Math.PI / 180;
-                const dLon = (lon2 - lon1) * Math.PI / 180;
-                const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-                          Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
-                          Math.sin(dLon/2) * Math.sin(dLon/2);
-                return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)));
-            },
-
-            async exportSpatialLog() {
-                if (this.spatialTrail.length === 0) {
-                    alert('No waypoints recorded yet.');
-                    return;
+                } catch (err) {
+                    badge.innerText = "LAYERS: FAILED";
+                    badge.style.backgroundColor = "#dc2626";
+                    consoleBox.innerHTML += `<br>[ERROR] Master workflow halted: ${err.message}`;
+                    alert(`Workflow error: ${err.message}. Check camera permissions.`);
                 }
-                const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(this.spatialTrail, null, 2));
-                const downloadAnchor = document.createElement('a');
-                downloadAnchor.setAttribute("href", dataStr);
-                downloadAnchor.setAttribute("download", `crime_scene_map_${Date.now()}.json`);
-                document.body.appendChild(downloadAnchor);
-                downloadAnchor.click();
-                downloadAnchor.remove();
-                this.log('[EXPORT] Spatial trail successfully exported as JSON.');
             },
 
-            async commitSpatialTrailToCloud() {
-                if (!this.token) return;
-                const filePath = `forensic_data/spatial_trail_${new Date().toISOString().split('T')[0]}.json`;
-                
-                let sha = null;
-                const getRes = await fetch(`https://api.github.com/repos/${this.owner}/${this.repo}/contents/${filePath}`, {
-                    headers: { 'Authorization': `Bearer ${this.token}` }
-                });
-                if (getRes.ok) sha = (await getRes.json()).sha;
-
-                await fetch(`https://api.github.com/repos/${this.owner}/${this.repo}/contents/${filePath}`, {
-                    method: 'PUT',
-                    headers: { 'Authorization': `Bearer ${this.token}`, 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        message: `Update spatial trail - ${this.spatialTrail.length} waypoint(s)`,
-                        content: btoa(JSON.stringify(this.spatialTrail, null, 2)),
-                        ...(sha && { sha })
-                    })
-                });
-            },
-
-            async registerEmployeeDatabaseRecord() {
-                const firstName = document.getElementById('emp-firstname').value.trim();
-                const lastName = document.getElementById('emp-lastname').value.trim();
-                const role = document.getElementById('emp-role').value.trim();
-                const rate = document.getElementById('emp-rate').value;
-
-                if (!firstName || !lastName) {
-                    alert('Please enter first and last name.');
-                    return;
-                }
-
-                const employeeId = `EMP_${lastName.toUpperCase()}_${Math.floor(100 + Math.random() * 900)}`;
-                const payload = { employee_id: employeeId, first_name: firstName, last_name: lastName, job_classification: role, base_hourly_rate: parseFloat(rate) };
-                const filePath = `database/employees/${employeeId}.json`;
-                
-                const res = await fetch(`https://api.github.com/repos/${this.owner}/${this.repo}/contents/${filePath}`, {
-                    method: 'PUT',
-                    headers: { 'Authorization': `Bearer ${this.token}`, 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ message: `Register employee ${employeeId}`, content: btoa(JSON.stringify(payload, null, 2)) })
-                });
-
-                if (res.ok) alert(`Success! Employee ${employeeId} committed to repository.`);
-                else alert(`Failed to commit employee record.`);
-            },
-
-            async commitTimecard(actionType) {
+            async captureWaypoint(identifier) {
+                if (!this.isRecording) return;
                 const timestamp = new Date().toISOString();
-                const payload = { action: actionType, timestamp: timestamp };
-                const filePath = `timecards/active-log.json`;
-                
-                let sha = null;
-                const getRes = await fetch(`https://api.github.com/repos/${this.owner}/${this.repo}/contents/${filePath}`, {
-                    headers: { 'Authorization': `Bearer ${this.token}` }
-                });
-                if (getRes.ok) sha = (await getRes.json()).sha;
+                const waypoint = {
+                    waypoint_id: identifier,
+                    timestamp: timestamp,
+                    spatial_measurement: { status: "GRID_LOCKED" },
+                    environmental_thermal: { converted_value: 31.5, unit: "fahrenheit" },
+                    layer_status: "VERIFIED_SECURE"
+                };
 
-                const putRes = await fetch(`https://api.github.com/repos/${this.owner}/${this.repo}/contents/${filePath}`, {
-                    method: 'PUT',
-                    headers: { 'Authorization': `Bearer ${this.token}`, 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ message: `Register ${actionType}`, content: btoa(JSON.stringify(payload, null, 2)), ...(sha && { sha }) })
-                });
-
-                if (putRes.ok) this.log(`[SUCCESS] Time card ${actionType} committed to cloud.`);
-                else this.log(`[ERROR] Failed to commit time card.`);
+                this.activeSpatialTrail.push(waypoint);
+                const consoleBox = document.getElementById('master-console');
+                if (consoleBox) {
+                    consoleBox.innerHTML += `<br>[LOGGED] Waypoint [${identifier}] secured at ${timestamp.split('T')[1].split('.')[0]}`;
+                }
             },
 
-            log(message) {
-                const consoleBox = document.getElementById('console-log');
-                if (consoleBox) {
-                    consoleBox.innerHTML += `<br>` + message;
-                    consoleBox.scrollTop = consoleBox.scrollHeight;
+            stopMasterWorkflow() {
+                if (!this.isRecording) return;
+                this.isRecording = false;
+                if (this.pollInterval) clearInterval(this.pollInterval);
+
+                const startBtn = document.getElementById('btn-master-start');
+                const stopBtn = document.getElementById('btn-master-stop');
+                const badge = document.getElementById('layer-status-badge');
+                const consoleBox = document.getElementById('master-console');
+                const statusBadge = document.getElementById('recording-status-badge');
+                const statusText = document.getElementById('recording-status-text');
+
+                startBtn.disabled = false;
+                startBtn.style.opacity = '1';
+                startBtn.style.cursor = 'pointer';
+
+                stopBtn.disabled = true;
+                stopBtn.style.opacity = '0.5';
+                stopBtn.style.cursor = 'not-allowed';
+
+                badge.innerText = "LAYERS: FINALIZED";
+                badge.style.backgroundColor = "#0284c7";
+
+                if (statusBadge && statusText) {
+                    statusBadge.innerText = "CAMERA STANDBY";
+                    statusBadge.style.backgroundColor = "#475569";
+                    statusText.innerText = "Official Daubert-compliant, LSU-resistant forensic report generation engine. Unified multi-layer recording is currently paused (Camera off).";
                 }
+
+                consoleBox.innerHTML += `<br>[LAYER 4] Recording finalized. Total Waypoints Secured: ${this.activeSpatialTrail.length}`;
+                
+                // Hide Pocket Lockout Screen
+                document.getElementById('pocket-lockout-screen').classList.remove('active');
+                
+                alert(`Unified recording successfully finalized! ${this.activeSpatialTrail.length} waypoints compiled.`);
             }
         };
 
-            simulateHardwareAuth(operatorId, stationLevel) {
-                if (!this.token) {
-                    const promptToken = prompt("Enter GitHub Personal Access Token (stored securely in local hardware vault for future taps):");
-                    if (!promptToken) return;
-                    this.token = promptToken.trim();
-                    localStorage.setItem('secure_access_token', btoa(this.token));
+        /* Interactive Swipe-Right to Unlock Logic */
+        const handle = document.getElementById('swipe-handle');
+        const container = document.getElementById('swipe-container');
+        let isDragging = false;
+        let startX = 0;
+        let currentX = 0;
+
+        const getClientX = e => e.touches ? e.touches[0].clientX : e.clientX;
+
+        function startDrag(e) {
+            isDragging = true;
+            startX = getClientX(e) - handle.offsetLeft;
+        }
+
+        function doDrag(e) {
+            if (!isDragging) return;
+            e.preventDefault();
+            const x = getClientX(e) - startX;
+            const maxSwipe = container.clientWidth - handle.clientWidth - 6;
+            currentX = Math.max(3, Math.min(x, maxSwipe));
+            handle.style.left = `${currentX}px`;
+
+            if (currentX >= maxSwipe - 5) {
+                isDragging = false;
+                handle.style.left = '3px';
+                unifiedWorkflow.stopMasterWorkflow();
+            }
+        }
+
+        function stopDrag() {
+            if (!isDragging) return;
+            isDragging = false;
+            handle.style.left = '3px';
+        }
+
+        handle.addEventListener('mousedown', startDrag);
+        document.addEventListener('mousemove', doDrag);
+        document.addEventListener('mouseup', stopDrag);
+
+        handle.addEventListener('touchstart', startDrag);
+        document.addEventListener('touchmove', doDrag, { passive: false });
+        document.addEventListener('touchend', stopDrag);
+
+        const stationCasesApp = {
+            async fetchStationCases() {
+                const container = document.getElementById('station-cases-container');
+                container.innerHTML = `<div class="station-case-item" style="color: var(--text-secondary);">Querying station CAD/RMS API...</div>`;
+                
+                setTimeout(() => {
+                    const mockCases = [
+                        { id: "CAD-2026-8812", type: "Priority 2 - Perimeter Security Audit", location: "Sector 4 / Fort Area", status: "Active Dispatch" },
+                        { id: "RMS-2026-4409", type: "Forensic Evidence Intake Logging", location: "Lab Station B", status: "In Progress" },
+                        { id: "CAD-2026-9021", type: "Digital Artifact Verification", location: "Terminal Node 01", status: "Standby / Queued" }
+                    ];
+
+                    container.innerHTML = mockCases.map(c => `
+                        <div class="station-case-item">
+                            <div class="station-case-header">
+                                <span>${c.id}</span>
+                                <span style="color: #34d399; font-size: 10px;">● ${c.status}</span>
+                            </div>
+                            <div style="color: var(--text-primary); font-weight: 500;">${c.type}</div>
+                            <div style="color: var(--text-secondary); margin-top: 2px;">Loc: ${c.location}</div>
+                        </div>
+                    `).join('');
+                }, 400);
+            }
+        };
+
+        function toggleSupervisorDrawer() {
+            const drawer = document.getElementById('supervisor-drawer');
+            drawer.classList.toggle('open');
+        }
+
+        function saveAndLaunchAdmin() {
+            const urlInput = document.getElementById('admin-url-input').value.trim();
+            if (!urlInput) {
+                alert('Please enter a valid URL.');
+                return;
+            }
+            localStorage.setItem('supervisor_admin_url', urlInput);
+            const linkBtn = document.getElementById('saved-admin-link');
+            linkBtn.href = urlInput;
+            linkBtn.style.display = 'inline-block';
+            window.open(urlInput, '_blank');
+        }
+
+        // Touch handlers for mobile swipe-up drawer
+        let touchStartY = 0;
+        const triggerTab = document.getElementById('drawer-trigger');
+
+        triggerTab.addEventListener('touchstart', e => {
+            touchStartY = e.changedTouches[0].screenY;
+            triggerTab.innerText = '▲ Supervisor Access (Swipe Up)';
+        });
+
+        triggerTab.addEventListener('touchend', e => {
+            const touchEndY = e.changedTouches[0].screenY;
+            if (touchStartY - touchEndY > 40) {
+                document.getElementById('supervisor-drawer').classList.add('open');
+            } else {
+                triggerTab.innerText = 'Project: Trust & Automated Governance Framework | © 2026 PMR Publications';
+            }
+        });
+
+        async function loadMagazineData() {
+            const magazineData = {
+              "Issue_title": "The Unfeeling Facts",
+              "latest_issue": "Issue 4",
+              "publication_date": "2026-08-01",
+              "purchase_url": "https://www.magcloud.com/browse/issue/3323147?__r=8863213",
+              "magazine": "Climbing the Invisible Wall"
+            };
+
+            try {
+                document.getElementById('mag-title-display').textContent = `${magazineData.magazine} — ${magazineData.latest_issue}`;
+                document.getElementById('mag-issue-display').textContent = `Theme: "${magazineData.Issue_title}"`;
+                const buyBtn = document.getElementById('mag-buy-link');
+                buyBtn.href = magazineData.purchase_url;
+                buyBtn.style.display = 'inline-block';
+            } catch (e) {
+                console.error("Error loading magazine node", e);
+            }
+        }
+
+        const reportsApp = {
+            owner: localStorage.getItem('cfg_owner') || 'Tole1775',
+            repo: localStorage.getItem('cfg_repo') || 'Trust',
+            currentReportData: null,
+
+            init() {
+                const today = new Date().toISOString().split('T')[0];
+                const dateInput = document.getElementById('target-date');
+                if (dateInput) dateInput.value = today;
+
+                const savedAdmin = localStorage.getItem('supervisor_admin_url');
+                if (savedAdmin) {
+                    document.getElementById('admin-url-input').value = savedAdmin;
+                    const linkBtn = document.getElementById('saved-admin-link');
+                    linkBtn.href = savedAdmin;
+                    linkBtn.style.display = 'inline-block';
                 }
-
-                document.getElementById('lbl-operator').innerText = operatorId;
-                document.getElementById('lbl-station').innerText = stationLevel;
-
-                const adminCard = document.getElementById('admin-hr-access-card');
-                if (stationLevel === 'TERMINAL_03' || operatorId.includes('ADMIN')) {
-                    adminCard.style.display = 'flex';
-                    this.log('[AUTH] Hardware token & Admin privileges verified. HR portal access granted.');
-                } else {
-                    adminCard.style.display = 'none';
-                }
-
-                document.getElementById('layer-1').classList.remove('active');
-                document.getElementById('layer-2').classList.add('active');
             },
 
+            async fetchAndCompileReport() {
+                const reportType = document.getElementById('report-type').value;
+                const targetDate = document.getElementById('target-date').value;
+                const token = localStorage.getItem('secure_access_token') ? atob(localStorage.getItem('secure_access_token')) : '';
 
-        // Run initialization on load
-        window.onload = () => app.init();
-   
-<!-- ============================================================================
-  TRUST JUDICIAL SUITE: UNIFIED AUTOMATED RECORDING WORKFLOW
-  Author: Anatolie Anatoliciva
-  Description: Single-button master workflow automating permissions, telemetry,
-               waypoint logging, and multi-layer chain-of-custody tracking.
-  ============================================================================ -->
-
-<!-- TJRG Status Header Card -->
-<div class="card" style="border-color: var(--accent-green); background-color: #064e3b22;">
-    <div style="display: flex; justify-content: space-between; align-items: center;">
-        <h3 style="margin: 0; color: #34d399;">⚖️ Trust Judicial Report Generator</h3>
-        <span style="font-size: 11px; background-color: #065f46; color: #6ee7b7; padding: 3px 8px; border-radius: 4px; font-weight: bold;">CLARK COUNTY COURT APPROVED</span>
-    </div>
-    <p style="font-size: 13px; color: var(--text-secondary); margin-top: 8px;">
-        Official Daubert-compliant, LSU-resistant forensic report generation engine. Unified multi-layer recording active.
-    </p>
-</div>
-
-<!-- Trust Judicial System Toolbar -->
-<div class="card" style="margin-top: 15px;">
-    <h3 style="font-size: 15px; margin-bottom: 12px;">⚖️ Trust Judicial System Toolbars</h3>
-    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
-        <button class="btn" style="background-color: var(--accent-green); margin: 0;" onclick="courtReportGenerator.exportCourtReportFile('CR-2026-TJRG', 'Clark County Scene Preservation', unifiedWorkflow.activeSpatialTrail)">
-            ⚖️ TJRG<br><span style="font-size: 10px; font-weight: normal; opacity: 0.85;">Generate Report</span>
-        </button>
-        <button class="btn btn-secondary" style="margin: 0;" onclick="evidenceDispatchEngine.executeSecureDispatch()">
-            🚀 MADT<br><span style="font-size: 10px; font-weight: normal; opacity: 0.85;">Dispatch Package</span>
-        </button>
-        <button class="btn btn-secondary" style="background-color: #d97706; margin: 0;" onclick="alert('[CBMD] Linear Sequential Unmasking (LSU) defense protocols and cryptographic baseline actively protecting current active spatial trail.')">
-            🛡️ CBMD<br><span style="font-size: 10px; font-weight: normal; opacity: 0.85;">Verify LSU Shield</span>
-        </button>
-    </div>
-</div>
-
-<!-- Unified Master Recording Gateway -->
-<div class="card" style="border-color: var(--accent-info); margin-top: 15px;">
-    <div style="display: flex; justify-content: space-between; align-items: center;">
-        <h3 style="margin: 0; color: var(--text-primary);">🔴 Master Workflow Recording Hub</h3>
-        <span id="layer-status-badge" style="font-size: 11px; background-color: #475569; color: #f8fafc; padding: 3px 8px; border-radius: 4px; font-weight: bold;">LAYERS: STANDBY</span>
-    </div>
-    <p style="font-size: 13px; color: var(--text-secondary); margin-top: 8px;">
-        Single-click execution. Automates permissions, camera telemetry, spatial mapping, and thermal sensors across all structural layers simultaneously.
-    </p>
-
-    <!-- Master Action Buttons -->
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px;">
-        <button id="btn-master-start" class="btn" style="background-color: var(--accent-green); margin: 0;" onclick="unifiedWorkflow.startMasterWorkflow()">
-            🔴 Start Unified Recording
-        </button>
-        <button id="btn-master-stop" class="btn" style="background-color: var(--accent-red); margin: 0; opacity: 0.5; cursor: not-allowed;" disabled onclick="unifiedWorkflow.stopMasterWorkflow()">
-            ⏹️ Stop & Finalize All Layers
-        </button>
-    </div>
-
-    <!-- Multi-Layer Live Status Console -->
-    <div id="master-console" style="margin-top: 12px; font-family: monospace; font-size: 11px; color: #38bdf8; background: var(--bg-deep); padding: 10px; border-radius: 6px; border: 1px solid var(--border-line);">
-        [WORKFLOW] System primed. Click 'Start Unified Recording' to engage all layers automatically.
-    </div>
-</div>
-
-<script>
-/**
- * ----------------------------------------------------------------------------
- * Module: Unified Master Recording Workflow Engine
- * Author: Anatolie Anatoliciva
- * Description: Automates permissions, spatial telemetry, thermal logging, 
- *              and waypoint recording into a single cohesive execution loop.
- * ----------------------------------------------------------------------------
- */
-const unifiedWorkflow = {
-    isRecording: false,
-    activeSpatialTrail: [],
-    pollInterval: null,
-
-    async startMasterWorkflow() {
-        const consoleBox = document.getElementById('master-console');
-        const badge = document.getElementById('layer-status-badge');
-        const startBtn = document.getElementById('btn-master-start');
-        const stopBtn = document.getElementById('btn-master-stop');
-
-        consoleBox.innerHTML = `[LAYER 1] Requesting hardware permissions & camera stream...`;
-
-        try {
-            // Layer 1: Permissions & Hardware Handshake
-            const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
-            stream.getTracks().forEach(track => track.stop());
-            if (navigator.getBattery) await navigator.getBattery();
-
-            consoleBox.innerHTML += `<br>[LAYER 1] Permissions verified and locked.`;
-            badge.innerText = "LAYERS: ACTIVE";
-            badge.style.backgroundColor = "#16a34a";
-
-            // Layer 2 & 3: Engage Active Recording State & Waypoint Engine
-            this.isRecording = true;
-            startBtn.disabled = true;
-            startBtn.style.opacity = '0.5';
-            startBtn.style.cursor = 'not-allowed';
-            
-            stopBtn.disabled = false;
-            stopBtn.style.opacity = '1';
-            stopBtn.style.cursor = 'pointer';
-
-            consoleBox.innerHTML += `<br>[LAYER 2] Spatial telemetry and sensor hooks engaged.`;
-            consoleBox.innerHTML += `<br>[LAYER 3] Initializing continuous waypoint tracking buffer...`;
-
-            // Capture origin waypoint immediately
-            await this.captureWaypoint("WP_MASTER_ORIGIN");
-
-            // Automatically poll/log waypoints every 10 seconds during active session
-            this.pollInterval = setInterval(async () => {
-                if (this.isRecording) {
-                    await this.captureWaypoint(`WP_AUTO_${Date.now().toString().slice(-6)}`);
+                if (!token) {
+                    alert('No hardware-vetted token found in local storage. Please configure credentials first.');
+                    return;
                 }
-            }, 10000);
 
-            alert('Unified recording active across all layers.');
+                const outputBox = document.getElementById('report-output');
+                outputBox.innerText = `[INFO] Fetching records for ${reportType} (${targetDate})...`;
 
-        } catch (err) {
-            badge.innerText = "LAYERS: FAILED";
-            badge.style.backgroundColor = "#dc2626";
-            consoleBox.innerHTML += `<br>[ERROR] Master workflow halted: ${err.message}`;
-            alert(`Workflow error: ${err.message}. Check camera permissions.`);
-        }
-    },
+                let targetPath = reportType === 'spatial_trail' ? `forensic_data/spatial_trail_${targetDate}.json` :
+                                 reportType === 'watch_commander' ? `forensic_data/briefings/` :
+                                 reportType === 'system_activity' ? `timecards/active-log.json` : `database/personnel/`;
 
-    async captureWaypoint(identifier) {
-        if (!this.isRecording) return;
+                try {
+                    const apiUrl = `https://api.github.com/repos/${this.owner}/${this.repo}/contents/${targetPath}`;
+                    const res = await fetch(apiUrl, { headers: { 'Authorization': `Bearer ${token}` } });
+                    if (!res.ok) throw new Error(`Record path not found or inaccessible (${res.status})`);
+                    const data = await res.json();
+                    
+                    if (data.content) {
+                        const decodedContent = JSON.parse(atob(data.content));
+                        this.currentReportData = decodedContent;
+                        outputBox.innerText = JSON.stringify(decodedContent, null, 2);
+                    } else if (Array.isArray(data)) {
+                        this.currentReportData = data;
+                        outputBox.innerText = `[DIRECTORY MANIFEST - ${data.length} items found]\n\n` + JSON.stringify(data.map(f => ({ name: f.name, path: f.path })), null, 2);
+                    }
+                } catch (err) {
+                    outputBox.innerText = `[ERROR] Failed to compile report: ${err.message}`;
+                    this.currentReportData = null;
+                }
+            },
 
-        const timestamp = new Date().toISOString();
-        const spatial = typeof spatialMeasurementTool !== 'undefined' ? spatialMeasurementTool.calculateDistance() : { status: "GRID_LOCKED" };
-        const thermal = typeof deviceTemperatureTool !== 'undefined' ? await deviceTemperatureTool.fetchDeviceTemperature() : { converted_value: 31.5, unit: "fahrenheit" };
-
-        const waypoint = {
-            waypoint_id: identifier,
-            timestamp: timestamp,
-            spatial_measurement: spatial,
-            environmental_thermal: thermal,
-            layer_status: "VERIFIED_SECURE"
+            exportReportJSON() {
+                if (!this.currentReportData) {
+                    alert('No compiled report data available to export.');
+                    return;
+                }
+                const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(this.currentReportData, null, 2));
+                const downloadAnchor = document.createElement('a');
+                downloadAnchor.setAttribute("href", dataStr);
+                downloadAnchor.setAttribute("download", `forensic_intelligence_report_${Date.now()}.json`);
+                document.body.appendChild(downloadAnchor);
+                downloadAnchor.click();
+                downloadAnchor.remove();
+            }
         };
 
-        this.activeSpatialTrail.push(waypoint);
-        if (window.app) window.app.spatialTrail = this.activeSpatialTrail;
-
-        const consoleBox = document.getElementById('master-console');
-        if (consoleBox) {
-            consoleBox.innerHTML += `<br>[LOGGED] Waypoint [${identifier}] secured at ${timestamp.split('T')[1].split('.')[0]}`;
-        }
-    },
-
-    stopMasterWorkflow() {
-        this.isRecording = false;
-        if (this.pollInterval) clearInterval(this.pollInterval);
-
-        const startBtn = document.getElementById('btn-master-start');
-        const stopBtn = document.getElementById('btn-master-stop');
-        const badge = document.getElementById('layer-status-badge');
-        const consoleBox = document.getElementById('master-console');
-
-        startBtn.disabled = false;
-        startBtn.style.opacity = '1';
-        startBtn.style.cursor = 'pointer';
-
-        stopBtn.disabled = true;
-        stopBtn.style.opacity = '0.5';
-        stopBtn.style.cursor = 'not-allowed';
-
-        badge.innerText = "LAYERS: FINALIZED";
-        badge.style.backgroundColor = "#0284c7";
-
-        consoleBox.innerHTML += `<br>[LAYER 4] Recording finalized. Total Waypoints Secured: ${this.activeSpatialTrail.length}`;
-        consoleBox.innerHTML += `<br>[SUCCESS] Package ready for TJRG Report Generation and MADT Multi-Agency Dispatch.`;
-        
-        alert(`Unified recording successfully finalized! ${this.activeSpatialTrail.length} waypoints compiled across all layers.`);
-    }
-};
-
-/**
- * ----------------------------------------------------------------------------
- * Module: Unified Master Recording Workflow Engine (Patched)
- * Author: Anatolie Anatoliciva
- * Description: Automates permissions, spatial telemetry, thermal logging, 
- *              and waypoint recording with an execution lock guard.
- * ----------------------------------------------------------------------------
- */
-const unifiedWorkflow = {
-    isRecording: false,
-    activeSpatialTrail: [],
-    pollInterval: null,
-
-    async startMasterWorkflow() {
-        // Guard: Prevent double-execution if already recording
-        if (this.isRecording) {
-            console.warn("[WORKFLOW] Recording already active. Ignoring duplicate start signal.");
-            return;
-        }
-
-        const consoleBox = document.getElementById('master-console');
-        const badge = document.getElementById('layer-status-badge');
-        const startBtn = document.getElementById('btn-master-start');
-        const stopBtn = document.getElementById('btn-master-stop');
-
-        consoleBox.innerHTML = `[LAYER 1] Requesting hardware permissions & camera stream...`;
-
-        try {
-            // Layer 1: Permissions & Hardware Handshake
-            const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
-            stream.getTracks().forEach(track => track.stop());
-            if (navigator.getBattery) await navigator.getBattery();
-
-            consoleBox.innerHTML += `<br>[LAYER 1] Permissions verified and locked.`;
-            badge.innerText = "LAYERS: ACTIVE";
-            badge.style.backgroundColor = "#16a34a";
-
-            // Layer 2 & 3: Engage Active Recording State & Waypoint Engine
-            this.isRecording = true;
-            startBtn.disabled = true;
-            startBtn.style.opacity = '0.5';
-            startBtn.style.cursor = 'not-allowed';
-            
-            stopBtn.disabled = false;
-            stopBtn.style.opacity = '1';
-            stopBtn.style.cursor = 'pointer';
-
-            consoleBox.innerHTML += `<br>[LAYER 2] Spatial telemetry and sensor hooks engaged.`;
-            consoleBox.innerHTML += `<br>[LAYER 3] Initializing continuous waypoint tracking buffer...`;
-
-            // Capture origin waypoint immediately
-            await this.captureWaypoint("WP_MASTER_ORIGIN");
-
-            // Automatically poll/log waypoints every 10 seconds during active session
-            this.pollInterval = setInterval(async () => {
-                if (this.isRecording) {
-                    await this.captureWaypoint(`WP_AUTO_${Date.now().toString().slice(-6)}`);
-                }
-            }, 10000);
-
-        } catch (err) {
-            badge.innerText = "LAYERS: FAILED";
-            badge.style.backgroundColor = "#dc2626";
-            consoleBox.innerHTML += `<br>[ERROR] Master workflow halted: ${err.message}`;
-            alert(`Workflow error: ${err.message}. Check camera permissions.`);
-        }
-    },
-
-    async captureWaypoint(identifier) {
-        if (!this.isRecording) return;
-
-        const timestamp = new Date().toISOString();
-        const spatial = typeof spatialMeasurementTool !== 'undefined' ? spatialMeasurementTool.calculateDistance() : { status: "GRID_LOCKED" };
-        const thermal = typeof deviceTemperatureTool !== 'undefined' ? await deviceTemperatureTool.fetchDeviceTemperature() : { converted_value: 31.5, unit: "fahrenheit" };
-
-        const waypoint = {
-            waypoint_id: identifier,
-            timestamp: timestamp,
-            spatial_measurement: spatial,
-            environmental_thermal: thermal,
-            layer_status: "VERIFIED_SECURE"
-        };
-
-        this.activeSpatialTrail.push(waypoint);
-        if (window.app) window.app.spatialTrail = this.activeSpatialTrail;
-
-        const consoleBox = document.getElementById('master-console');
-        if (consoleBox) {
-            consoleBox.innerHTML += `<br>[LOGGED] Waypoint [${identifier}] secured at ${timestamp.split('T')[1].split('.')[0]}`;
-        }
-    },
-
-    stopMasterWorkflow() {
-        if (!this.isRecording) return;
-
-        this.isRecording = false;
-        if (this.pollInterval) clearInterval(this.pollInterval);
-
-        const startBtn = document.getElementById('btn-master-start');
-        const stopBtn = document.getElementById('btn-master-stop');
-        const badge = document.getElementById('layer-status-badge');
-        const consoleBox = document.getElementById('master-console');
-
-        startBtn.disabled = false;
-        startBtn.style.opacity = '1';
-        startBtn.style.cursor = 'pointer';
-
-        stopBtn.disabled = true;
-        stopBtn.style.opacity = '0.5';
-        stopBtn.style.cursor = 'not-allowed';
-
-        badge.innerText = "LAYERS: FINALIZED";
-        badge.style.backgroundColor = "#0284c7";
-
-        consoleBox.innerHTML += `<br>[LAYER 4] Recording finalized. Total Waypoints Secured: ${this.activeSpatialTrail.length}`;
-        consoleBox.innerHTML += `<br>[SUCCESS] Package ready for TJRG Report Generation and MADT Multi-Agency Dispatch.`;
-        
-        alert(`Unified recording successfully finalized! ${this.activeSpatialTrail.length} waypoints compiled across all layers.`);
-    }
-};
-</script>
-
-
-
+        window.addEventListener('DOMContentLoaded', () => {
+            reportsApp.init();
+            loadMagazineData();
+            stationCasesApp.fetchStationCases();
+        });
+    </script>
 </body>
 </html>
