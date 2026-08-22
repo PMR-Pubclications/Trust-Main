@@ -1,0 +1,7 @@
+// android/build.gradle
+allprojects {
+    repositories {
+        mavenCentral()
+        google() // Allowed for standard AndroidX dependencies, but no non-free SDKs
+    }
+}
