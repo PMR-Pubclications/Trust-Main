@@ -293,3 +293,251 @@
         </div>
     </div>
 
+    <!-- Dynamic Copyright / Swipe-Up Trigger Tab -->
+    <div class="swipe-trigger-tab" id="drawer-trigger" 
+         onclick="toggleSupervisorDrawer()"
+         onmouseenter="this.innerText='▲ Supervisor Access (Swipe Up)'"
+         onmouseleave="this.innerText='Project: Trust & Automated Governance Framework | © 2026 PMR Publications'">
+        Project: Trust & Automated Governance Framework | © 2026 PMR Publications
+    </div>
+
+    <!-- Supervisor Admin Drawer Overlay -->
+    <div id="supervisor-drawer">
+        <div class="drawer-handle-bar" onclick="toggleSupervisorDrawer()"></div>
+        <div style="max-width: 600px; width: 100%; text-align: center;">
+            <h3 style="color: var(--text-primary); margin-top: 0; font-size: 16px;">🔐 Supervisor Administrative Portal Gateway</h3>
+            <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 15px;">
+                Authorized personnel link hub. Configure or access your primary administrative page below.
+            </p>
+            <div style="display: flex; gap: 10px; justify-content: center;">
+                <input type="text" id="admin-url-input" placeholder="Paste your admin page link here..." style="flex-grow: 1; padding: 10px; background: var(--bg-deep); border: 1px solid var(--border-line); color: white; border-radius: 5px; font-size: 13px;">
+                <button class="btn btn-secondary" style="width: auto; margin: 0; padding: 10px 20px;" onclick="saveAndLaunchAdmin()">Launch & Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Consolidated JavaScript Logic -->
+    <script>
+        function saveConfiguration() {
+            const owner = document.getElementById('cfg-owner').value.trim();
+            const repo = document.getElementById('cfg-repo').value.trim();
+            const token = document.getElementById('secure-token').value.trim();
+
+            if (owner) localStorage.setItem('cfg_owner', owner);
+            if (repo) localStorage.setItem('cfg_repo', repo);
+            if (token) localStorage.setItem('secure_access_token', btoa(token));
+
+            alert('Configuration successfully saved to local storage.');
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            if (localStorage.getItem('cfg_owner')) document.getElementById('cfg-owner').value = localStorage.getItem('cfg_owner');
+            if (localStorage.getItem('cfg_repo')) document.getElementById('cfg-repo').value = localStorage.getItem('cfg_repo');
+        });
+
+        const personnelProvisioning = {
+            async fetchDeviceIP() {
+                return new Promise((resolve) => {
+                    const ips = new Set();
+                    try {
+                        const RTCPeerConnection = window.RTCPeerConnection || window.mozRTCPeerConnection || window.webkitRTCPeerConnection;
+                        if (!RTCPeerConnection) return resolve("IP_DISCOVERY_UNAVAILABLE");
+
+                        const pc = new RTCPeerConnection({ iceServers: [] });
+                        pc.createDataChannel("");
+                        pc.createOffer().then(offer => pc.setLocalDescription(offer)).catch(() => {});
+
+                        pc.onicecandidate = (ice) => {
+                            if (!ice || !ice.candidate || !ice.candidate.candidate) return;
+                            const parts = ice.candidate.candidate.split(' ');
+                            const ip = parts[4];
+                            if (ip && (ip.includes('.') || ip.includes(':'))) {
+                                ips.add(ip);
+                            }
+                        };
+
+                        setTimeout(() => {
+                            pc.close();
+                            resolve(Array.from(ips)[0] || "192.168.1.X (Local Fallback)");
+                        }, 800);
+                    } catch (e) {
+                        resolve("IP_CAPTURE_ERROR");
+                    }
+                });
+            },
+
+            async scanNfcBadge() {
+                const nfcInput = document.getElementById('nfc-tag-id');
+                if ('NDEFReader' in window) {
+                    try {
+                        const ndef = new NDEFReader();
+                        alert('NFC Reader active. Please tap the hardware token against your device sensor...');
+                        await ndef.scan();
+                        ndef.onreading = event => {
+                            const serialNumber = event.serialNumber || "NFC_UID_UNKNOWN";
+                            nfcInput.value = serialNumber;
+                            alert(`NFC Badge captured: ${serialNumber}`);
+                        };
+                    } catch (err) {
+                        const manualUid = prompt("NFC hardware read failed or unavailable. Enter NFC Badge UID manually:");
+                        if (manualUid) nfcInput.value = manualUid.trim();
+                    }
+                } else {
+                    const manualUid = prompt("Web NFC not supported on this browser. Input NFC Badge UID manually:");
+                    if (manualUid) nfcInput.value = manualUid.trim();
+                }
+            },
+
+            async executeFullEnrollment() {
+                const personnelId = document.getElementById('personnel-id').value.trim();
+                const personnelName = document.getElementById('personnel-name').value.trim();
+                const nfcTagId = document.getElementById('nfc-tag-id').value.trim();
+                const consoleBox = document.getElementById('provisioning-console');
+
+                if (!personnelId || !personnelName) {
+                    alert('Personnel ID and Full Name are mandatory.');
+                    return;
+                }
+
+                consoleBox.style.display = 'block';
+                consoleBox.innerText = `[1/5] Harvesting local network telemetry (IP binding)...`;
+
+                const deviceIp = await this.fetchDeviceIP();
+                consoleBox.innerText += `\n[2/5] Device IP bound: ${deviceIp}`;
+
+                try {
+                    consoleBox.innerText += `\n[3/5] Prompting hardware biometric fingerprint sensor...`;
+
+                    if (!window.PublicKeyCredential) {
+                        throw new Error('WebAuthn biometric hardware API not supported.');
+                    }
+
+                    const challenge = new Uint8Array(32);
+                    window.crypto.getRandomValues(challenge);
+
+                    const credential = await navigator.credentials.create({
+                        publicKey: {
+                            challenge: challenge,
+                            rp: { name: "Trust Governance Framework HR", id: window.location.hostname },
+                            user: {
+                                id: Uint8Array.from(personnelId, c => c.charCodeAt(0)),
+                                name: personnelId,
+                                displayName: personnelName,
+                            },
+                            pubKeyCredParams: [{ alg: -7, type: "public-key" }],
+                            timeout: 60000,
+                            attestation: "direct",
+                            authenticatorSelection: { authenticatorAttachment: "platform", userVerification: "required" }
+                        }
+                    });
+
+                    const credentialIdB64 = btoa(String.fromCharCode(...new Uint8Array(credential.rawId)));
+
+                    consoleBox.innerText += `\n[4/5] Packaging personnel record with NFC tag (${nfcTagId || 'PENDING'})...`;
+
+                    const comprehensiveRecord = {
+                        personnel_id: personnelId,
+                        name: personnelName,
+                        biometric_credential_id: credentialIdB64,
+                        nfc_badge_uid: nfcTagId || "PENDING_ASSIGNMENT",
+                        network_binding: {
+                            captured_ip: deviceIp,
+                            subnet_scope: "Local Intranet / Station Node"
+                        },
+                        enrollment_timestamp: new Date().toISOString(),
+                        status: "ACTIVE_VETTED"
+                    };
+
+                    // Save locally
+                    localStorage.setItem(`hr_full_${personnelId}`, JSON.stringify(comprehensiveRecord));
+
+                    consoleBox.innerText += `\n[5/5] Committing complete record directly to GitHub repository...`;
+                    await this.commitToGitHub(comprehensiveRecord);
+
+                    consoleBox.innerText += `\n[SUCCESS] Personnel record fully provisioned, IP-bound, NFC-linked, and synced!`;
+                    alert(`Provisioning successful for ${personnelName}!`);
+
+                } catch (err) {
+                    consoleBox.innerText += `\n[ERROR] Provisioning halted: ${err.message}`;
+                    console.error(err);
+                }
+            },
+
+            async commitToGitHub(record) {
+                const owner = localStorage.getItem('cfg_owner') || 'Tole1775';
+                const repo = localStorage.getItem('cfg_repo') || 'Trust';
+                const token = localStorage.getItem('secure_access_token') ? atob(localStorage.getItem('secure_access_token')) : '';
+
+                if (!token) {
+                    throw new Error('GitHub secure access token missing from local storage.');
+                }
+
+                const filePath = `database/hr/personnel_${record.personnel_id}.json`;
+                const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${filePath}`;
+                const fileContentB64 = btoa(JSON.stringify(record, null, 2));
+
+                let fileSha = null;
+                try {
+                    const checkRes = await fetch(apiUrl, { headers: { 'Authorization': `Bearer ${token}` } });
+                    if (checkRes.ok) {
+                        const fileData = await checkRes.json();
+                        fileSha = fileData.sha;
+                    }
+                } catch (e) {}
+
+                const commitPayload = {
+                    message: `HR: Provision personnel profile & telemetry for ${record.personnel_id}`,
+                    content: fileContentB64,
+                    sha: fileSha
+                };
+
+                const putRes = await fetch(apiUrl, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(commitPayload)
+                });
+
+                if (!putRes.ok) {
+                    const errData = await putRes.json();
+                    throw new Error(`GitHub Commit Error: ${errData.message}`);
+                }
+            }
+        };
+
+        function toggleSupervisorDrawer() {
+            document.getElementById('supervisor-drawer').classList.toggle('open');
+        }
+
+        function saveAndLaunchAdmin() {
+            const urlInput = document.getElementById('admin-url-input').value.trim();
+            if (!urlInput) {
+                alert('Please enter a valid URL.');
+                return;
+            }
+            localStorage.setItem('supervisor_admin_url', urlInput);
+            window.open(urlInput, '_blank');
+        }
+
+        // Touch handlers for mobile swipe-up drawer
+        let touchStartY = 0;
+        const triggerTab = document.getElementById('drawer-trigger');
+
+        triggerTab.addEventListener('touchstart', e => {
+            touchStartY = e.changedTouches[0].screenY;
+            triggerTab.innerText = '▲ Supervisor Access (Swipe Up)';
+        });
+
+        triggerTab.addEventListener('touchend', e => {
+            const touchEndY = e.changedTouches[0].screenY;
+            if (touchStartY - touchEndY > 40) {
+                document.getElementById('supervisor-drawer').classList.add('open');
+            } else {
+                triggerTab.innerText = 'Project: Trust & Automated Governance Framework | © 2026 PMR Publications';
+            }
+        });
+    </script>
+</body>
+</html>
