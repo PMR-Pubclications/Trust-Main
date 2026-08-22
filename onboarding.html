@@ -1,9 +1,23 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!--
+      ----------------------------------------------------------------------------
+      Project: Trust & Automated Governance Framework
+      File: hr.html (Part 1 of 2)
+      
+      Author: Anatolie Anatoliciva
+      Title: Forensic Consultant & Engineer
+      Location: Vancouver, Washington
+      Copyright (c) 2026 PMR Publications. All rights reserved.
+      
+      Description: HR Personnel Provisioning & Biometric/NFC Governance Portal
+      ----------------------------------------------------------------------------
+    -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Framework Onboarding | Trust & Automated Governance</title>
+    <title>HR Personnel Provisioning | Trust Governance</title>
     <style>
         :root {
             --bg-deep: #020617;
@@ -14,6 +28,7 @@
             --text-secondary: #94a3b8;
             --accent-green: #16a34a;
             --accent-hover: #22c55e;
+            --accent-red: #dc2626;
             --accent-info: #0284c7;
         }
 
@@ -23,51 +38,83 @@
             background-color: var(--bg-deep);
             color: var(--text-primary);
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
+            padding-bottom: 60px;
+            overflow-x: hidden;
         }
 
-        .onboard-container {
-            width: 100%;
-            max-width: 550px;
+        .reports-container {
+            width: 96vw;
+            margin: 2vh auto;
             background-color: var(--panel-main);
             border: 2px solid var(--border-line);
             border-radius: 10px;
-            padding: 30px;
+            display: flex;
+            flex-direction: column;
             box-shadow: 0 20px 40px rgba(0,0,0,0.8);
-            box-sizing: border-box;
+            min-height: 94vh;
         }
 
-        h1 {
-            font-size: 20px;
-            margin-top: 0;
-            margin-bottom: 5px;
+        .reports-header {
+            padding: 20px 30px;
+            background-color: var(--bg-deep);
+            border-bottom: 2px solid var(--border-line);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .reports-header h1 {
+            margin: 0;
+            font-size: 18px;
+            letter-spacing: 0.5px;
             color: var(--text-primary);
         }
 
-        .subtitle {
-            font-size: 13px;
+        .reports-sub {
+            font-size: 12px;
             color: var(--text-secondary);
-            margin-bottom: 25px;
+        }
+
+        .reports-body {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            padding: 25px;
+            flex-grow: 1;
+        }
+
+        .card {
+            background-color: var(--card-surface);
+            border: 2px solid var(--border-line);
+            border-radius: 8px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card h3 {
+            margin-top: 0;
+            font-size: 16px;
+            border-bottom: 2px solid var(--border-line);
+            padding-bottom: 10px;
+            color: var(--text-primary);
         }
 
         .form-group {
-            margin-bottom: 18px;
+            margin-bottom: 15px;
         }
 
-        label {
+        .form-group label {
             display: block;
             font-size: 13px;
             font-weight: bold;
-            margin-bottom: 6px;
+            margin-bottom: 5px;
             color: var(--text-secondary);
         }
 
-        input {
+        .form-group input, .form-group select {
             width: 100%;
-            padding: 12px;
+            padding: 10px;
             background-color: var(--bg-deep);
             border: 2px solid var(--border-line);
             color: var(--text-primary);
@@ -76,14 +123,14 @@
             font-size: 14px;
         }
 
-        input:focus {
+        .form-group input:focus, .form-group select:focus {
             border-color: var(--accent-info);
             outline: none;
         }
 
         .btn {
             width: 100%;
-            padding: 14px;
+            padding: 12px;
             background-color: var(--accent-green);
             color: white;
             border: none;
@@ -91,7 +138,11 @@
             font-weight: bold;
             font-size: 14px;
             cursor: pointer;
-            margin-top: 10px;
+            margin-top: 5px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            box-sizing: border-box;
             transition: background-color 0.2s;
         }
 
@@ -99,252 +150,146 @@
             background-color: var(--accent-hover);
         }
 
-        #response-box {
-            margin-top: 20px;
-            padding: 12px;
-            border-radius: 6px;
-            font-family: monospace;
-            font-size: 12px;
-            display: none;
+        .btn-secondary {
+            background-color: var(--accent-info);
         }
-        .success { background-color: #064e3b; border: 1px solid #34d399; color: #34d399; }
-        .error { background-color: #7f1d1d; border: 1px solid #f87171; color: #f87171; }
+        .btn-secondary:hover {
+            background-color: #0369a1;
+        }
+
+        /* Supervisor Swipe-Up Drawer Overlay */
+        #supervisor-drawer {
+            position: fixed;
+            bottom: -100%;
+            left: 0;
+            width: 100%;
+            height: 280px;
+            background-color: #090d16;
+            border-top: 3px solid var(--accent-info);
+            box-shadow: 0 -10px 30px rgba(0,0,0,0.9);
+            transition: bottom 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        #supervisor-drawer.open {
+            bottom: 0;
+        }
+        .drawer-handle-bar {
+            width: 60px;
+            height: 5px;
+            background-color: var(--border-line);
+            border-radius: 3px;
+            margin-bottom: 15px;
+            cursor: pointer;
+        }
+
+        /* Dynamic Copyright / Swipe Trigger Tab */
+        .swipe-trigger-tab {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--panel-main);
+            border: 1px solid var(--border-line);
+            border-bottom: none;
+            padding: 6px 20px;
+            font-size: 11px;
+            color: var(--text-secondary);
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+            cursor: pointer;
+            z-index: 1500;
+            font-family: monospace;
+            transition: background-color 0.2s ease, color 0.2s ease;
+            white-space: nowrap;
+        }
+        .swipe-trigger-tab:hover {
+            background-color: var(--accent-info);
+            color: white;
+        }
     </style>
 </head>
 <body>
 
-    <div class="onboard-container">
-        <h1>Framework Onboarding</h1>
-        <div class="subtitle">Initialize repository parameters and generate secure cryptographic credentials.</div>
-
-        <form id="onboard-form" onsubmit="submitOnboarding(event)">
-            <div class="form-group">
-                <label for="owner_name">GitHub Owner / Handle</label>
-                <input type="text" id="owner_name" required placeholder="e.g., Tole1775">
+    <div class="reports-container">
+        <!-- Header -->
+        <div class="reports-header">
+            <div>
+                <h1>HUMAN RESOURCES & PROVISIONING PORTAL</h1>
+                <div class="reports-sub">Trust Governance Framework • Vancouver, Washington</div>
             </div>
-
-            <div class="form-group">
-                <label for="repo_name">Repository Name</label>
-                <input type="text" id="repo_name" required placeholder="e.g., Trust">
+            <div>
+                <a href="reports.html" class="btn btn-secondary" style="width: auto; padding: 8px 18px; margin: 0;">⬅ Return to Reports Console</a>
             </div>
+        </div>
 
-            <div class="form-group">
-                <label for="organization">Organization / Entity</label>
-                <input type="text" id="organization" value="PMR Publications">
-            </div>
-
-            <div class="form-group">
-                <label for="contact_email">Administrative Contact Email</label>
-                <input type="email" id="contact_email" placeholder="Optional contact email">
-            </div>
-
-            <button type="submit" class="btn">🔑 Generate Key & Save Profile</button>
-        </form>
-
-        <div id="response-box"></div>
-    </div>
-
-    <script>
-        async function submitOnboarding(event) {
-            event.preventDefault();
-
-            const payload = {
-                owner_name: document.getElementById('owner_name').value.trim(),
-                repo_name: document.getElementById('repo_name').value.trim(),
-                organization: document.getElementById('organization').value.trim(),
-                contact_email: document.getElementById('contact_email').value.trim()
-            };
-
-            const responseBox = document.getElementById('response-box');
-            responseBox.style.display = 'block';
-            responseBox.className = '';
-            responseBox.innerText = '[PROCESSING] Generating private key and writing to database...';
-
-            try {
-                const res = await fetch('http://localhost:3000/api/onboard', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-
-                const data = await res.json();
-
-                if (!res.ok) throw new Error(data.error || 'Server error occurred.');
-
-                responseBox.className = 'success';
-                responseBox.innerHTML = `<strong>SUCCESS:</strong> ${data.message}<br><br>Profile ID: ${data.profile_id}<br>Key Preview: <code>${data.generated_key_preview}</code>`;
+        <!-- Body Layout -->
+        <div class="reports-body">
+            
+            <!-- Column 1: Onboarding & API Config Card -->
+            <div class="card">
+                <h3>Framework Initialization & Credentials</h3>
+                <p style="font-size: 13px; color: var(--text-secondary);">Configure repository targets and cryptographic access credentials for synchronization.</p>
                 
-                // Save config locally for subsequent portal use
-                localStorage.setItem('cfg_owner', payload.owner_name);
-                localStorage.setItem('cfg_repo', payload.repo_name);
+                <div class="form-group" style="margin-top: 10px;">
+                    <label for="cfg-owner">GitHub Owner / Handle</label>
+                    <input type="text" id="cfg-owner" placeholder="e.g., Tole1775">
+                </div>
 
-            } catch (err) {
-                responseBox.className = 'error';
-                responseBox.innerText = `[ERROR] ${err.message}`;
-            }
-        }
+                <div class="form-group">
+                    <label for="cfg-repo">Repository Name</label>
+                    <input type="text" id="cfg-repo" placeholder="e.g., Trust">
+                </div>
 
-<!-- HR Fingerprint & Biometric Registration Card -->
-<div class="card" style="border-color: var(--accent-info); margin-top: 20px;">
-    <h3 style="font-size: 16px; color: var(--text-primary); border-bottom: 2px solid var(--border-line); padding-bottom: 10px;">
-        👆 Personnel Biometric & Fingerprint Enrollment Layer
-    </h3>
-    <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 15px;">
-        Register hardware-vetted biometric credentials (Fingerprint/Passkey) for personnel access control. Records are saved locally and synced directly to the GitHub repository.
-    </p>
+                <div class="form-group">
+                    <label for="secure-token">Secure Access Token (GitHub Token / PAT)</label>
+                    <input type="password" id="secure-token" placeholder="Paste Base64 or plain token...">
+                </div>
 
-    <div class="form-group">
-        <label for="personnel-id">Personnel Identifier / Badge Number</label>
-        <input type="text" id="personnel-id" placeholder="e.g., EMP-2026-042">
+                <button class="btn btn-secondary" onclick="saveConfiguration()">💾 Save Core Configuration</button>
+            </div>
+
+            <!-- Column 2: Personnel Provisioning & Biometric/NFC Layer -->
+            <div class="card" style="border-color: var(--accent-info);">
+                <h3>👆 Biometric, IP Binding & NFC Enrollment</h3>
+                <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 15px;">
+                    Capture hardware fingerprints via WebAuthn, bind local network IP address, and link NFC badges.
+                </p>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div class="form-group">
+                        <label for="personnel-id">Personnel ID / Badge</label>
+                        <input type="text" id="personnel-id" placeholder="e.g., EMP-042">
+                    </div>
+                    <div class="form-group">
+                        <label for="personnel-name">Full Legal Name</label>
+                        <input type="text" id="personnel-name" placeholder="e.g., Anthony Antolic">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="nfc-tag-id">NFC Proximity Badge UID</label>
+                    <div style="display: flex; gap: 8px;">
+                        <input type="text" id="nfc-tag-id" placeholder="Tap tag or enter hex UID..." style="flex-grow: 1;">
+                        <button type="button" class="btn btn-secondary" style="width: auto; margin: 0; padding: 0 12px;" onclick="personnelProvisioning.scanNfcBadge()">
+                            📡 Scan NFC
+                        </button>
+                    </div>
+                </div>
+
+                <button class="btn" style="background-color: var(--accent-green);" onclick="personnelProvisioning.executeFullEnrollment()">
+                    🔒 Scan Fingerprint, Bind IP & Sync to GitHub
+                </button>
+
+                <div id="provisioning-console" style="margin-top: 15px; font-family: monospace; font-size: 11px; color: #38bdf8; background: var(--bg-deep); padding: 10px; border-radius: 6px; border: 1px solid var(--border-line); display: none;">
+                    [PROVISIONING] System primed...
+                </div>
+            </div>
+
+        </div>
     </div>
 
-    <div class="form-group">
-        <label for="personnel-name">Full Legal Name</label>
-        <input type="text" id="personnel-name" placeholder="e.g., Anthony Antolic">
-    </div>
-
-    <button class="btn btn-secondary" onclick="biometricEnrollment.registerFingerprint()">
-        🔒 Scan Fingerprint & Enroll Credential
-    </button>
-
-    <div id="enrollment-console" style="margin-top: 15px; font-family: monospace; font-size: 11px; color: #38bdf8; background: var(--bg-deep); padding: 10px; border-radius: 6px; border: 1px solid var(--border-line); display: none;">
-        [BIOMETRIC] System ready for hardware enrollment...
-    </div>
-</div>
-
-
-    const biometricEnrollment = {
-        async registerFingerprint() {
-            const personnelId = document.getElementById('personnel-id').value.trim();
-            const personnelName = document.getElementById('personnel-name').value.trim();
-            const consoleBox = document.getElementById('enrollment-console');
-
-            if (!personnelId || !personnelName) {
-                alert('Please enter both Personnel ID and Full Legal Name before scanning biometrics.');
-                return;
-            }
-
-            consoleBox.style.display = 'block';
-            consoleBox.innerText = `[1/3] Prompting hardware biometric sensor for [${personnelName}]...`;
-
-            try {
-                // Check if WebAuthn (Fingerprint/Passkey hardware) is supported
-                if (!window.PublicKeyCredential) {
-                    throw new Error('WebAuthn biometric hardware API is not supported on this browser/device.');
-                }
-
-                // Generate a random challenge for cryptographic binding
-                const challenge = new Uint8Array(32);
-                window.crypto.getRandomValues(challenge);
-
-                const publicKeyCredentialCreationOptions = {
-                    challenge: challenge,
-                    rp: {
-                        name: "Trust Governance Framework HR",
-                        id: window.location.hostname,
-                    },
-                    user: {
-                        id: Uint8Array.from(personnelId, c => c.charCodeAt(0)),
-                        name: personnelId,
-                        displayName: personnelName,
-                    },
-                    pubKeyCredParams: [{ alg: -7, type: "public-key" }], // ES256
-                    timeout: 60000,
-                    attestation: "direct",
-                    authenticatorSelection: {
-                        authenticatorAttachment: "platform", // Uses built-in fingerprint/TouchID/Windows Hello
-                        userVerification: "required",
-                        residentKey: "preferred"
-                    }
-                };
-
-                // Trigger hardware biometric prompt (Fingerprint reader)
-                const credential = await navigator.credentials.create({
-                    publicKey: publicKeyCredentialCreationOptions
-                });
-
-                consoleBox.innerText += `\n[2/3] Biometric credential successfully captured. Serializing payload...`;
-
-                // Extract credential details safely
-                const credentialIdB64 = btoa(String.fromCharCode(...new Uint8Array(credential.rawId)));
-                const timestamp = new Date().toISOString();
-
-                const biometricRecord = {
-                    personnel_id: personnelId,
-                    name: personnelName,
-                    credential_id: credentialIdB64,
-                    enrollment_type: "hardware_biometric_fingerprint",
-                    timestamp: timestamp,
-                    status: "ACTIVE_VERIFIED"
-                };
-
-                // 1. Save Locally (localStorage)
-                const localKey = `hr_bio_${personnelId}`;
-                localStorage.setItem(localKey, JSON.stringify(biometricRecord));
-
-                consoleBox.innerText += `\n[3/3] Saved locally. Committing record to GitHub repository...`;
-
-                // 2. Commit to GitHub Repository
-                await this.commitToGitHub(biometricRecord);
-
-                consoleBox.innerText += `\n[SUCCESS] Biometric fingerprint record registered and synced across local and cloud databases.`;
-                alert(`Fingerprint successfully enrolled for ${personnelName}!`);
-
-            } catch (err) {
-                consoleBox.innerText += `\n[ERROR] Enrollment failed: ${err.message}`;
-                console.error(err);
-            }
-        },
-
-        async commitToGitHub(record) {
-            const owner = localStorage.getItem('cfg_owner') || 'Tole1775';
-            const repo = localStorage.getItem('cfg_repo') || 'Trust';
-            const token = localStorage.getItem('secure_access_token') ? atob(localStorage.getItem('secure_access_token')) : '';
-
-            if (!token) {
-                throw new Error('GitHub secure access token missing. Configure repository credentials first.');
-            }
-
-            const filePath = `database/hr/biometrics_${record.personnel_id}.json`;
-            const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${filePath}`;
-            const fileContentB64 = btoa(JSON.stringify(record, null, 2));
-
-            // Check if file already exists to get its SHA (required for GitHub updates)
-            let fileSha = null;
-            try {
-                const checkRes = await fetch(apiUrl, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                if (checkRes.ok) {
-                    const fileData = await checkRes.json();
-                    fileSha = fileData.sha;
-                }
-            } catch (e) {
-                // File likely doesn't exist yet, which is fine for new records
-            }
-
-            const commitPayload = {
-                message: `HR: Enroll biometric fingerprint record for ${record.personnel_id}`,
-                content: fileContentB64,
-                sha: fileSha
-            };
-
-            const putRes = await fetch(apiUrl, {
-                method: 'PUT',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(commitPayload)
-            });
-
-            if (!putRes.ok) {
-                const errData = await putRes.json();
-                throw new Error(`GitHub Commit Failed: ${errData.message}`);
-            }
-        }
-    };
-</script>
-
-</body>
-</html>
