@@ -1,0 +1,23 @@
+# metadata/com.legacytrust.trust.yml
+Categories:
+  - Security
+  - Utilities
+License: GPL-3.0-only
+SourceCode: https://github.com/Tole1775/Trust
+IssueTracker: https://github.com/Tole1775/Trust/issues
+
+Summary: Mobile field tool for scene preservation and documentation
+Description: |-
+  A lightweight mobile application designed for police and fire departments 
+  to assist in scene preservation and field documentation.
+
+RepoType: git
+Repo: https://github.com/Tole1775/Trust.git
+
+Builds:
+  - versionName: 1.0.0
+    versionCode: 100
+    commit: v1.0.0
+    subdir: android
+    gradle:
+      - yes
