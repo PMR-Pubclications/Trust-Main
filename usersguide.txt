@@ -1,0 +1,22 @@
+================================================================================
+                     TRUST GOVERNANCE FRAMEWORK (TGF)
+                        NEW USER OPERATIONAL GUIDE
+================================================================================
+1. Account Setup & Key Generation
+Access Provisioning: Log into the TGF dashboard using your designated system credentials or authorized SSO token.
+Cryptographic Key Initialization: Generate your dual-key pair (Signing Key and Encryption Key) through the security portal.
+Key Custody: Store your private key securely in an encrypted hardware module or physical vault. Never upload unencrypted private keys to a shared environment.
+2. Standard Operating Procedures
+Initiating an Action or Submission: Navigate to the active module (Governance, Audit, or Asset Ledger) and select New Submission.
+Attaching Evidence & Provenance: Upload all supporting documentation, smart contract binaries, or ledger references. Ensure every item includes an valid cryptographic signature or SHA-256 hash.
+Execution & Timelock Protocols: Submit proposed parameter changes or transactional requests to the governance pipeline. Actions are subject to mandatory multi-signature verification and standard timelock delays before execution.
+3. Compliance & Governance Matrix
+
+Core ResponsibilityRequirement StandardAction Required
+Identity VerificationMulti-Factor / Hardware KeyVerify quarterly or upon role change.
+Audit LoggingImmutable Event TrailAttach cryptographically signed logs for every action.
+Anomaly ReportingSeverity Assessment (Low to Critical)Immediately trigger an incident report upon detection.
+
+4. Emergency & Security Protocols
+System Compromise: If key loss or credential compromise is suspected, immediately trigger the Revocation Protocol via the security portal or notify the Duty Auditor.
+Governance Freeze: In the event of a critical security warning, designated custodians may execute a temporary freeze on execution pipelines pending audit completion.
