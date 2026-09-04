@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trust Repository - First Response Data Entry</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f9;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        .container {
+            max-width: 600px;
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            margin: auto;
+        }
+        h2 {
+            text-align: center;
+            color: #003366;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        input[type="text"], select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        textarea {
+            resize: vertical;
+            height: 100px;
+        }
+        button {
+            width: 100%;
+            background-color: #003366;
+            color: white;
+            padding: 12px;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #002244;
+        }
+        #response-message {
+            margin-top: 15px;
+            text-align: center;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Trust Repository Data Intake</h2>
+    <form id="firstResponseForm">
+        <div class="form-group">
+            <label for="incidentId">Incident / Case Number:</label>
+            <input type="text" id="incidentId" name="incidentId" required placeholder="e.g., INC-2026-001">
+        </div>
+
+        <div class="form-group">
+            <label for="agencyCategory">Agency Classification (Category):</label>
+            <select id="agencyCategory" name="agencyCategory" required>
+                <option value="">-- Select Category --</option>
+                <option value="Police">Police (Crime Scene)</option>
+                <option value="Fire">Fire (Arson Investigation)</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="evidenceData">First Response Data / Evidence Details:</label>
+            <textarea id="evidenceData" name="evidenceData" required placeholder="Enter item descriptions, collection locations, and notes..."></textarea>
+        </div>
+
+        <button type="submit">Submit to Trust Repository</button>
+    </form>
+    <div id="response-message"></div>
+</div>
+
+<!-- Load your custom endpoint logic securely from the repository without exposing keys in the main HTML -->
+<script src="https://raw.githubusercontent.com/Tole1775/Trust/main/asset/js/GitHubAPI-Endpoint.js"></script>
+
+<script>
+    document.getElementById('firstResponseForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        const incidentId = document.getElementById('incidentId').value;
+        const agencyCategory = document.getElementById('agencyCategory').value;
+        const evidenceData = document.getElementById('evidenceData').value;
+        const messageDiv = document.getElementById('response-message');
+
+        const newSqlEntry = `\nINSERT INTO scene_evidence (case_number, general_category, description) VALUES ('${incidentId}', '${agencyCategory}', '${evidenceData}');`;
+
+        try {
+            // Assumes your external GitHubAPI-Endpoint.js file exposes a function 
+            // like handleGitHubCommit(newSqlEntry, agencyCategory) containing the protected logic/keys.
+            if (typeof handleGitHubCommit === 'function') {
+                await handleGitHubCommit(newSqlEntry, agencyCategory, incidentId);
+                messageDiv.style.color = "green";
+                messageDiv.textContent = `Data successfully committed under ${agencyCategory}!`;
+                document.getElementById('firstResponseForm').reset();
+            } else {
+                throw new Error("External endpoint function 'handleGitHubCommit' is not defined in the loaded script.");
+            }
+        } catch (error) {
+            messageDiv.style.color = "red";
+            messageDiv.textContent = `Error: ${error.message}`;
+            console.error(error);
+        }
+    });
+</script>
+
+</body>
+</html>
