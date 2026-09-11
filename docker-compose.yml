@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  trust:
+    build: .
+    image: trust-app:latest
+    restart: unless-stopped
+    expose:
+      - "3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+    volumes:
+      - ./governance.db:/app/governance.db
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+
+  apache:
+    image: httpd:2.4
+    depends_on:
+      trust:
+        condition: service_healthy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./apache/httpd.conf:/usr/local/apache2/conf/httpd.conf:ro
+      - ./apache/extra/httpd-vhosts.conf:/usr/local/apache2/conf/extra/httpd-vhosts.conf:ro
+      - ./apache/certs:/usr/local/apache2/conf/certs:rw
+    restart: unless-stopped
+
+  certbot:
+    image: quay.io/letsencrypt/letsencrypt:latest
+    command: 
+      - --help
+    volumes:
+      - ./apache/certs:/etc/letsencrypt
+      - ./apache/var/www/html:/var/www/html
+    entrypoint: ["/bin/true"]
+    # The certbot service is provided as a helper; use the `docker-compose run --rm certbot ...` command
+    # to request/renew certificates, see apache/README.md for instructions.
+
+networks:
+  default:
+    driver: bridge
