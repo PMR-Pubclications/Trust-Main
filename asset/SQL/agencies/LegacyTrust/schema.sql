@@ -8,6 +8,16 @@ CREATE TABLE legacy_trust_admins (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE agency_rfid_badges (
+    badge_id INT PRIMARY KEY AUTO_INCREMENT,
+    card_uid VARCHAR(128) UNIQUE NOT NULL,
+    admin_id INT NOT NULL,
+    is_active BOOLEAN DEFAULT TRUE,
+    assigned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (admin_id) REFERENCES legacy_trust_admins(admin_id) ON DELETE CASCADE
+);
+
+
 -- Example Admin User (Password should be pre-hashed, e.g., via BCrypt)
 -- INSERT INTO legacy_trust_admins (username, password_hash, role) 
 -- VALUES ('admin_trust', '$2a$10$YourHashedPasswordHere...', 'SUPER_ADMIN');
