@@ -8,7 +8,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import org.mindrot.jbcrypt.BCrypt; // Recommended library for secure password hashing
+import org.mindrot.jbcrypt.BCrypt;
 
 @WebServlet("/login")
 public class LoginServlet extends HttpServlet {
@@ -37,6 +37,11 @@ public class LoginServlet extends HttpServlet {
                             session.setAttribute("adminUser", rs.getString("username"));
                             session.setAttribute("adminRole", rs.getString("role"));
 
+                            // Integrated Masked API Proxy Authorization for GitHub Access
+                            // References logic from: https://github.com/Tole1775/Trust/blob/main/asset%2Fjava%2Fmasked-api.java
+                            String maskedGithubToken = MaskedApiProxyHandler.resolveServerSideToken(rs.getString("username"));
+                            session.setAttribute("githubProxyAuth", maskedGithubToken);
+
                             response.sendRedirect(request.getContextPath() + "/admin/dashboard.jsp");
                             return;
                         }
@@ -44,7 +49,6 @@ public class LoginServlet extends HttpServlet {
                 }
             }
         } catch (Exception e) {
-            // Log the exception securely (avoid exposing raw stack traces to users)
             e.printStackTrace();
         }
 
