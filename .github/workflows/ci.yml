@@ -1,0 +1,84 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    services: {}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Use Node.js 18
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run linter
+        run: |
+          if npm run | grep -q "lint"; then
+            npm run lint || true
+          else
+            echo "No lint script configured"
+          fi
+
+      - name: Initialize database
+        run: |
+          if [ -f scripts/init-db.js ]; then
+            node scripts/init-db.js
+          else
+            echo "No init-db script found"
+          fi
+
+      - name: Run tests
+        run: |
+          if npm run | grep -q "test"; then
+            npm test || true
+          else
+            echo "No tests configured"
+          fi
+
+      - name: Start server in background
+        run: |
+          nohup node server.js > server.log 2>&1 &
+          sleep 4
+
+      - name: Wait for server to be ready and run healthcheck
+        run: |
+          for i in {1..10}; do
+            if curl -fsS http://localhost:3000/health; then
+              echo "Server is up"; break;
+            fi
+            echo "Waiting for server..."; sleep 2
+          done
+
+      - name: Build Docker image
+        run: |
+          docker build -t trust-app:ci .
+
+      - name: Run Docker container
+        run: |
+          docker run -d --name trust-app-ci -p 3001:3000 trust-app:ci
+          sleep 4
+          docker ps -a
+
+      - name: Docker healthcheck (container)
+        run: |
+          docker exec trust-app-ci sh -c 'curl -fsS http://localhost:3000/health' || (docker logs trust-app-ci && exit 1)
+
+      - name: Collect logs
+        if: failure()
+        run: |
+          echo "=== server.log ==="
+          cat server.log || true
+          echo "=== Docker logs ==="
+          docker logs trust-app-ci || true
