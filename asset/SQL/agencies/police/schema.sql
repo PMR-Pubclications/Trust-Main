@@ -48,3 +48,25 @@ CREATE TABLE IF NOT EXISTS agency_image_binaries (
     intake_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (category_id) REFERENCES agency_categories(category_id)
 );
+
+-- For Fire Agency Images (asset/SQL/agencies/fire/schema.sql)
+CREATE TABLE IF NOT EXISTS fire_agency_images (
+    image_id INT AUTO_INCREMENT PRIMARY KEY,
+    file_name VARCHAR(255) NOT NULL,
+    mime_type VARCHAR(100) NOT NULL,
+    image_binary LONGBLOB NOT NULL,
+    sha256_hash VARCHAR(64) UNIQUE NOT NULL,
+    submitter_role VARCHAR(100) NOT NULL,
+    intake_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- For Police Agency Images (asset/SQL/agencies/police/schema.sql)
+CREATE TABLE IF NOT EXISTS police_agency_images (
+    image_id INT AUTO_INCREMENT PRIMARY KEY,
+    file_name VARCHAR(255) NOT NULL,
+    mime_type VARCHAR(100) NOT NULL,
+    image_binary LONGBLOB NOT NULL,
+    sha256_hash VARCHAR(64) UNIQUE NOT NULL,
+    submitter_role VARCHAR(100) NOT NULL,
+    intake_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
