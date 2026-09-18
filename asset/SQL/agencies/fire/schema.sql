@@ -1,3 +1,6 @@
+SELECT record_id, title, payload, intake_timestamp 
+FROM operational_records 
+WHERE security_tag IN ('PUBLIC', 'FIRST_RESPONDER');
 
 CREATE TABLE legacy_trust_admins (
     admin_id INT PRIMARY KEY AUTO_INCREMENT,
