@@ -318,6 +318,44 @@
 
     <!-- Consolidated JavaScript Logic -->
     <script>
+
+// Handles the submission of onboarding profiles to the Express server
+document.getElementById('onboardingForm').addEventListener('submit', async (event) => {
+    event.preventDefault();
+
+    const payload = {
+        owner_name: document.getElementById('ownerName').value.trim(),
+        repo_name: document.getElementById('repoName').value.trim(),
+        organization: document.getElementById('organization').value.trim(),
+        contact_email: document.getElementById('contactEmail').value.trim()
+    };
+
+    try {
+        const response = await fetch('http://localhost:3000/api/onboard', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        });
+
+        const result = await response.json();
+
+        if (response.ok && result.success) {
+            console.log('Onboarding successful:', result.message);
+            alert(`Success! Profile ID: ${result.profile_id} created.`);
+            // Optional: Redirect to the desktop legacy trust view
+            window.location.href = 'legacy-trust-desktop.html';
+        } else {
+            console.error('Onboarding failed:', result.error);
+            alert(`Error: ${result.error}`);
+        }
+    } catch (err) {
+        console.error('Network or server connection error:', err);
+        alert('Failed to connect to the governance onboarding server.');
+    }
+});
+
         function saveConfiguration() {
             const owner = document.getElementById('cfg-owner').value.trim();
             const repo = document.getElementById('cfg-repo').value.trim();
