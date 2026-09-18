@@ -2,6 +2,8 @@ const express = require('express');
 const sqlite3 = require('sqlite3').verbose();
 const crypto = require('crypto');
 const cors = require('cors');
+const { exec } = require('child_process');
+const path = require('path');
 
 const app = express();
 app.use(express.json());
@@ -40,7 +42,6 @@ app.post('/api/onboard', (req, res) => {
             privateKeyEncoding: { type: 'pkcs8', format: 'pem' }
         });
 
-        // Insert into SQLite Database
         const query = `INSERT INTO onboarding_profiles (owner_name, repo_name, organization, contact_email, github_private_key) VALUES (?, ?, ?, ?, ?)`;
         
         db.run(query, [owner_name, repo_name, organization || 'PMR Publications', contact_email, privateKey], function(err) {
@@ -51,51 +52,37 @@ app.post('/api/onboard', (req, res) => {
                 success: true,
                 message: 'Onboarding profile saved and private key generated successfully.',
                 profile_id: this.lastID,
-                generated_key_preview: privateKey.split('\n')[1] + '...' // Return preview snippet only for security
+                generated_key_preview: privateKey.split('\n')[1] + '...'
             });
         });
-// assets/js/main.js
-import { generateSecurityHeaders } from './generate-headers.js';
-import { generateKey } from './cryptoUtils.js';
 
-async function initApp() {
-  console.log("App Initializing...");
-  
-  const headers = generateSecurityHeaders();
-  console.log("Security Headers Configured:", headers);
-
-  const key = await generateKey();
-  console.log("Encryption Key Generated successfully.");
-}
-
-// assets/js/cryptoUtils.js
-export async function generateKey() {
-  return await crypto.subtle.generateKey(
-    { name: "AES-GCM", length: 256 },
-    true,
-    ["encrypt", "decrypt"]
-  );
-}
-
-// assets/js/generate-headers.js
-export function generateSecurityHeaders() {
-  return {
-    "Content-Security-Policy": "default-src 'self'",
-    "X-Content-Type-Options": "nosniff",
-    "X-Frame-Options": "DENY"
-  };
-}
-
-
-initApp()
     } catch (err) {
         res.status(500).json({ error: 'Key generation failed: ' + err.message });
     }
 });
 
+// Secure Endpoint to Trigger the Python Google Drive / Trust Access Script
+app.post('/api/trigger-trust-sync', (req, res) => {
+    // Path to your secure-googledive-access.py script
+    const scriptPath = path.join(__dirname, 'asset', 'py', 'secure-googledive-access.py');
+
+    // Execute the Python script securely
+    exec(`python3 "${scriptPath}"`, (error, stdout, stderr) => {
+        if (error) {
+            console.error(`Execution error: ${error.message}`);
+            return res.status(500).json({ success: false, error: error.message });
+        }
+        if (stderr) {
+            console.warn(`Script stderr: ${stderr}`);
+        }
+        res.json({
+            success: true,
+            message: 'Secure trust Google Drive access script executed successfully.',
+            output: stdout
+        });
+    });
+});
+
 app.listen(3000, () => {
     console.log('Governance onboarding server running on port 3000');
 });
-
-
-
