@@ -1,3 +1,9 @@
+
+SELECT record_id, title, payload, intake_timestamp 
+FROM operational_records 
+WHERE security_tag IN ('PUBLIC', 'FIRST_RESPONDER');
+
+
 SELECT record_id, title, payload, intake_timestamp 
 FROM operational_records 
 WHERE security_tag IN ('PUBLIC', 'FIRST_RESPONDER');
