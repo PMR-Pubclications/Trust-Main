@@ -1,11 +1,40 @@
 from datetime import datetime, timezone
 import requests
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import Depends, FastAPI, HTTPException, Query, Security
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
-app = FastAPI(title="Etherscan Date-Pull API Framework", version="1.0.0")
+app = FastAPI(
+    title="Trust Admin Executor - Etherscan Date-Pull API", version="1.0.0"
+)
 
-# Etherscan V2 Base URL (Supports 60+ EVM chains via chainid)
+# API and Storage Configurations
 ETHERSCAN_V2_URL = "https://api.etherscan.io/v2/api"
+# Designated Google Drive folder for NFY activity
+GOOGLE_DRIVE_FOLDER_URL = (
+    "https://drive.google.com/drive/folders/1fkANYQyX1piQDfh4NHTexdYf4jEvpsN_"
+)
+
+# Security Scheme for Trust Admin Executor
+security = HTTPBearer()
+
+# In production, load this securely from environment variables (e.g., os.getenv("TRUST_ADMIN_TOKEN"))
+AUTHORIZED_ADMIN_TOKEN = "trust-admin-executor-secure-token-xyz"
+
+
+def verify_trust_admin_executor(
+    credentials: HTTPAuthorizationCredentials = Security(security),
+) -> str:
+  """Dependency to verify that the requester holds the Trust Admin Executor role/token."""
+  token = credentials.credentials
+  if token != AUTHORIZED_ADMIN_TOKEN:
+    raise HTTPException(
+        status_code=403,
+        detail=(
+            "Access Denied: This endpoint is restricted to the Trust Admin"
+            " Executor."
+        ),
+    )
+  return token
 
 
 class EtherscanDateFetcher:
@@ -95,23 +124,25 @@ class EtherscanDateFetcher:
         "end_date": end_date,
         "resolved_start_block": start_block,
         "resolved_end_block": end_block,
+        "storage_destination": GOOGLE_DRIVE_FOLDER_URL,
         "transactions": data.get("result", []),
     }
 
 
-# Initialize wrapper (Use environment variables for production keys)
-# fetcher = EtherscanDateFetcher(api_key="NZWP67D6AMHG6HBH63W6HVZCCHCFUDUH99", chain_id=1)
-
-
-@app.get("/api/v1/pull-txs-by-date")
+@app.get(
+    "/api/v1/pull-txs-by-date",
+    dependencies=[Depends(verify_trust_admin_executor)],
+)
 def pull_txs_endpoint(
     address: str = Query(..., description="Target EVM wallet address"),
     start_date: str = Query(..., description="Start date (YYYY-MM-DD)"),
     end_date: str = Query(..., description="End date (YYYY-MM-DD)"),
     chain_id: int = Query(1, description="EVM Chain ID (default: 1 for Ethereum)"),
 ):
-  """API Endpoint to pull transaction records over a specific date range."""
-  # Dynamically initialize or pass credentials safely
+  """Protected API Endpoint for NFY Activity.
+
+  Only accessible by providing the valid Trust Admin Executor token.
+  """
   api_key = "YOUR_ETHERSCAN_API_KEY"
   fetcher = EtherscanDateFetcher(api_key=api_key, chain_id=chain_id)
 
