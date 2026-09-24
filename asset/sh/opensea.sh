@@ -3,3 +3,11 @@ opensea login --scopes read:favorites
 opensea auth status
 opensea whoami
 
+export OPENSEA_API_KEY="f25c57a885754235a82996ee8ed9b342"
+export OPENSEA_PRIVATE_KEY="f25c57a885754235a82996ee8ed9b342"
+export DROP_SLUG="your-drop-slug"
+
+opensea login --private-key --scopes read:eligibility
+opensea whoami
+opensea drops eligibility "$DROP_SLUG"
+opensea auth revoke
