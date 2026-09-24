@@ -4,6 +4,8 @@ import json
 import os
 from requests.exceptions import RequestException
 
+from opensea_client import OpenSeaAgentClient
+
 # Configure logging to write to standard output and a log file
 logging.basicConfig(
     level=logging.INFO,
