@@ -65,7 +65,7 @@ class OpenSeaAgentClient:
 if __name__ == "__main__":
     # Replace these placeholder strings with your actual keys and addresses
     API_KEY = "f25c57a885754235a82996ee8ed9b342"
-    SCOPED_TOKEN = "YOUR_SCOPED_AGENT_TOKEN"
+    SCOPED_TOKEN = "SXDCV61lRXTPn_Qr11OhRYV_fiaXA-4bfC3f3Dv4b47t8yQJwmA1icjCPoRJZ6dJ3E0sRJ-SvAuCFlXOVBgVQHB9gz7_lEw"
     ADMIN_WALLET = "0x26600142FC4B2ED0276536557fa8bF2a82F1d5c1"
     
     client = OpenSeaAgentClient(api_key=API_KEY, scoped_token=SCOPED_TOKEN)
