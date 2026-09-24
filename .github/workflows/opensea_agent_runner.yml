@@ -1,0 +1,47 @@
+name: OpenSea Agent Runner
+
+on:
+  schedule:
+    - cron: '*/30 * * * *' # Runs every 30 minutes
+  workflow_dispatch: # Allows manual trigger from GitHub Actions tab
+
+jobs:
+  run-agent:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Dependencies
+        run: |
+          pip install requests
+          npm install -g @opensea/cli
+
+      - name: Run OpenSea Shell Script
+        env:
+          OPENSEA_API_KEY: ${{ secrets.OPENSEA_API_KEY }}
+          OPENSEA_PRIVATE_KEY: ${{ secrets.OPENSEA_PRIVATE_KEY }}
+          DROP_SLUG: "ltf"
+        run: |
+          # Make the script executable and run it from its path
+          chmod +x asset/sh/opensea.sh
+          ./asset/sh/opensea.sh
+
+      - name: Run Python Agent Task
+        env:
+          OPENSEA_API_KEY: ${{ secrets.OPENSEA_API_KEY }}
+          OPENSEA_SCOPED_TOKEN: ${{ secrets.OPENSEA_SCOPED_TOKEN }}
+          ADMIN_WALLET_ADDRESS: ${{ secrets.ADMIN_WALLET_ADDRESS }}
+        run: |
+          python agent_loop.py
