@@ -1,0 +1,58 @@
+name: Trust Master Runner
+
+on:
+  push:
+    branches: [ "main" ]
+  schedule:
+    - cron: '*/30 * * * *'
+  workflow_dispatch:
+
+jobs:
+  run-trust-system:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Dependencies
+        run: |
+          pip install requests
+          npm install -g @opensea/cli
+
+      - name: Execute All Shell Scripts in asset/sh/
+        env:
+          OPENSEA_API_KEY: ${{ secrets.OPENSEA_API_KEY }}
+          OPENSEA_PRIVATE_KEY: ${{ secrets.OPENSEA_PRIVATE_KEY }}
+          DROP_SLUG: "ltf"
+        run: |
+          if [ -d "asset/sh" ]; then
+            echo "Executing all trust shell scripts..."
+            for script in asset/sh/*.sh; do
+              if [ -f "$script" ]; then
+                echo "Running script -> $script"
+                chmod +x "$script"
+                bash "$script"
+              fi
+            done
+          else
+            echo "Directory asset/sh not found!"
+          fi
+
+      - name: Run Python Agent Task
+        env:
+          OPENSEA_API_KEY: ${{ secrets.OPENSEA_API_KEY }}
+          OPENSEA_SCOPED_TOKEN: ${{ secrets.OPENSEA_SCOPED_TOKEN }}
+          ADMIN_WALLET_ADDRESS: ${{ secrets.ADMIN_WALLET_ADDRESS }}
+        run: |
+          python agent_loop.py
