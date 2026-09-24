@@ -11,3 +11,5 @@ opensea login --private-key --scopes read:eligibility
 opensea whoami
 opensea drops eligibility "$DROP_SLUG"
 opensea auth revoke 
+
+python agent_loop.py
