@@ -2,9 +2,8 @@ import time
 import logging
 import json
 import os
+import requests  # <-- Moved to the top so the class can use it!
 from requests.exceptions import RequestException
-
-from opensea_client import OpenSeaAgentClient
 
 # Configure logging to write to standard output and a log file
 logging.basicConfig(
@@ -31,6 +30,7 @@ class OpenSeaAgentClient:
     def get_nfts(self, chain: str, address: str, limit: int = 50):
         url = f"{self.base_url}/api/v2/chain/{chain}/account/{address}/nfts"
         params = {"limit": limit}
+        # This now works because requests is imported at the top level
         response = requests.get(url, headers=self.headers, params=params)
         response.raise_for_status()
         return response.json()
@@ -56,9 +56,6 @@ def run_agent_loop(interval_seconds: int = 300):
             
             nft_count = len(nfts_data.get("nfts", []))
             logging.info(f"Successfully checked holdings. Total tracked NFTs found: {nft_count}")
-            
-            # Here you can inject your custom decision logic:
-            # e.g., evaluate floor prices, check triggers, or execute automated actions.
 
         except RequestException as e:
             logging.error(f"API request failed: {e}")
@@ -69,6 +66,4 @@ def run_agent_loop(interval_seconds: int = 300):
         time.sleep(interval_seconds)
 
 if __name__ == "__main__":
-    import requests
-    # Run the loop every 5 minutes (300 seconds)
     run_agent_loop(interval_seconds=300)
