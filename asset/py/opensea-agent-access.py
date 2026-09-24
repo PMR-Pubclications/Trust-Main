@@ -66,7 +66,7 @@ if __name__ == "__main__":
     # Replace these placeholder strings with your actual keys and addresses
     API_KEY = "YOUR_API_KEY"
     SCOPED_TOKEN = "YOUR_SCOPED_AGENT_TOKEN"
-    ADMIN_WALLET = "0xYOUR_ADMIN_WALLET_ADDRESS"
+    ADMIN_WALLET = "0x26600142FC4B2ED0276536557fa8bF2a82F1d5c1"
     
     client = OpenSeaAgentClient(api_key=API_KEY, scoped_token=SCOPED_TOKEN)
     
