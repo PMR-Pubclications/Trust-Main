@@ -281,3 +281,78 @@ app.post('/api/trigger-trust-sync', roleRequired('trust_executor'), (req, res) =
 app.listen(PORT, () => {
   console.log(`Governance onboarding server running on port ${PORT}`);
 });
+
+
+const express = require('express');
+const cors = require('cors');
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+app.use(cors());
+app.use(express.json());
+
+// In-Memory State representing the live mining & ledger backend
+let miningState = {
+    activeWorkers: 4,
+    hashrateTH: 4.8,
+    dailyYieldECT: 14.2,
+    bctReserve: 342.85,
+    ledgerBalance: 1482550.00,
+    ledgerStatus: "RECONCILED",
+    pendingBlocks: 12,
+    transactions: [
+        { hash: "0x8f4c...3e19", timestamp: new Date().toISOString().replace('T', ' ').substring(0, 16), category: "Trust Distribution", amount: "+$45,000.00", status: "Verified" },
+        { hash: "0x3a12...9b04", timestamp: new Date(Date.now() - 3600000 * 8).toISOString().replace('T', ' ').substring(0, 16), category: "Agent Gas Provision", amount: "-$1,250.00", status: "Verified" },
+        { hash: "0x7c91...1a82", timestamp: new Date(Date.now() - 3600000 * 14).toISOString().replace('T', ' ').substring(0, 16), category: "Asset Liquidation (LTF)", amount: "+$120,000.00", status: "Verified" }
+    ]
+};
+
+// Background loop simulating real mining hashrate fluctuations & ledger increments
+setInterval(() => {
+    // Add slight natural variance to hashrate (+/- 0.2 TH/s)
+    const variance = (Math.random() * 0.4 - 0.2);
+    miningState.hashrateTH = parseFloat(Math.max(1.0, miningState.hashrateTH + variance).toFixed(2));
+    
+    // Accumulate minor fractional yield changes
+    miningState.bctReserve = parseFloat((miningState.bctReserve + 0.001).toFixed(4));
+}, 5000);
+
+// API Endpoint to fetch real-time miner & ledger stats
+api_router = express.Router();
+api_router.get('/stats', (req, res) => {
+    res.json({
+        success: true,
+        timestamp: new Date().toISOString(),
+        node: "Active-Main",
+        ...miningState
+    });
+});
+
+// API Endpoint to force a sync or add a ledger entry
+api_router.post('/sync', (req, res) => {
+    // Simulate finding a new block / processing settlement
+    const randomHash = '0x' + Math.random().toString(16).substring(2, 10) + '...' + Math.random().toString(16).substring(2, 6);
+    const newTx = {
+        hash: randomHash,
+        timestamp: new Date().toISOString().replace('T', ' ').substring(0, 16),
+        category: "ECT Mining Reward Payout",
+        amount: "+$2,450.00",
+        status: "Verified"
+    };
+    
+    miningState.transactions.unshift(newTx);
+    if(miningState.transactions.length > 10) miningState.transactions.pop(); // keep last 10
+    miningState.ledgerBalance += 2450.00;
+
+    res.json({
+        success: true,
+        message: "Backend node synchronized successfully.",
+        state: miningState
+    });
+});
+
+app.use('/api', api_router);
+
+app.listen(PORT, () => {
+    console.log(`[BACKEND MINER] Legacy Trust daemon online on port ${PORT}`);
+});
