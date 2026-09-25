@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  lnd:
+    image: lightninglabs/lnd:v0.17.4-beta
+    container-name: lightning-receiver-node
+    restart: unless-stopped
+    ports:
+      - "9735:9735" # P2P Lightning port
+      - "10009:10009" # gRPC API port
+      - "8080:8080" # REST proxy port
+    volumes:
+      - lnd_data:/root/.lnd
+    command:
+      - --bitcoin.active
+      - --bitcoin.mainnet
+      - --bitcoin.node=neutrino
+      - --neutrino.connect=seed.btcven.com
+      - --rpclisten=0.0.0.0:10009
+      - --restlisten=0.0.0.0:8080
+      - --tlsextraip=0.0.0.0
+
+volumes:
+  lnd_data:
+    driver: local
