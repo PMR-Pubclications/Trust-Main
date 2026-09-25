@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>First Response Admin - Telemetry & Unit Control</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-900 text-slate-100 font-sans min-h-screen p-6">
+    <div class="max-w-4xl mx-auto space-y-8">
+        
+        <!-- Header -->
+        <header class="border-b border-slate-700 pb-4">
+            <h1 class="text-2xl font-bold tracking-wide">First Response Admin Console</h1>
+            <p class="text-sm text-slate-400">Department Unit Telemetry, Chain-of-Custody & API Configuration</p>
+        </header>
+
+        <!-- Department Configuration Section -->
+        <section class="bg-slate-800 p-6 rounded-lg border border-slate-700 shadow-xl">
+            <h2 class="text-lg font-semibold mb-4 text-emerald-400">Department Configuration & Priority APIs</h2>
+            <form id="configForm" class="space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-medium uppercase tracking-wider text-slate-400 mb-1">Department ID</label>
+                        <input type="text" id="deptId" required class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm focus:outline-none focus:border-emerald-500" placeholder="e.g. PD-WA-104">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium uppercase tracking-wider text-slate-400 mb-1">Receiver Notification Email</label>
+                        <input type="email" id="receiverEmail" required class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm focus:outline-none focus:border-emerald-500" placeholder="admin@department.gov">
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-medium uppercase tracking-wider text-slate-400 mb-1">Priority API Endpoint</label>
+                        <input type="url" id="priorityApiEndpoint" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm focus:outline-none focus:border-emerald-500" placeholder="https://api.department.gov/v1/ingest">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium uppercase tracking-wider text-slate-400 mb-1">API Secret / Auth Token</label>
+                        <input type="password" id="apiSecretToken" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm focus:outline-none focus:border-emerald-500" placeholder="Bearer Token or Key">
+                    </div>
+                </div>
+                <button type="submit" class="bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-sm px-4 py-2 rounded transition">Save Configuration</button>
+            </form>
+        </section>
+
+        <!-- Individual Unit Telemetry Export Section -->
+        <section class="bg-slate-800 p-6 rounded-lg border border-slate-700 shadow-xl">
+            <h2 class="text-lg font-semibold mb-4 text-cyan-400">Individual Unit Telemetry Package Export</h2>
+            <form id="exportForm" class="space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-medium uppercase tracking-wider text-slate-400 mb-1">Target Department ID</label>
+                        <input type="text" id="exportDeptId" required class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm focus:outline-none focus:border-cyan-500" placeholder="e.g. PD-WA-104">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium uppercase tracking-wider text-slate-400 mb-1">Unit ID / Mobile Terminal</label>
+                        <input type="text" id="unitId" required class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm focus:outline-none focus:border-cyan-500" placeholder="e.g. Unit-Alpha-03">
+                    </div>
+                </div>
+                <button type="submit" class="bg-cyan-600 hover:bg-cyan-500 text-white font-medium text-sm px-4 py-2 rounded transition">Package & Dispatch Telemetry ZIP</button>
+            </form>
+        </section>
+
+        <!-- Status Notification Box -->
+        <div id="statusBox" class="hidden p-4 rounded text-sm font-medium border"></div>
+
+    </div>
+
+    <script>
+        const showStatus = (message, isError = false) => {
+            const box = document.getElementById('statusBox');
+            box.textContent = message;
+            box.className = `p-4 rounded text-sm font-medium border ${isError ? 'bg-red-950 border-red-800 text-red-200' : 'bg-emerald-950 border-emerald-800 text-emerald-200'}`;
+            box.classList.remove('hidden');
+        };
+
+        // Handle Department Configuration Submission
+        document.getElementById('configForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const payload = {
+                deptId: document.getElementById('deptId').value,
+                receiverEmail: document.getElementById('receiverEmail').value,
+                priorityApiEndpoint: document.getElementById('priorityApiEndpoint').value,
+                apiSecretToken: document.getElementById('apiSecretToken').value
+            };
+
+            try {
+                const res = await fetch('/api/admin/config', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                if (res.ok) showStatus(data.message);
+                else showStatus(data.error, true);
+            } catch (err) {
+                showStatus('Network error while saving configuration.', true);
+            }
+        });
+
+        // Handle Individual Unit Telemetry Export Trigger
+        document.getElementById('exportForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const payload = {
+                deptId: document.getElementById('exportDeptId').value,
+                unitId: document.getElementById('unitId').value
+            };
+
+            showStatus('Compiling unit logs and generating encrypted ZIP archive...', false);
+
+            try {
+                const res = await fetch('/api/admin/export-unit-telemetry', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                if (res.ok) showStatus(data.message);
+                else showStatus(data.error, true);
+            } catch (err) {
+                showStatus('Network error during telemetry extraction.', true);
+            }
+        });
+    </script>
+</body>
+</html>
