@@ -353,3 +353,10 @@ app.post('/api/sync', async (req, res) => {
 app.listen(PORT, () => {
     console.log(`[MINING CORE DAEMON] Legacy Trust Admin Tier 1 server running live on http://localhost:${PORT}`);
 });
+  await run(`CREATE TABLE IF NOT EXISTS accounts_receivable (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    client_name TEXT NOT NULL,
+    amount REAL NOT NULL,
+    status TEXT NOT NULL DEFAULT 'Pending',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  )`);
