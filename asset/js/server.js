@@ -360,3 +360,37 @@ app.listen(PORT, () => {
     status TEXT NOT NULL DEFAULT 'Pending',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
   )`);
+// --- ACCOUNTS RECEIVABLE ROUTES (CARD 5) ---
+
+// Fetch all receivables records from Accounts-Receivable database
+app.get('/api/receivables/list', async (req, res) => {
+    try {
+        const rows = await all(`SELECT * FROM accounts_receivable ORDER BY id DESC`, []);
+        res.json({ success: true, receivables: rows });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+// Add a new receivable entry into the database
+app.post('/api/receivables/add', async (req, res) => {
+    const { client_name, amount } = req.body;
+    if (!client_name || amount === undefined) {
+        return res.status(400).json({ success: false, error: 'Client name and amount are required.' });
+    }
+
+    try {
+        const dbResult = await run(
+            `INSERT INTO accounts_receivable (client_name, amount, status) VALUES (?, ?, ?)`,
+            [client_name, parseFloat(amount), 'Active']
+        );
+        
+        res.json({ 
+            success: true, 
+            id: dbResult.lastID, 
+            message: "Receivable successfully recorded to Accounts-Receivable ledger." 
+        });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
