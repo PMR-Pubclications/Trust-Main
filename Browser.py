@@ -65,3 +65,117 @@ class TrustSecureShellRuntime:
         if self.socket_connection:
             self.socket_connection.close()
         print("[SHELL] Secure shell gracefully terminated.")
+        #!/usr/bin/env python3
+"""Launch an approved Linux application selected by its Trust Shell tag.
+
+The trusted shell must route launches through this program and supply the tag
+from verified app metadata. The policy is administrator-controlled JSON:
+
+    {"version": 1, "apps": {"evidence-viewer": {
+        "executable": "/usr/bin/evidence-viewer",
+        "sha256": "<64 lowercase hex characters>"
+    }}}
+
+Example: app_tag_receiver.py --tag evidence-viewer -- [app arguments]
+"""
+
+import argparse
+import hashlib
+import json
+import os
+import re
+import stat
+import subprocess
+import sys
+from pathlib import Path
+from typing import Any
+
+DEFAULT_POLICY = Path("/etc/trust-shell/app-tags.json")
+TAG_PATTERN = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]{0,127}\Z")
+SHA256_PATTERN = re.compile(r"[0-9a-f]{64}\Z")
+
+
+class PolicyError(Exception):
+    pass
+
+
+def load_policy(policy_path: Path) -> dict[str, Any]:
+    try:
+        metadata = policy_path.stat()
+    except OSError as error:
+        raise PolicyError(f"cannot access policy: {error}") from error
+
+    if metadata.st_uid not in (0, os.geteuid()):
+        raise PolicyError("policy must be owned by root or the shell user")
+    if metadata.st_mode & (stat.S_IWGRP | stat.S_IWOTH):
+        raise PolicyError("policy must not be writable by group or other users")
+
+    try:
+        policy = json.loads(policy_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as error:
+        raise PolicyError(f"cannot read policy: {error}") from error
+
+    if not isinstance(policy, dict) or policy.get("version") != 1:
+        raise PolicyError("unsupported or missing policy version")
+    apps = policy.get("apps")
+    if not isinstance(apps, dict):
+        raise PolicyError("policy must contain an apps object")
+    return apps
+
+
+def authorize(tag: str, apps: dict[str, Any]) -> Path:
+    if not TAG_PATTERN.fullmatch(tag):
+        raise PolicyError("invalid or missing app tag")
+
+    entry = apps.get(tag)
+    if not isinstance(entry, dict):
+        raise PolicyError("app tag is not allowlisted")
+
+    executable_value = entry.get("executable")
+    expected_hash = entry.get("sha256")
+    if not isinstance(executable_value, str) or not executable_value.startswith("/"):
+        raise PolicyError("allowlist entry must specify an absolute executable path")
+    if not isinstance(expected_hash, str) or not SHA256_PATTERN.fullmatch(expected_hash):
+        raise PolicyError("allowlist entry must specify a lowercase SHA-256 digest")
+
+    executable = Path(executable_value)
+    try:
+        resolved = executable.resolve(strict=True)
+        if not resolved.is_file() or not os.access(resolved, os.X_OK):
+            raise PolicyError("allowlisted executable is missing or not executable")
+        digest = hashlib.sha256(resolved.read_bytes()).hexdigest()
+    except OSError as error:
+        raise PolicyError(f"cannot verify executable: {error}") from error
+
+    if digest != expected_hash:
+        raise PolicyError("executable digest does not match the allowlist")
+    return resolved
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--policy", type=Path, default=DEFAULT_POLICY)
+    parser.add_argument("--tag", required=True, help="tag supplied by the trusted shell")
+    parser.add_argument("arguments", nargs=argparse.REMAINDER, help="arguments after --")
+    args = parser.parse_args()
+
+    command_arguments = args.arguments
+    if command_arguments and command_arguments[0] == "--":
+        command_arguments = command_arguments[1:]
+
+    try:
+        apps = load_policy(args.policy)
+        executable = authorize(args.tag, apps)
+    except PolicyError as error:
+        print(f"[APP_GUARD] denied: {error}", file=sys.stderr)
+        return 126
+
+    try:
+        return subprocess.run([str(executable), *command_arguments], check=False).returncode
+    except OSError as error:
+        print(f"[APP_GUARD] launch failed: {error}", file=sys.stderr)
+        return 126
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
