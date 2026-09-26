@@ -1,5 +1,5 @@
 ================================================================================
-                     TRUST GOVERNANCE FRAMEWORK (TGF)
+                     TRUST Ferensics FRAMEWORK (TFF)
                         NEW USER OPERATIONAL GUIDE
 ================================================================================
 1. Account Setup & Key Generation
