@@ -20,3 +20,5 @@ Anomaly ReportingSeverity Assessment (Low to Critical)Immediately trigger an inc
 4. Emergency & Security Protocols
 System Compromise: If key loss or credential compromise is suspected, immediately trigger the Revocation Protocol via the security portal or notify the Duty Auditor.
 Governance Freeze: In the event of a critical security warning, designated custodians may execute a temporary freeze on execution pipelines pending audit completion.
+
+5. It is important to note that any subroutines that have not been used will be shut down within the app to save on RAM. Also the Trust Ferensics App is always free to use. But we use you device to mine Bitcoin to help pay for the program.
