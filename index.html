@@ -382,6 +382,43 @@
 </head>
 <body>
 
+<div class="workspace-card telemetry-card">
+    <h3>System Resource Governance</h3>
+    <div class="telemetry-row">
+        <span>RAM Usage:</span>
+        <span id="ramUsageVal" class="metric-value">--%</span>
+    </div>
+    <div class="telemetry-row">
+        <span>Miner Status:</span>
+        <span id="minerStatusVal" class="status-badge active">ACTIVE (Throttled)</span>
+    </div>
+    <div class="telemetry-row">
+        <span>Watchdog State:</span>
+        <span id="watchdogStateVal" class="metric-value">Armed (85% Limit)</span>
+    </div>
+</div>
+
+<style>
+.telemetry-card {
+    background: #121212;
+    border: 1px solid #333;
+    padding: 15px;
+    border-radius: 4px;
+    font-family: monospace;
+    color: #00ff66;
+}
+.telemetry-row {
+    display: flex;
+    justify-content: space-between;
+    margin: 8px 0;
+    font-size: 14px;
+}
+.status-badge.active { color: #00ff66; }
+.status-badge.throttled { color: #ffaa00; }
+.status-badge.shutdown { color: #ff3333; }
+</style>
+
+
     <!-- Layer 1 Flash Screen Background Overlay -->
     <div id="flash-screen-overlay"></div>
 
