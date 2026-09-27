@@ -394,3 +394,28 @@ app.post('/api/receivables/add', async (req, res) => {
         res.status(500).json({ success: false, error: err.message });
     }
 });
+
+// Express route for workspace telemetry
+app.get('/api/telemetry-status', (req, res) => {
+    try {
+        const fs = require('fs');
+        const meminfo = fs.readFileSync('/proc/meminfo', 'utf8');
+        
+        let total = 0, available = 0;
+        meminfo.split('\n').forEach(line => {
+            if (line.startsWith('MemTotal:')) total = parseInt(line.split(/\s+/)[1]);
+            if (line.startsWith('MemAvailable:')) available = parseInt(line.split(/\s+/)[1]);
+        });
+
+        const usage = total > 0 ? ((total - available) / total) * 100 : 0.0;
+
+        res.json({
+            ramUsage: usage,
+            minerState: "ACTIVE (Throttled)", // Dynamically track via watchdog state if needed
+            watchdogState: "Armed (85% Limit)"
+        });
+    } catch (err) {
+        res.status(500).json({ error: "Failed to read system memory" });
+    }
+});
+
