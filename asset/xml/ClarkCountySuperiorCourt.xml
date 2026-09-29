@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<SWWA_JurisdictionalForm xmlns="https://trust.internal/schema/sw_wa_jurisdiction">
+  <Jurisdiction>
+    <State>WA</State>
+    <County>Clark</County>
+    <MunicipalityOrDistrict>Clark County Judicial District</MunicipalityOrDistrict>
+    <AgencyCategory>JudicialCourt</AgencyCategory>
+    <AgencyName>Clark County Superior Court</AgencyName>
+  </Jurisdiction>
+
+  <FormMetadata>
+    <FormID>CC-CR-02.0100</FormID>
+    <FormTitle>Electronic Evidence Motion & Chain of Custody Envelope</FormTitle>
+    <StatuteOrOrdinance>GR 30 / CrR 4.7</StatuteOrOrdinance>
+  </FormMetadata>
+
+  <Payload>
+    <CourtFiling>
+      <CaseNumber>26-2-04120-1</CaseNumber>
+      <FilingParty>Defense / Independent Forensic Analyst</FilingParty>
+      <SubmittedEvidence>
+        <Item>
+          <ArtifactID>RAW_THERMAL_FRAME_01</ArtifactID>
+          <Sha256Hash>97271d8e73e5480d95c6c09becbbcf73</Sha256Hash>
+        </Item>
+      </SubmittedEvidence>
+    </CourtFiling>
+  </Payload>
+
+  <VerificationBlock>
+    <OperatorID>BAR_MEMBER_1998</OperatorID>
+    <Timestamp>2026-09-29T00:52:00Z</Timestamp>
+    <SignatureHash>4a8b9c1d2e3f405162738495a6b7c8d9</SignatureHash>
+  </VerificationBlock>
+</SWWA_JurisdictionalForm>
