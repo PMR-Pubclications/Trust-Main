@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<SWWA_JurisdictionalForm xmlns="https://trust.internal/schema/sw_wa_jurisdiction">
+  <Jurisdiction>
+    <State>WA</State>
+    <County>Cowlitz</County>
+    <MunicipalityOrDistrict>Longview / Kelso</MunicipalityOrDistrict>
+    <AgencyCategory>LawEnforcement</AgencyCategory>
+    <AgencyName>Cowlitz County Sheriff's Office / Longview PD</AgencyName>
+  </Jurisdiction>
+
+  <FormMetadata>
+    <FormID>COWL-LE-EVID-301</FormID>
+    <FormTitle>Digital Evidence Intake & Property Custody Form</FormTitle>
+    <StatuteOrOrdinance>RCW 10.93.070</StatuteOrOrdinance>
+  </FormMetadata>
+
+  <Payload>
+    <PropertyIntake>
+      <CaseNumber>COWL-2026-0911</CaseNumber>
+      <SubmittingUnit>Cowlitz 911 Dispatch</SubmittingUnit>
+      <EvidenceType>Encrypted Audio & Video Telemetry</EvidenceType>
+      <FileHash>97271d8e73e5480d95c6c09becbbcf73</FileHash>
+    </PropertyIntake>
+  </Payload>
+
+  <VerificationBlock>
+    <OperatorID>USER_VOICE_PRINT_9727</OperatorID>
+    <Timestamp>2026-09-29T00:52:00Z</Timestamp>
+    <SignatureHash>f0e1d2c3b4a59876543210fedcba9876543210fedcba9876543210fedcba9876</SignatureHash>
+  </VerificationBlock>
+</SWWA_JurisdictionalForm>
