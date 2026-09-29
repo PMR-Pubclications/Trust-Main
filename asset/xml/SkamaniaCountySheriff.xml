@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<SWWA_JurisdictionalForm xmlns="https://trust.internal/schema/sw_wa_jurisdiction">
+  <Jurisdiction>
+    <State>WA</State>
+    <County>Skamania</County>
+    <MunicipalityOrDistrict>Stevenson / Columbia River Gorge</MunicipalityOrDistrict>
+    <AgencyCategory>LawEnforcement</AgencyCategory>
+    <AgencyName>Skamania County Sheriff's Office</AgencyName>
+  </Jurisdiction>
+
+  <FormMetadata>
+    <FormID>SKAM-SAR-201</FormID>
+    <FormTitle>Wilderness Search & Rescue / Backcountry Incident Log</FormTitle>
+    <StatuteOrOrdinance>RCW 38.52.400</StatuteOrOrdinance>
+  </FormMetadata>
+
+  <Payload>
+    <SarLog>
+      <IncidentID>SKAM-SAR-2026-042</IncidentID>
+      <GpsCoordinates>45.6961° N, 121.8848° W</GpsCoordinates>
+      <RadioFrequency>155.160 MHz (VHF SAR)</RadioFrequency>
+      <TelemetrySummary>Thermal scan deployed across tree-line grid unit 4.</TelemetrySummary>
+    </SarLog>
+  </Payload>
+
+  <VerificationBlock>
+    <OperatorID>UNIT_MOBILE_01</OperatorID>
+    <Timestamp>2026-09-29T00:52:00Z</Timestamp>
+    <SignatureHash>a1b2c3d4e5f67890123456789abcdef0123456789abcdef0123456789abcdef0</SignatureHash>
+  </VerificationBlock>
+</SWWA_JurisdictionalForm>
