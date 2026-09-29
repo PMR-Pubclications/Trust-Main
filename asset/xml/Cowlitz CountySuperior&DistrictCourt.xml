@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<SWWA_JurisdictionalForm xmlns="https://trust.internal/schema/sw_wa_jurisdiction">
+  <Jurisdiction>
+    <State>WA</State>
+    <County>Cowlitz</County>
+    <MunicipalityOrDistrict>Hall of Justice - Kelso</MunicipalityOrDistrict>
+    <AgencyCategory>JudicialCourt</AgencyCategory>
+    <AgencyName>Cowlitz County District Court</AgencyName>
+  </Jurisdiction>
+
+  <FormMetadata>
+    <FormID>COWL-CT-NOTICE-01</FormID>
+    <FormTitle>Notice of Electronic Appearance & Remote Telemetry Record</FormTitle>
+    <StatuteOrOrdinance>GR 30 / ARLJ 9</StatuteOrOrdinance>
+  </FormMetadata>
+
+  <Payload>
+    <CourtFiling>
+      <CaseNumber>26-1-00811-3</CaseNumber>
+      <HearingType>Evidentiary Motion</HearingType>
+      <FilingStatus>Accepted Electronic Submission</FilingStatus>
+    </CourtFiling>
+  </Payload>
+
+  <VerificationBlock>
+    <OperatorID>BAR_MEMBER_1998</OperatorID>
+    <Timestamp>2026-09-29T00:52:00Z</Timestamp>
+    <SignatureHash>123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0</SignatureHash>
+  </VerificationBlock>
+</SWWA_JurisdictionalForm>
