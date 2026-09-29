@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<SWWA_JurisdictionalForm xmlns="https://trust.internal/schema/sw_wa_jurisdiction">
+  <Jurisdiction>
+    <State>WA</State>
+    <County>Skamania</County>
+    <MunicipalityOrDistrict>Fire District 2</MunicipalityOrDistrict>
+    <AgencyCategory>FireEMS</AgencyCategory>
+    <AgencyName>Skamania County Fire District 2</AgencyName>
+  </Jurisdiction>
+
+  <FormMetadata>
+    <FormID>SKAM-FD2-WILD-10</FormID>
+    <FormTitle>Wildland / Interface Fire Telemetry Report</FormTitle>
+    <StatuteOrOrdinance>WAC 296-305-07001</StatuteOrOrdinance>
+  </FormMetadata>
+
+  <Payload>
+    <WildlandReport>
+      <DispatchCode>10-70</DispatchCode>
+      <ThermalArrayReading>412.0 C</ThermalArrayReading>
+      <ContainmentStatus>Active Monitoring</ContainmentStatus>
+    </WildlandReport>
+  </Payload>
+
+  <VerificationBlock>
+    <OperatorID>COMMAND_UNIT_SKAM_02</OperatorID>
+    <Timestamp>2026-09-29T00:52:00Z</Timestamp>
+    <SignatureHash>7890abcdef0123456789abcdef0123456789abcdef0123456789abcdef012345</SignatureHash>
+  </VerificationBlock>
+</SWWA_JurisdictionalForm>
