@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<SWWA_JurisdictionalForm xmlns="https://trust.internal/schema/sw_wa_jurisdiction">
+  <Jurisdiction>
+    <State>WA</State>
+    <County>Clark</County>
+    <MunicipalityOrDistrict>Vancouver</MunicipalityOrDistrict>
+    <AgencyCategory>LawEnforcement</AgencyCategory>
+    <AgencyName>Vancouver Police Department / CRESA 911</AgencyName>
+  </Jurisdiction>
+
+  <FormMetadata>
+    <FormID>CLARK-LE-INCIDENT-101</FormID>
+    <FormTitle>Field Incident & Incident Command Log</FormTitle>
+    <StatuteOrOrdinance>RCW 10.31.100 / VMC Title 7</StatuteOrOrdinance>
+  </FormMetadata>
+
+  <Payload>
+    <IncidentDetails>
+      <CresaCadNumber>CRESA-2026-00892</CresaCadNumber>
+      <RadioCode>10-97</RadioCode>
+      <OfficerBadge>VPD_441</OfficerBadge>
+      <Location>Mill Plain Blvd / I-5 Corridor</Location>
+      <Narrative>Field observation logged and cryptographically signed.</Narrative>
+    </IncidentDetails>
+  </Payload>
+
+  <VerificationBlock>
+    <OperatorID>USER_VOICE_PRINT_9727</OperatorID>
+    <Timestamp>2026-09-29T00:52:00Z</Timestamp>
+    <SignatureHash>e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855</SignatureHash>
+  </VerificationBlock>
+</SWWA_JurisdictionalForm>
