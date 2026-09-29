@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           targetNamespace="https://trust.internal/schema/jurisdiction/form"
+           xmlns:tns="https://trust.internal/schema/jurisdiction/form"
+           elementFormDefault="qualified">
+
+  <!-- Core Envelope for All Agency Forms -->
+  <xs:element name="JurisdictionalForm">
+    <xs:complexType>
+      <xs:sequence>
+
+        <!-- Regional Location Metadata -->
+        <xs:element name="JurisdictionContext">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="State" type="xs:string"/>
+              <xs:element name="County" type="xs:string"/>
+              <xs:element name="City" type="xs:string"/>
+              <xs:element name="District" type="xs:string" minOccurs="0"/>
+              <xs:element name="AgencyType">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:enumeration value="LawEnforcement"/>
+                    <xs:enumeration value="FireDepartment"/>
+                    <xs:enumeration value="JudicialCourt"/>
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="AgencyName" type="xs:string"/>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+
+        <!-- Form Header Information -->
+        <xs:element name="FormMetadata">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="FormID" type="xs:string"/>
+              <xs:element name="FormTitle" type="xs:string"/>
+              <xs:element name="RevisionDate" type="xs:date"/>
+              <xs:element name="StatuteReference" type="xs:string" minOccurs="0"/>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+
+        <!-- Dynamic Payload Area -->
+        <xs:element name="FormData" type="tns:FormDataPayloadType"/>
+
+        <!-- Digital Chain-of-Custody & Signatures -->
+        <xs:element name="VerificationBlock">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="OfficerOrFilerID" type="xs:string"/>
+              <xs:element name="Timestamp" type="xs:dateTime"/>
+              <xs:element name="DigitalSignatureHash" type="xs:string"/>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <!-- Abstract Form Data Payload Type -->
+  <xs:complexType name="FormDataPayloadType">
+    <xs:sequence>
+      <xs:any processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+</xs:schema>
