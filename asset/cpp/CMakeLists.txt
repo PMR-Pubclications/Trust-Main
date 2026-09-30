@@ -214,3 +214,63 @@ elseif(IOS)
         ${COREMEDIA_FRAMEWORK}
     )
 endif()
+cmake_minimum_required(VERSION 3.18)
+project(AudioVideoEngine CXX)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
+# DSP Core (Platform Agnostic)
+set(CORE_SOURCES
+    src/LMSAdaptiveFilter.cpp
+    src/SingleChannelNoiseFilter.cpp
+)
+
+# Detect host OS or cross-compilation target
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND NOT ANDROID)
+    message(STATUS "Configuring Standalone Linux Engine")
+    
+    list(APPEND PLATFORM_SOURCES 
+        src/linux/LinuxCamera.cpp
+        src/linux/ServerMain.cpp
+    )
+    
+    add_executable(audio_video_engine ${CORE_SOURCES} ${PLATFORM_SOURCES})
+    
+    find_package(Threads REQUIRED)
+    target_link_libraries(audio_video_engine PRIVATE Threads::Threads)
+
+elseif(ANDROID)
+    message(STATUS "Configuring Android NDK Shared Library")
+    
+    list(APPEND PLATFORM_SOURCES 
+        src/android/AndroidMicSearcher.cpp
+        src/android/AndroidCamera.cpp
+    )
+    
+    add_library(audio_video_engine SHARED ${CORE_SOURCES} ${PLATFORM_SOURCES})
+    
+    find_library(camera2ndk-lib camera2ndk)
+    find_library(log-lib log)
+    target_link_libraries(audio_video_engine PRIVATE ${camera2ndk-lib} ${log-lib})
+
+elseif(IOS)
+    message(STATUS "Configuring iOS Static Library")
+    
+    list(APPEND PLATFORM_SOURCES 
+        src/ios/IOSMicSearcher.mm
+        src/ios/IOSCamera.mm
+    )
+    
+    add_library(audio_video_engine STATIC ${CORE_SOURCES} ${PLATFORM_SOURCES})
+    
+    find_library(AVFOUNDATION_FRAMEWORK AVFoundation)
+    target_link_libraries(audio_video_engine PRIVATE ${AVFOUNDATION_FRAMEWORK})
+endif()
+
+# Make headers universally accessible inside and outside this directory
+target_include_directories(audio_video_engine PUBLIC 
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+)
+
