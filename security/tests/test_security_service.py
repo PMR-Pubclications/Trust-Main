@@ -5,7 +5,7 @@ import unittest
 from http.server import ThreadingHTTPServer
 from pathlib import Path
 
-from security_service import make_handler, validate_policy
+from security_service import PolicyError, make_handler, validate_policy
 
 
 VALID_POLICY = "[Security]\nrequire_ssl = true\nauth_mode = token\n"
@@ -27,7 +27,7 @@ class SecurityPolicyTests(unittest.TestCase):
                 encoding="utf-8",
             )
 
-            with self.assertRaisesRegex(Exception, "require_ssl must be true"):
+            with self.assertRaisesRegex(PolicyError, "require_ssl must be true"):
                 validate_policy(policy_path)
 
     def test_health_endpoint_reports_policy_status(self):

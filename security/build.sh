@@ -15,6 +15,7 @@ for source in (root / "tests").glob("*.py"):
     compile(source.read_bytes(), str(source), "exec")
 PY
 
+PYTHONDONTWRITEBYTECODE=1 \
 PYTHONPATH="$SCRIPT_DIR/src${PYTHONPATH:+:$PYTHONPATH}" \
     python3 -m unittest discover -s "$SCRIPT_DIR/tests" -v
 
