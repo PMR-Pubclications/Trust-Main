@@ -65,9 +65,12 @@ process today. It is a small Express app that:
 * exposes `GET /status`, which reports which modules are mounted vs. which
   are stubs/not-applicable on a server (`face`, `gait`, `nfc` are reported
   `mounted: false`),
-* mounts `voice/VoiceAndRadioCodeTelemetry.js` at `/api/v1/trust`, which
-  implements the `10-23`/`10-8` radio-code arrival/departure workflow
-  gated behind `verifyVoiceToken()` — **a stub that always returns true**.
+* mounts `voice/VoiceAndRadioCodeTelemetry.js` at `/api/v1/trust`
+  (behind a lightweight in-memory rate limiter — see
+  `SECURITY_RATE_LIMIT_WINDOW_MS`/`SECURITY_RATE_LIMIT_MAX_REQUESTS`),
+  which implements the `10-23`/`10-8` radio-code arrival/departure
+  workflow gated behind `verifyVoiceToken()` — **a stub that always
+  returns true**.
 
 The `nfc/`, `auth/`, and `native/camera/` code is **not** loaded by
 `server.js`:

@@ -58,3 +58,8 @@ security/node_modules/
 security/.env
 security/build/
 security/data/
+
+# Gradle / Android build artifacts (generated locally by CI/build tooling)
+.gradle/
+**/build/
+*.class

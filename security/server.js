@@ -53,7 +53,35 @@ app.get('/status', (req, res) => {
   });
 });
 
-app.use('/api/v1/trust', voiceTelemetryRouter);
+// Minimal fixed-window rate limiter for the voice-token telemetry
+// endpoint. This route performs authorization (verifyVoiceToken) and
+// must not be left unbounded, or it becomes a brute-force / DoS vector.
+// Kept dependency-free on purpose; swap for a shared store (e.g. Redis)
+// if this service is ever scaled horizontally behind a load balancer.
+const RATE_LIMIT_WINDOW_MS = Number(process.env.SECURITY_RATE_LIMIT_WINDOW_MS || 60_000);
+const RATE_LIMIT_MAX_REQUESTS = Number(process.env.SECURITY_RATE_LIMIT_MAX_REQUESTS || 30);
+const rateLimitBuckets = new Map();
+
+function telemetryRateLimiter(req, res, next) {
+  const key = req.ip || req.socket.remoteAddress || 'unknown';
+  const now = Date.now();
+  const bucket = rateLimitBuckets.get(key);
+
+  if (!bucket || now - bucket.windowStart >= RATE_LIMIT_WINDOW_MS) {
+    rateLimitBuckets.set(key, { windowStart: now, count: 1 });
+    return next();
+  }
+
+  if (bucket.count >= RATE_LIMIT_MAX_REQUESTS) {
+    res.set('Retry-After', String(Math.ceil((RATE_LIMIT_WINDOW_MS - (now - bucket.windowStart)) / 1000)));
+    return res.status(429).json({ error: 'Too many requests. Please slow down.' });
+  }
+
+  bucket.count += 1;
+  return next();
+}
+
+app.use('/api/v1/trust', telemetryRateLimiter, voiceTelemetryRouter);
 
 if (require.main === module) {
   app.listen(PORT, () => {
