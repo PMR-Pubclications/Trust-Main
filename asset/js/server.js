@@ -47,6 +47,7 @@ const db = new sqlite3.Database(dbPath, (err) => {
   console.log('Connected to the LegacyTrust SQLite database:', dbPath);
 });
 
+
 const run = (sql, params = []) => new Promise((resolve, reject) => {
   db.run(sql, params, function (err) {
     if (err) return reject(err);
@@ -307,7 +308,7 @@ app.get('/api/property/list', async (req, res) => {
 
 // Force Sync endpoint executing pipeline scripts & recording state
 app.post('/api/sync', async (req, res) => {
-  const scriptPath = path.resolve(__dirname, 'asset', 'py', 'secure-googledive-access.py');
+  const scriptPath = path.resolve(__dirname, '..', '..', 'security', 'python', 'secure-googledive-access.py');
   const timestamp = new Date().toISOString().replace('T', ' ').substring(0, 16);
   const generatedHash = '0x' + crypto.randomBytes(4).toString('hex') + '...' + Date.now().toString(16).slice(-4);
 
@@ -418,4 +419,3 @@ app.get('/api/telemetry-status', (req, res) => {
         res.status(500).json({ error: "Failed to read system memory" });
     }
 });
-

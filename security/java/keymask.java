@@ -31,7 +31,7 @@ public class KeyMaskingUtil {
     }
 
     public static void main(String[] args) {
-        String apiKey = "trust_live_9f8e7d6c5b4a3f8a";
+        String apiKey = "example-secret-key";
         String safeDisplay = maskExistingKey(apiKey, 4);
         
         System.out.println("Original: " + apiKey);

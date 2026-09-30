@@ -4,7 +4,7 @@ git init
 # Link your local folder to your GitHub repository remote
 git remote add origin https://github.com/Tole1775/Trust.git
 
-# Stage all your files (including your asset/sh/opensea.sh and Python scripts)
+# Stage all your files (including your security/scripts/opensea.sh and Python scripts)
 git add .
 
 # Commit your files with a descriptive message

@@ -14,6 +14,8 @@ Drawing from my professional background in forensics, I built this tool with the
 ### Training & Contact
 Instructions, documentation, and user training for the Trust app are available on our website.
 
+Security-focused source files, configuration, and manifests are collected in [`security/`](security/README.md).
+
 If you have questions or feedback, feel free to reach out:
 
 * **Author:** Anthony Antolic (Anatolie Anatoliciva / Anatolicivich)
