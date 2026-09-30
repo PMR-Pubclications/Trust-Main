@@ -1,0 +1,41 @@
+# security/.gitignore
+#
+# Never commit real secrets, credentials, certificates, private keys, or
+# biometric data for the security service.
+
+node_modules/
+npm-debug.log*
+
+# Real environment file (copy from .env.example instead)
+.env
+.env.*
+!.env.example
+
+# Local/native build output
+build/
+*.o
+*.so
+*.a
+*.node
+
+# Persistent runtime/audit data volumes if run outside Docker
+data/
+*.db
+*.sqlite
+*.sqlite3
+
+# Certificates and keys
+*.pem
+*.key
+*.crt
+*.p12
+*.jks
+
+# Any accidental local captures of biometric material (voice/face/gait
+# samples, camera frames, enrollment templates) must never be committed.
+*.wav
+*.m4a
+*.aac
+biometric-data/
+enrollments/
+templates/

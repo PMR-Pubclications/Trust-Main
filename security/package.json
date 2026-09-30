@@ -1,0 +1,17 @@
+{
+  "name": "trust-security-service",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Standalone security/biometric integration service for Trust: NFC, voice-token telemetry, and auth boundary stubs. Face/gait recognition and native camera capture are NOT included in this Node process (see security/README.md).",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node test/smoke.test.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
