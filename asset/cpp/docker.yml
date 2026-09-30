@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  cpp_audio_video:
+    build:
+      context: ./audio_video_engine
+      dockerfile: Dockerfile
+    container_name: cpp_audio_engine
+    network_mode: "host"          # Shares host network for ultra-low latency sockets
+    restart: always
+
+  java_ballistics:
+    build:
+      context: ./ballistics_analysis
+      dockerfile: Dockerfile
+    container_name: java_ballistics_engine
+    network_mode: "host"
+    restart: always
