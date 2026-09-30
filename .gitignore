@@ -52,3 +52,9 @@ m4/lt~obsolete.m4
 # can automatically generate from config.status script
 # (which is called by configure script))
 Makefile
+
+# /security standalone service (see security/.gitignore for full rules)
+security/node_modules/
+security/.env
+security/build/
+security/data/

@@ -1,0 +1,64 @@
+// security/server.js
+//
+// Standalone entry point for the Trust "security" service on a headless
+// Linux server. This process intentionally only wires up the parts of the
+// repository's security/biometric code that are pure server-side Node.js:
+//
+//   - voice/VoiceAndRadioCodeTelemetry.js  (Express router, voice-token
+//     gated radio-code telemetry ingestion)
+//
+// It deliberately does NOT attempt to run:
+//   - nfc/NFC_Tap-to-Authenticate.js   -> requires a browser Web NFC API
+//     (window, NDEFReader) and a physical NFC reader; it is a front-end
+//     snippet meant to be embedded in a browser page, not server code.
+//   - native/camera/*                  -> C++/Obj-C++ camera capture
+//     backends for Android/iOS/Linux, built separately via CMake (see
+//     native/camera/CMakeLists.txt). They are not Node modules.
+//   - auth/*.java                      -> servlet/authorization utilities
+//     meant for a Java/Jakarta EE application server, built and deployed
+//     independently (see README.md).
+//
+// verifyVoiceToken() inside VoiceAndRadioCodeTelemetry.js is a documented
+// stub that always returns true; this service does NOT implement working
+// voice biometric recognition.
+'use strict';
+
+const express = require('express');
+const path = require('path');
+
+const voiceTelemetryRouter = require(path.join(__dirname, 'voice', 'VoiceAndRadioCodeTelemetry.js'));
+
+const app = express();
+const PORT = Number(process.env.SECURITY_PORT || 3100);
+
+app.use(express.json({ limit: '100kb' }));
+
+app.get('/health', (req, res) => {
+  res.json({ ok: true, service: 'trust-security', timestamp: new Date().toISOString() });
+});
+
+// Describes which security modules are live server endpoints vs. stubs
+// that live elsewhere (browser/mobile/native) so operators don't assume
+// face/gait/NFC recognition is running here.
+app.get('/status', (req, res) => {
+  res.json({
+    service: 'trust-security',
+    modules: {
+      voice: { mounted: true, path: '/api/v1/trust', stub: true, note: 'verifyVoiceToken() always returns true; no real voice biometric matching is implemented.' },
+      nfc: { mounted: false, reason: 'browser-only Web NFC snippet, see security/nfc/README.md' },
+      auth: { mounted: false, reason: 'Java servlet/authorization utilities, deployed separately, see security/auth' },
+      face: { mounted: false, reason: 'no face recognition implementation in this repository; only shared camera capture interfaces exist under security/native/camera' },
+      gait: { mounted: false, reason: 'no gait recognition implementation in this repository; only shared camera capture interfaces exist under security/native/camera' }
+    }
+  });
+});
+
+app.use('/api/v1/trust', voiceTelemetryRouter);
+
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`[trust-security] listening on http://0.0.0.0:${PORT}`);
+  });
+}
+
+module.exports = app;

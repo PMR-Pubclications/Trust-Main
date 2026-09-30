@@ -1,0 +1,45 @@
+# Standalone deployment of the Trust security service.
+# Build context is the repository root because the Dockerfile only COPYs
+# files from security/.
+#
+# Usage (from the repository root):
+#   docker compose -f security/docker-compose.yml up -d --build
+#
+# Or from inside security/:
+#   docker compose up -d --build
+
+services:
+  trust-security:
+    build:
+      context: ..
+      dockerfile: security/Dockerfile
+    image: trust-security:latest
+    container_name: trust-security
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=production
+      - SECURITY_PORT=3100
+    expose:
+      - "3100"
+    # Uncomment to expose directly without a reverse proxy:
+    # ports:
+    #   - "3100:3100"
+    volumes:
+      # Persistent storage for audit/ledger data written by the voice
+      # telemetry module. Do NOT store biometric templates or raw audio
+      # here; commitToSecureLedger() is a stub and only logs a hash today.
+      - trust-security-data:/app/data
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://127.0.0.1:3100/health', r => process.exit(r.statusCode===200?0:1)).on('error', () => process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  trust-security-data:
+
+networks:
+  default:
+    driver: bridge

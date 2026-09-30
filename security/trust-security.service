@@ -1,0 +1,51 @@
+# security/trust-security.service
+#
+# Optional systemd unit for running the Trust security service directly
+# with Node.js (without Docker) on a Linux server.
+#
+# Install:
+#   sudo useradd --system --no-create-home --shell /usr/sbin/nologin trust-security
+#   sudo mkdir -p /opt/trust-security /var/lib/trust-security
+#   sudo cp -r security/* /opt/trust-security/
+#   sudo cp security/.env.example /opt/trust-security/.env   # then edit real values
+#   sudo chown -R trust-security:trust-security /opt/trust-security /var/lib/trust-security
+#   sudo chmod 600 /opt/trust-security/.env
+#   (cd /opt/trust-security && sudo -u trust-security npm ci --omit=dev)
+#   sudo cp security/trust-security.service /etc/systemd/system/
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now trust-security
+#
+# Logs: journalctl -u trust-security -f
+
+[Unit]
+Description=Trust Security Service (NFC/voice-token telemetry, auth boundary)
+After=network.target
+Documentation=file:///opt/trust-security/README.md
+
+[Service]
+Type=simple
+User=trust-security
+Group=trust-security
+WorkingDirectory=/opt/trust-security
+EnvironmentFile=/opt/trust-security/.env
+Environment=NODE_ENV=production
+Environment=SECURITY_DATA_DIR=/var/lib/trust-security
+ExecStart=/usr/bin/node /opt/trust-security/server.js
+Restart=on-failure
+RestartSec=5
+
+# Hardening (safe defaults; relax only if a specific feature requires it)
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/trust-security
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+LockPersonality=true
+MemoryDenyWriteExecute=true
+
+[Install]
+WantedBy=multi-user.target

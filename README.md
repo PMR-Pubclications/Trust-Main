@@ -11,6 +11,16 @@ Drawing from my professional background in forensics, I built this tool with the
 * Sales of *"Climbing the Invisible Wall"*, a publication I produce periodically.
 * Community donations and contributions.
 
+### Security & Biometric Integration
+
+Security-, authentication-, and biometric-related code (NFC tap-to-authenticate,
+voice-token telemetry, passkey/auth utilities, and the shared camera capture
+interface used for face/gait capture) has been consolidated under
+[`/security`](security/README.md), which also includes a standalone Linux
+deployment (Docker/Compose, systemd unit, and deployment script). See
+[`security/docs/MIGRATION.md`](security/docs/MIGRATION.md) for the full list
+of files moved out of `asset/js`, `asset/java`, and `asset/cpp`.
+
 ### Training & Contact
 Instructions, documentation, and user training for the Trust app are available on our website.
 
