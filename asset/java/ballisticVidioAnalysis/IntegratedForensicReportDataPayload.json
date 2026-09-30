@@ -1,0 +1,22 @@
+{
+  "dropletsAnalyzed": 84,
+  "areaOfOrigin_3D": {
+    "X_meters": 1.425,
+    "Y_meters": 0.882,
+    "Z_meters": 1.150
+  },
+  "shooterTrajectory": {
+    "azimuthDegrees": 214.5,
+    "elevationDegrees": -8.2,
+    "vectorUnit": {
+      "dx": -0.821,
+      "dy": -0.553,
+      "dz": 0.142
+    },
+    "estimatedShooterDistanceBounds": {
+      "minMeters": 2.5,
+      "maxMeters": 15.0
+    }
+  },
+  "exportModel": "scene_trajectory_map.obj"
+}
