@@ -55,4 +55,4 @@ jobs:
           OPENSEA_SCOPED_TOKEN: ${{ secrets.OPENSEA_SCOPED_TOKEN }}
           ADMIN_WALLET_ADDRESS: ${{ secrets.ADMIN_WALLET_ADDRESS }}
         run: |
-          python agent_loop.py
+          python asset/py/agent_loop.py

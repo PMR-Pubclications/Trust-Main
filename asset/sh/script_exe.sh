@@ -1,1 +1,1 @@
-chmod +x run-trust-check.sh
+chmod +x "$(dirname "$0")/../../security/scripts/run-trust-check.sh"

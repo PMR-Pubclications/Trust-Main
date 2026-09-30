@@ -1,5 +1,6 @@
 import requests
 import json
+import os
 
 class OpenSeaAgentClient:
     def __init__(self, api_key: str, scoped_token: str, base_url: str = "https://api.opensea.io"):
@@ -64,9 +65,9 @@ class OpenSeaAgentClient:
 # --- Example Usage ---
 if __name__ == "__main__":
     # Replace these placeholder strings with your actual keys and addresses
-    API_KEY = "f25c57a885754235a82996ee8ed9b342"
-    SCOPED_TOKEN = "SXDCV61lRXTPn_Qr11OhRYV_fiaXA-4bfC3f3Dv4b47t8yQJwmA1icjCPoRJZ6dJ3E0sRJ-SvAuCFlXOVBgVQHB9gz7_lEw"
-    ADMIN_WALLET = "0x26600142FC4B2ED0276536557fa8bF2a82F1d5c1"
+    API_KEY = os.environ["OPENSEA_API_KEY"]
+    SCOPED_TOKEN = os.environ["OPENSEA_SCOPED_TOKEN"]
+    ADMIN_WALLET = os.environ["ADMIN_WALLET_ADDRESS"]
     
     client = OpenSeaAgentClient(api_key=API_KEY, scoped_token=SCOPED_TOKEN)
     

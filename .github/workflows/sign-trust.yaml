@@ -24,5 +24,5 @@ jobs:
         env:
           SIGNING_PRIVATE_KEY: ${{ secrets.SIGNING_PRIVATE_KEY }}
         run: |
-          chmod +x ./run-trust-check.sh
-          ./run-trust-check.sh
+          chmod +x ./security/scripts/run-trust-check.sh
+          ./security/scripts/run-trust-check.sh
