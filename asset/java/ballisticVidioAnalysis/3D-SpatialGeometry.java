@@ -22,3 +22,12 @@ public record Point3D(double x, double y, double z) {
         return mag == 0 ? new Point3D(0, 0, 0) : new Point3D(x / mag, y / mag, z / mag);
     }
 }
+
+package com.forensic.bpa.spatial;
+
+public record Ray3D(Point3D anchor, Point3D direction) {
+    public Ray3D {
+        direction = direction.normalize();
+    }
+}
+
