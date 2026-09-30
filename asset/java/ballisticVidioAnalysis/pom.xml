@@ -1,0 +1,13 @@
+<dependencies>
+    <!-- OpenCV Java bindings -->
+    <dependency>
+        <groupId>org.bytedeco</groupId>
+        <artifactId>javacv-platform</artifactId>
+        <version>1.5.9</version>
+    </dependency>
+    <!-- Spring Web for Video Upload Endpoint -->
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-web</artifactId>
+    </dependency>
+</dependencies>
