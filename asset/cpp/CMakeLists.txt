@@ -89,3 +89,65 @@ endif()
 target_include_directories(AudioFilterEngine PUBLIC 
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
 )
+
+cmake_minimum_required(VERSION 3.18)
+project(AudioVideoEngine CXX)
+
+set(CMAKE_CXX_STANDARD 17)
+
+set(CORE_SOURCES
+    src/LMSAdaptiveFilter.cpp
+    src/SingleChannelNoiseFilter.cpp
+)
+
+# -----------------------------------------------------------------------------
+# Linux Server Target
+# -----------------------------------------------------------------------------
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND NOT ANDROID)
+    list(APPEND SERVER_SOURCES 
+        src/linux/ServerMain.cpp 
+        src/linux/LinuxCamera.cpp
+    )
+    add_executable(media_server ${CORE_SOURCES} ${SERVER_SOURCES})
+    find_package(Threads REQUIRED)
+    target_link_libraries(media_server PRIVATE Threads::Threads)
+
+# -----------------------------------------------------------------------------
+# Android Target
+# -----------------------------------------------------------------------------
+elseif(ANDROID)
+    list(APPEND ANDROID_SOURCES 
+        src/android/AndroidMicSearcher.cpp 
+        src/android/AndroidCamera.cpp
+    )
+    add_library(AudioVideoEngine SHARED ${CORE_SOURCES} ${ANDROID_SOURCES})
+    
+    # Link Android NDK Camera2 & Media libraries
+    find_library(camera2ndk-lib camera2ndk)
+    find_library(mediandk-lib mediandk)
+    find_library(log-lib log)
+    
+    target_link_libraries(AudioVideoEngine PRIVATE 
+        ${camera2ndk-lib} 
+        ${mediandk-lib} 
+        ${log-lib}
+    )
+
+# -----------------------------------------------------------------------------
+# iOS Target
+# -----------------------------------------------------------------------------
+elseif(IOS)
+    list(APPEND IOS_SOURCES 
+        src/ios/IOSMicSearcher.mm 
+        src/ios/IOSCamera.mm
+    )
+    add_library(AudioVideoEngine STATIC ${CORE_SOURCES} ${IOS_SOURCES})
+    
+    find_library(AVFOUNDATION_FRAMEWORK AVFoundation)
+    find_library(COREMEDIA_FRAMEWORK CoreMedia)
+    
+    target_link_libraries(AudioVideoEngine PRIVATE 
+        ${AVFOUNDATION_FRAMEWORK} 
+        ${COREMEDIA_FRAMEWORK}
+    )
+endif()
