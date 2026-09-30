@@ -4,6 +4,7 @@ import com.forensic.bpa.report.ReportPackagePublisher;
 import com.forensic.bpa.service.BloodSpatterAnalyzer;
 import com.forensic.bpa.spatial.Ray3D;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -19,13 +20,26 @@ public class ForensicPipelineController {
 
     private final BloodSpatterAnalyzer analyzer = new BloodSpatterAnalyzer();
     private final ReportPackagePublisher publisher = new ReportPackagePublisher();
+    private final String reportServiceUrl;
+
+    public ForensicPipelineController(
+            @Value("${forensic.report-service-url:}") String reportServiceUrl
+    ) {
+        this.reportServiceUrl = reportServiceUrl;
+    }
 
     @PostMapping("/process-and-push")
     public ResponseEntity<Map<String, Object>> processAndPushToReport(
             @RequestParam("caseId") String caseId,
-            @RequestParam("file") MultipartFile file,
-            @RequestParam("reportServiceUrl") String reportServiceUrl
+            @RequestParam("file") MultipartFile file
     ) {
+        if (reportServiceUrl.isBlank()) {
+            return ResponseEntity.status(503).body(Map.of(
+                    "status", "ERROR",
+                    "message", "Report package service is not configured."
+            ));
+        }
+
         try {
             File tempVideo = File.createTempFile("upload_vid_", ".mp4");
             file.transferTo(tempVideo);
