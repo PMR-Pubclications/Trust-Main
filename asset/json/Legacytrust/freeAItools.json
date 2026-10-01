@@ -1,0 +1,18 @@
+{
+  "verification_type": "eip3009_authorization",
+  "tool_chain_id": 8453,
+  "tool_registry_address": "0x...",
+  "tool_onchain_id": "42",
+  "latency_ms": 120,
+  "eip3009": {
+    "caller_address": "0xCALLER",
+    "signature": "0x...",
+    "chain_id": 8453,
+    "from": "0xCALLER",
+    "to": "0xOPERATOR",
+    "value": "0",
+    "valid_after": "0",
+    "valid_before": "1749158400",
+    "nonce": "0x..."
+  }
+}
