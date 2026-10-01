@@ -16,7 +16,7 @@
           "ROBINHOOD_API_SECRET"
         ],
         "failClosedOnMissingEnv": true,
-        "headerScheme": "token-prefixed Authorization header (HTTP authentication scheme), value injected from environment"
+        "headerScheme": "raw-value Authorization header: the environment variable value is substituted as-is with no additional prefix"
       },
       "risk": {
         "autoApprove": false,
@@ -44,7 +44,7 @@
           "GEMINI_API_SECRET"
         ],
         "failClosedOnMissingEnv": true,
-        "headerScheme": "token-prefixed Authorization header (HTTP authentication scheme), value injected from environment"
+        "headerScheme": "raw-value Authorization header: the environment variable value is substituted as-is with no additional prefix"
       },
       "risk": {
         "autoApprove": false,
