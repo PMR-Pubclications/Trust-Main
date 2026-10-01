@@ -1,13 +1,12 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "description": "Agent policy configuration defining exactly what each AI trading agent is permitted to do. Enforced in addition to, and never looser than, the global riskPolicy in ai-trading-protocol.json.",
   "protocolRef": "ai-trading-protocol.json",
   "version": "1.0.0",
   "defaultPolicy": {
     "autonomyLevel": "assisted",
     "allowedSymbols": [],
-    "maxPerTradeNotionalUSD": 100.00,
-    "maxDailyAggregateNotionalUSD": 250.00,
+    "maxPerTradeNotionalUSD": 100.0,
+    "maxDailyAggregateNotionalUSD": 250.0,
     "restrictedActions": [
       "options",
       "shorting",
@@ -22,9 +21,14 @@
       "agentId": "robinhood-agent",
       "venue": "robinhood-trading",
       "autonomyLevel": "supervised-autonomy",
-      "allowedSymbols": ["AAPL", "MSFT", "GOOGL", "AMZN"],
-      "maxPerTradeNotionalUSD": 250.00,
-      "maxDailyAggregateNotionalUSD": 1000.00,
+      "allowedSymbols": [
+        "AAPL",
+        "MSFT",
+        "GOOGL",
+        "AMZN"
+      ],
+      "maxPerTradeNotionalUSD": 250.0,
+      "maxDailyAggregateNotionalUSD": 1000.0,
       "restrictedActions": [
         "options",
         "shorting",
@@ -34,7 +38,9 @@
       "approvalWorkflow": {
         "belowAutoExecuteThreshold": "auto-execute",
         "aboveAutoExecuteThreshold": "requires-human-approval",
-        "approvers": ["account-owner"],
+        "approvers": [
+          "account-owner"
+        ],
         "minimumApprovals": 1
       }
     },
@@ -42,9 +48,12 @@
       "agentId": "gemini-agent",
       "venue": "gemini-trading",
       "autonomyLevel": "assisted",
-      "allowedSymbols": ["BTC-USD", "ETH-USD"],
-      "maxPerTradeNotionalUSD": 100.00,
-      "maxDailyAggregateNotionalUSD": 250.00,
+      "allowedSymbols": [
+        "BTC-USD",
+        "ETH-USD"
+      ],
+      "maxPerTradeNotionalUSD": 100.0,
+      "maxDailyAggregateNotionalUSD": 250.0,
       "restrictedActions": [
         "options",
         "shorting",
@@ -55,7 +64,9 @@
       "approvalWorkflow": {
         "belowAutoExecuteThreshold": "requires-human-approval",
         "aboveAutoExecuteThreshold": "requires-human-approval",
-        "approvers": ["account-owner"],
+        "approvers": [
+          "account-owner"
+        ],
         "minimumApprovals": 1
       }
     }

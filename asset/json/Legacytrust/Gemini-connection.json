@@ -1,10 +1,11 @@
 {
   "_deprecated": "This file is superseded by mcp-server-config.json, which consolidates all MCP server definitions under the AI Trading Protocol (see ai-trading-protocol.json). It is kept only for backward compatibility and MUST NOT contain real credentials.",
   "mcpServers": {
-    "robinhood-trading": {
-      "url": "https://agent.robinhood.com/mcp/trading",
+    "gemini-trading": {
+      "url": "https://agent.gemini.com/mcp/trading",
       "headers": {
-        "Authorization": "${ROBINHOOD_API_KEY}"
+        "Authorization": "${GEMINI_API_KEY}",
+        "X-API-Secret": "${GEMINI_API_SECRET}"
       }
     }
   },

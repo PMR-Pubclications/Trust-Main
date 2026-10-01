@@ -1,5 +1,4 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "description": "Unified MCP (Model Context Protocol) server configuration for AI trading agents. Replaces and consolidates the legacy RobbinHood.json and Gemini-connection.json files. All credentials are injected via environment variables at runtime; no secrets are stored in this file.",
   "protocolRef": "ai-trading-protocol.json",
   "version": "1.0.0",
@@ -21,9 +20,10 @@
       },
       "risk": {
         "autoApprove": false,
-        "maxRiskLimitUSD": 250,
-        "inheritFrom": "ai-trading-protocol.json#/riskPolicy",
-        "note": "Matches robinhood-agent.maxPerTradeNotionalUSD in agent-policies.json; keep these two values in sync."
+        "inheritFrom": [
+          "ai-trading-protocol.json#/riskPolicy",
+          "agent-policies.json#/agents/0/maxPerTradeNotionalUSD"
+        ]
       },
       "logging": {
         "enabled": true,
@@ -48,9 +48,10 @@
       },
       "risk": {
         "autoApprove": false,
-        "maxRiskLimitUSD": 100,
-        "inheritFrom": "ai-trading-protocol.json#/riskPolicy",
-        "note": "Matches gemini-agent.maxPerTradeNotionalUSD in agent-policies.json; keep these two values in sync."
+        "inheritFrom": [
+          "ai-trading-protocol.json#/riskPolicy",
+          "agent-policies.json#/agents/1/maxPerTradeNotionalUSD"
+        ]
       },
       "logging": {
         "enabled": true,
@@ -60,9 +61,8 @@
     }
   },
   "globalSettings": {
-    "description": "Defaults applied to all servers unless overridden per-server above. defaultConnection (timeout/retry/heartbeat) applies to every server in mcpServers unless a server defines its own 'connection' block.",
+    "description": "Defaults applied to all servers unless overridden per-server above. defaultConnection (timeout/retry/heartbeat) applies to every server in mcpServers unless a server defines its own 'connection' block. Per-server risk limits are not duplicated here; agent-policies.json is the single source of truth for maxPerTradeNotionalUSD/maxDailyAggregateNotionalUSD, referenced via each server's risk.inheritFrom.",
     "autoApprove": false,
-    "maxRiskLimitUSD": 100,
     "requireAuditLogging": true,
     "failClosedOnAuthError": true,
     "defaultConnection": {

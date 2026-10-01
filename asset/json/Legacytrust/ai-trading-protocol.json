@@ -1,5 +1,4 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "protocol": "AI-Trading-Protocol",
   "version": "1.0.0",
   "description": "Master protocol specification governing how AI agents (e.g. Robinhood, Gemini) may submit, approve, execute, and audit market trades on behalf of a principal. This document is the source of truth for the companion files in this folder: mcp-server-config.json, trading-schema.json, agent-policies.json, and audit-config.json.",
@@ -32,9 +31,9 @@
   },
   "riskPolicy": {
     "description": "Hard limits enforced on every trade intent prior to execution, regardless of agent autonomy level.",
-    "maxPositionSizeUSD": 5000.00,
+    "maxPositionSizeUSD": 5000.0,
     "maxSinglePositionPercentOfPortfolio": 10,
-    "maxDailyLossUSD": 250.00,
+    "maxDailyLossUSD": 250.0,
     "maxDailyLossPercentOfPortfolio": 2,
     "maxOrdersPerDay": 20,
     "maxOpenOrdersConcurrent": 5,
@@ -77,13 +76,13 @@
         "level": "supervised-autonomy",
         "description": "Agent may auto-execute trades below a notional threshold and within risk policy; trades above the threshold require human approval.",
         "requiresHumanApproval": "conditional",
-        "autoExecuteThresholdUSD": 250.00
+        "autoExecuteThresholdUSD": 250.0
       },
       {
         "level": "full-autonomy",
         "description": "Agent may auto-execute any trade that passes risk policy validation. Reserved for highly trusted, extensively audited agents.",
         "requiresHumanApproval": false,
-        "autoExecuteThresholdUSD": 5000.00
+        "autoExecuteThresholdUSD": 5000.0
       }
     ],
     "defaultLevel": "assisted",
@@ -116,13 +115,37 @@
       "settled"
     ],
     "transitions": {
-      "created": ["validated", "rejected"],
-      "validated": ["pending_approval", "approved", "rejected"],
-      "pending_approval": ["approved", "rejected"],
-      "approved": ["submitted", "cancelled"],
-      "submitted": ["partially_filled", "filled", "cancelled", "failed"],
-      "partially_filled": ["filled", "cancelled", "failed"],
-      "filled": ["settled"]
+      "created": [
+        "validated",
+        "rejected"
+      ],
+      "validated": [
+        "pending_approval",
+        "approved",
+        "rejected"
+      ],
+      "pending_approval": [
+        "approved",
+        "rejected"
+      ],
+      "approved": [
+        "submitted",
+        "cancelled"
+      ],
+      "submitted": [
+        "partially_filled",
+        "filled",
+        "cancelled",
+        "failed"
+      ],
+      "partially_filled": [
+        "filled",
+        "cancelled",
+        "failed"
+      ],
+      "filled": [
+        "settled"
+      ]
     }
   },
   "auditAndCompliance": {
