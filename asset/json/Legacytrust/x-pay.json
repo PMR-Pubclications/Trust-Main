@@ -1,0 +1,16 @@
+{
+  "x402Version": 1,
+  "scheme": "exact",
+  "network": "base",
+  "payload": {
+    "signature": "0x...",
+    "authorization": {
+      "from": "0xCALLER",
+      "to": "0xOPERATOR",
+      "value": "0 (free) or amount in base units (paid)",
+      "validAfter": "0",
+      "validBefore": "1749158400",
+      "nonce": "0x<random-32-bytes>"
+    }
+  }
+}
