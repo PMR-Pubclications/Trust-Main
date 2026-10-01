@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NFT Displayer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 20px;
+        }
+
+        #image-container {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>NFT Displayer</h1>
+    <button onclick="fetchImage()">Load Image</button>
+    <div id="image-container"></div>
+
+    <script>
+        function fetchImage() {
+            // Placeholder API URL
+            const apiUrl = 'https://jsonplaceholder.typicode.com/photos/1';
+            const apiKey = 'f25c57a885754235a82996ee8ed9b342'
+
+            // Make a fetch request to the API
+            fetch(apiUrl)
+                .then(response => response.json())
+                .then(data => {
+                    // Assuming the API returns an object with an 'url' property for the image
+                    const imageUrl = data.url;
+
+                    // Display the image in the #image-container div
+                    document.getElementById('image-container').innerHTML = `
+                        <img src="${imageUrl}" alt="API Image">
+                    `;
+                })
+                .catch(error => {
+                    console.error('Error fetching image:', error);
+                });
+        }
+    </script>
+</body>
+
+</html>
