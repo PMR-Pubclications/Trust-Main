@@ -1,0 +1,5 @@
+cd packages/tool-sdk
+pnpm run build
+pnpm run test
+pnpm run lint
+pnpm run type-check
