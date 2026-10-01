@@ -1,0 +1,5 @@
+This application downloads public records and formats reports according to the custom document preferences of law enforcement, fire departments, and judicial agencies across Clark, Skamania, and Cowlitz counties in Southwest Washington.
+
+The app is written to completely bypass linear sequential unmasking—the greatest evil of a court system designed to convict innocent people based on the political landscape. This folder is processed by the swWaFormLoader.js file located in the firstresponders/asset/js/ferensics/ directory. As I said, absolute transparency is key, especially in the courts; otherwise, we end up with corrupt judges and corrupt prosecuting attorneys.
+
+https://github.com/PMR-Pubclications/Trust-Main/blob/main/firstresponders/asset%2Fjs%2Fferensics%2FswWaFormLoader.js

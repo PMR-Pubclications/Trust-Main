@@ -1,22 +1,17 @@
-# Trust
+# Trust-Main
 
-This repository houses the APIs and digital assets for the **Legacy Trust For The Future** website and mobile project. 
+The repository is organized into two modules:
 
-While developing this platform, I realized that police and fire departments could benefit from a lightweight mobile application designed specifically to aid in scene preservation and field documentation. *Trust* is dedicated to those who protect our communities—please use it to its full potential.
+- [`trust/`](trust/) contains Trust and legacy Trust applications, administration,
+  shared platform assets, and its documentation.
+- [`firstresponders/`](firstresponders/) contains first-responder, dispatch,
+  forensic, police, fire, and scene-preservation assets.
 
-Drawing from my professional background in forensics, I built this tool with the features and functionality I wished I had while working in the field. 
+The original directory structure is preserved inside each module. GitHub
+workflows remain under `.github/workflows/` so GitHub Actions can discover and
+run them; their commands reference the module paths. The shared agency schema
+remains at [`asset/SQL/agencies/joint.sql`](asset/SQL/agencies/joint.sql).
 
-### Funding & Support
-*Trust* is a free application. It is supported through:
-* Sales of *"Climbing the Invisible Wall"*, a publication I produce periodically.
-* Community donations and contributions.
-
-### Training & Contact
-Instructions, documentation, and user training for the Trust app are available on our website.
-
-If you have questions or feedback, feel free to reach out:
-
-* **Author:** Anthony Antolic (Anatolie Anatoliciva / Anatolicivich)
-* **Phone:** +1 (503) 462-8607
-* **Email:** antolicanthony3@gmail.com
-* **Website:** [innovativeconceptsdotblog.wordpress.com](https://innovativeconceptsdotblog.wordpress.com/)
+Build the Trust container from the repository root with
+`docker build -f trust/Dockerfile .`; start the compose stack with
+`docker compose -f trust/docker-compose.yml up`.
