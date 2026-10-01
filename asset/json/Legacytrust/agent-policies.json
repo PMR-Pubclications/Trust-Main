@@ -16,9 +16,8 @@
       "crypto_derivatives"
     ]
   },
-  "agents": [
-    {
-      "agentId": "robinhood-agent",
+  "agents": {
+    "robinhood-agent": {
       "venue": "robinhood-trading",
       "autonomyLevel": "supervised-autonomy",
       "allowedSymbols": [
@@ -44,8 +43,7 @@
         "minimumApprovals": 1
       }
     },
-    {
-      "agentId": "gemini-agent",
+    "gemini-agent": {
       "venue": "gemini-trading",
       "autonomyLevel": "assisted",
       "allowedSymbols": [
@@ -70,7 +68,7 @@
         "minimumApprovals": 1
       }
     }
-  ],
+  },
   "approvalWorkflowRules": {
     "description": "General rules governing who must sign off on which trades, applied on top of per-agent approvalWorkflow blocks.",
     "rules": [

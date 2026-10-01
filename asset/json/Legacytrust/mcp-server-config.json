@@ -22,7 +22,7 @@
         "autoApprove": false,
         "inheritFrom": [
           "ai-trading-protocol.json#/riskPolicy",
-          "agent-policies.json#/agents/0/maxPerTradeNotionalUSD"
+          "agent-policies.json#/agents/robinhood-agent/maxPerTradeNotionalUSD"
         ]
       },
       "logging": {
@@ -50,7 +50,7 @@
         "autoApprove": false,
         "inheritFrom": [
           "ai-trading-protocol.json#/riskPolicy",
-          "agent-policies.json#/agents/1/maxPerTradeNotionalUSD"
+          "agent-policies.json#/agents/gemini-agent/maxPerTradeNotionalUSD"
         ]
       },
       "logging": {
