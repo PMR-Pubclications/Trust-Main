@@ -18,7 +18,7 @@ const fs = require('fs');
 function getSystemVersion() {
     try {
         // Option: Read from a standard package or version configuration file
-        const packageData = JSON.parse(fs.readFileSync('./package.json', 'utf8'));
+        const packageData = JSON.parse(fs.readFileSync('./trust/asset/json/package.json', 'utf8'));
         console.log(`[VERSION_DETECT] Active System Version: v${packageData.version}`);
         return packageData.version;
     } catch (error) {

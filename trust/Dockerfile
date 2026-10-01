@@ -7,7 +7,7 @@ WORKDIR /app
 ENV NODE_ENV=production
 
 # Install dependencies
-COPY package.json package-lock.json* ./
+COPY asset/json/package.json package-lock.json* ./
 RUN if [ -f package-lock.json ]; then npm ci --only=production; else npm install --production; fi
 
 # Copy application files
@@ -25,4 +25,4 @@ EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
   CMD node -e "require('http').get('http://localhost:3000/health', res=>{if(res.statusCode===200) process.exit(0); else process.exit(1)}).on('error', ()=>process.exit(1))"
 
-CMD ["node", "server.js"]
+CMD ["node", "asset/js/server.js"]

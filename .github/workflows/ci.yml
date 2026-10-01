@@ -49,7 +49,7 @@ jobs:
 
       - name: Start server in background
         run: |
-          nohup node server.js > server.log 2>&1 &
+          nohup node trust/asset/js/server.js > server.log 2>&1 &
           sleep 4
 
       - name: Wait for server to be ready and run healthcheck
@@ -63,7 +63,7 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build -t trust-app:ci .
+          docker build -t trust-app:ci -f trust/Dockerfile trust
 
       - name: Run Docker container
         run: |

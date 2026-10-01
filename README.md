@@ -6,6 +6,18 @@ While developing this platform, I realized that police and fire departments coul
 
 Drawing from my professional background in forensics, I built this tool with the features and functionality I wished I had while working in the field. 
 
+### Repository Structure
+This repository is organized into two top-level modules:
+
+* **`trust/`** — The Legacy Trust For The Future application: trust administration, governance, security/authentication, legacy Trust assets, blockchain/NFT tooling, podcast, deployment, and mobile app packaging.
+* **`firstResponder/`** — The first-responder field tool: dispatch, forensics, ballistics analysis, evidence handling, bodycam/camera capture, CAD/jurisdiction data, and police/fire agency content.
+
+Each module preserves its original internal directory layout under its module root. For example:
+* `asset/html/legacy-trust-desktop.html` now lives at `trust/asset/html/legacy-trust-desktop.html`.
+* `asset/html/dispatch-modal.html` now lives at `firstResponder/asset/html/dispatch-modal.html`.
+
+Files and configuration that are genuinely shared by both modules (for example `db_config.ini`, `json.ini`, `timecards/`, `pay-scale.json`, `apache/httpd.conf`, and `.github/workflows/`) remain at the repository root.
+
 ### Funding & Support
 *Trust* is a free application. It is supported through:
 * Sales of *"Climbing the Invisible Wall"*, a publication I produce periodically.
