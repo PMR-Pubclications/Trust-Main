@@ -134,7 +134,7 @@
         "averageFillPrice": { "type": "number", "minimum": 0 },
         "totalFees": { "type": "number", "minimum": 0 },
         "settledAt": { "type": "string", "format": "date-time" },
-        "status": { "type": "string", "enum": ["filled", "partially_filled", "cancelled"] }
+        "status": { "type": "string", "enum": ["filled", "cancelled"], "description": "Terminal settlement status only; partial fills are not final confirmations." }
       }
     },
     "errorResponse": {
