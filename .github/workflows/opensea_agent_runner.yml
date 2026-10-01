@@ -35,8 +35,8 @@ jobs:
           DROP_SLUG: "ltf"
         run: |
           # Make the script executable and run it from its path
-          chmod +x asset/sh/opensea.sh
-          ./asset/sh/opensea.sh
+          chmod +x trust/asset/sh/opensea.sh
+          ./trust/asset/sh/opensea.sh
 
       - name: Run Python Agent Task
         env:
@@ -44,4 +44,4 @@ jobs:
           OPENSEA_SCOPED_TOKEN: ${{ secrets.OPENSEA_SCOPED_TOKEN }}
           ADMIN_WALLET_ADDRESS: ${{ secrets.ADMIN_WALLET_ADDRESS }}
         run: |
-          python agent_loop.py
+          python trust/asset/py/agent_loop.py

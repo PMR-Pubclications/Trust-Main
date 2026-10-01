@@ -27,9 +27,9 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - ./apache/httpd.conf:/usr/local/apache2/conf/httpd.conf:ro
-      - ./apache/extra/httpd-vhosts.conf:/usr/local/apache2/conf/extra/httpd-vhosts.conf:ro
-      - ./apache/certs:/usr/local/apache2/conf/certs:rw
+      - ../apache/httpd.conf:/usr/local/apache2/conf/httpd.conf:ro
+      - ../apache/extra/httpd-vhosts.conf:/usr/local/apache2/conf/extra/httpd-vhosts.conf:ro
+      - ../apache/certs:/usr/local/apache2/conf/certs:rw
     restart: unless-stopped
 
   certbot:
@@ -37,8 +37,8 @@ services:
     command: 
       - --help
     volumes:
-      - ./apache/certs:/etc/letsencrypt
-      - ./apache/var/www/html:/var/www/html
+      - ../apache/certs:/etc/letsencrypt
+      - ../apache/var/www/html:/var/www/html
     entrypoint: ["/bin/true"]
     # The certbot service is provided as a helper; use the `docker-compose run --rm certbot ...` command
     # to request/renew certificates, see apache/README.md for instructions.
