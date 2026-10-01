@@ -1,0 +1,11 @@
+{
+  "name": "trust-forensic-video-bridge",
+  "private": true,
+  "scripts": {
+    "start": "node forensicVideoBridge.js",
+    "test": "node --test forensicVideoBridge.test.js"
+  },
+  "dependencies": {
+    "ws": "8.21.0"
+  }
+}
