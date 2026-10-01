@@ -25,7 +25,13 @@ If you have questions or feedback, feel free to reach out:
 
 The standalone Trust video bridge accepts encoded video uploads from the C++ engine or Trust-Shell over HTTP, forwards each upload as a multipart request to the ballistics analysis service, and returns the analysis result. It also publishes upload lifecycle events to authenticated WebSocket subscribers.
 
-Start the bridge from the repository root after installing its Node.js dependency:
+Start the ballistics service first; it listens on `127.0.0.1:9091`:
+
+```sh
+mvn -f asset/java/ballisticVideoAnalysis/pom.xml spring-boot:run
+```
+
+In a second terminal, install the bridge dependency and start the HTTP/WebSocket API from the repository root:
 
 ```sh
 npm install --prefix asset/js
