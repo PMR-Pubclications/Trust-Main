@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>NFT API Receiver & Trading Hub</title>
+  <style>
+    * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+    body { background-color: #0d1117; color: #c9d1d9; display: flex; flex-direction: column; align-items: center; min-height: 100vh; margin: 0; padding: 20px; }
+    h1 { color: #58a6ff; margin-bottom: 20px; }
+    .search-box { display: flex; gap: 10px; margin-bottom: 25px; flex-wrap: wrap; justify-content: center; width: 100%; max-width: 700px; }
+    input, select, button { padding: 12px 16px; border-radius: 8px; border: 1px solid #30363d; background: #161b22; color: #fff; font-size: 14px; }
+    input { flex: 1; min-width: 200px; }
+    button { background: #238636; border: none; font-weight: bold; cursor: pointer; transition: 0.2s; }
+    button:hover { background: #2ea043; }
+    
+    .card { background: #161b22; border: 1px solid #30363d; border-radius: 12px; width: 100%; max-width: 480px; overflow: hidden; display: none; box-shadow: 0 8px 24px rgba(0,0,0,0.5); }
+    .card img { width: 100%; height: 380px; object-fit: cover; background: #010409; }
+    .card-body { padding: 20px; }
+    .card-title { font-size: 22px; font-weight: bold; color: #f0f6fc; margin-bottom: 12px; }
+    .stat-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #21262d; font-size: 14px; }
+    .stat-label { color: #8b949e; }
+    .stat-value { font-weight: 600; color: #f0f6fc; text-align: right; }
+    .actions { display: flex; gap: 12px; margin-top: 20px; }
+    .btn-buy { flex: 1; background: #1f6feb; text-align: center; text-decoration: none; display: block; border-radius: 8px; padding: 12px; font-weight: bold; color: white; }
+    .btn-buy:hover { background: #388bfd; }
+    .btn-sell { flex: 1; background: #da3633; text-align: center; text-decoration: none; display: block; border-radius: 8px; padding: 12px; font-weight: bold; color: white; }
+    .btn-sell:hover { background: #f85149; }
+    .loader { display: none; color: #58a6ff; margin: 20px 0; }
+  </style>
+</head>
+<body>
+
+  <h1>NFT Receiver Dashboard</h1>
+
+  <div class="search-box">
+    <select id="chain">
+      <option value="ethereum">Ethereum</option>
+      <option value="polygon">Polygon</option>
+      <option value="arbitrum">Arbitrum</option>
+    </select>
+    <input type="text" id="address" placeholder="Contract Address (e.g. 0xbc4ca0...)" value="0xBC4CA0EdA7647A8aB7C2061c2E118A18a936f13D">
+    <input type="text" id="tokenId" placeholder="Token ID" value="1" style="max-width: 100px;">
+    <button onclick="fetchNFT()">Fetch NFT</button>
+  </div>
+
+  <div id="loader" class="loader">Fetching data from OpenSea API...</div>
+
+  <div id="nftCard" class="card">
+    <img id="nftImage" src="" alt="NFT Image">
+    <div class="card-body">
+      <div id="nftName" class="card-title">NFT Name</div>
+
+      <div class="stat-row">
+        <span class="stat-label">Floor Cost / Price:</span>
+        <span id="nftCost" class="stat-value">-</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">Collection Trading Volume:</span>
+        <span id="nftVolume" class="stat-value">-</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">Last Purchased Date:</span>
+        <span id="lastSaleDate" class="stat-value">-</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">Last Sale Price:</span>
+        <span id="lastSalePrice" class="stat-value">-</span>
+      </div>
+
+      <div class="actions">
+        <a id="buyBtn" class="btn-buy" target="_blank" href="#">Buy Now</a>
+        <a id="sellBtn" class="btn-sell" target="_blank" href="#">List for Sale</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    async function fetchNFT() {
+      const chain = document.getElementById('chain').value;
+      const address = document.getElementById('address').value.trim();
+      const tokenId = document.getElementById('tokenId').value.trim();
+      const loader = document.getElementById('loader');
+      const card = document.getElementById('nftCard');
+
+      if (!address || !tokenId) {
+        alert('Please provide both contract address and token ID.');
+        return;
+      }
+
+      loader.style.display = 'block';
+      card.style.display = 'none';
+
+      try {
+        const response = await fetch(`/api/nft/${chain}/${address}/${tokenId}`);
+        const result = await response.json();
+
+        if (!result.success) {
+          alert('Error: ' + result.error);
+          return;
+        }
+
+        const data = result.data;
+        document.getElementById('nftImage').src = data.image;
+        document.getElementById('nftName').innerText = data.name;
+        document.getElementById('nftCost').innerText = data.cost;
+        document.getElementById('nftVolume').innerText = data.tradingVolume;
+        document.getElementById('lastSaleDate').innerText = data.lastPurchased.date;
+        document.getElementById('lastSalePrice').innerText = data.lastPurchased.price;
+
+        // Buy button directs to direct marketplace purchasing page
+        document.getElementById('buyBtn').href = data.openseaUrl;
+        
+        // Sell button directs to listing/management on OpenSea
+        document.getElementById('sellBtn').href = `https://opensea.io/account`;
+
+        card.style.display = 'block';
+      } catch (err) {
+        alert('Failed to connect to API receiver.');
+      } finally {
+        loader.style.display = 'none';
+      }
+    }
+
+    // Load initial example on launch
+    fetchNFT();
+  </script>
+</body>
+</html>
