@@ -68,8 +68,8 @@
         }
       },
       "oneOf": [
-        { "required": ["quantity"] },
-        { "required": ["notional"] }
+        { "required": ["quantity"], "not": { "required": ["notional"] } },
+        { "required": ["notional"], "not": { "required": ["quantity"] } }
       ],
       "allOf": [
         {

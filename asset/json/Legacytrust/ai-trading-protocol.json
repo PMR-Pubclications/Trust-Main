@@ -4,7 +4,6 @@
   "description": "Master protocol specification governing how AI agents (e.g. Robinhood, Gemini) may submit, approve, execute, and audit market trades on behalf of a principal. This document is the source of truth for the companion files in this folder: mcp-server-config.json, trading-schema.json, agent-policies.json, and audit-config.json.",
   "metadata": {
     "owner": "Legacytrust",
-    "lastUpdated": "2024-01-01",
     "relatedFiles": [
       "mcp-server-config.json",
       "trading-schema.json",

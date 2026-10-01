@@ -1,8 +1,0 @@
-{
-  "_deprecated": "This file is superseded by mcp-server-config.json, which consolidates all MCP server definitions under the AI Trading Protocol (see ai-trading-protocol.json). It is kept only for backward compatibility.",
-  "mcpServers": {
-    "robinhood-trading": {
-      "url": "https://agent.robinhood.com/mcp/trading"
-    }
-  }
-}
