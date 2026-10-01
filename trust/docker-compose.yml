@@ -2,7 +2,9 @@ version: '3.8'
 
 services:
   trust:
-    build: .
+    build:
+      context: ..
+      dockerfile: trust/Dockerfile
     image: trust-app:latest
     restart: unless-stopped
     expose:

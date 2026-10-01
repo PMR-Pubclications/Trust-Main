@@ -77,7 +77,7 @@
             padding: 0;
             background-color: var(--bg-deep);
             /* Main Workflow Background */
-            background-image: url('https://raw.githubusercontent.com/Tole1775/Trust/main/graphics/work-flow.png');
+            background-image: url('graphics/work-flow.png');
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
@@ -95,7 +95,7 @@
             width: 100vw;
             height: 100vh;
             background-color: var(--bg-deep);
-            background-image: url('https://raw.githubusercontent.com/Tole1775/Trust/main/graphics/trust-flash.png');
+            background-image: url('graphics/trust-flash.png');
             background-size: cover;
             background-position: center;
             z-index: 9999;
@@ -113,7 +113,7 @@
             width: 100vw;
             height: 100vh;
             background-color: #000;
-            background-image: url('https://raw.githubusercontent.com/Tole1775/Trust/main/graphics/system-lock.png');
+            background-image: url('graphics/system-lock.png');
             background-size: cover;
             background-position: center;
             z-index: 9000;
@@ -371,7 +371,7 @@
     </style>
 <!-- Link to Manifest -->
 <link rel="manifest" href="/manifest.json">
-<script src="https://cdn.jsdelivr.net/gh/Tole1775/Trust@main/generate-headers.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/PMR-Pubclications/Trust-Main@main/trust/asset/js/generate-headers.js"></script>
 
 
 <!-- iOS Support -->
@@ -838,8 +838,8 @@
         }
 
         const reportsApp = {
-            owner: localStorage.getItem('cfg_owner') || 'Tole1775',
-            repo: localStorage.getItem('cfg_repo') || 'Trust',
+            owner: localStorage.getItem('cfg_owner') || 'PMR-Pubclications',
+            repo: localStorage.getItem('cfg_repo') || 'Trust-Main',
             currentReportData: null,
 
             init() {
@@ -869,9 +869,9 @@
                 const outputBox = document.getElementById('report-output');
                 outputBox.innerText = `[INFO] Fetching records for ${reportType} (${targetDate})...`;
 
-                let targetPath = reportType === 'spatial_trail' ? `forensic_data/spatial_trail_${targetDate}.json` :
-                                 reportType === 'watch_commander' ? `forensic_data/briefings/` :
-                                 reportType === 'system_activity' ? `timecards/active-log.json` : `database/personnel/`;
+                let targetPath = reportType === 'spatial_trail' ? `firstresponders/forensic_data/spatial_trail_${targetDate}.json` :
+                                 reportType === 'watch_commander' ? `firstresponders/forensic_data/briefings/` :
+                                 reportType === 'system_activity' ? `trust/timecards/active-log.json` : `firstresponders/database/personnel/`;
 
                 try {
                     const apiUrl = `https://api.github.com/repos/${this.owner}/${this.repo}/contents/${targetPath}`;

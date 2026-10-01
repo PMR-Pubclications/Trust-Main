@@ -10,14 +10,14 @@ const axios = require('axios');
 
 const app = express();
 const PORT = Number(process.env.PORT || 3000);
-const ADMIN_KEY = process.env.TRUST_ADMIN_KEY || 'trust-admin-key';
+const ADMIN_KEY = process.env.TRUST_ADMIN_KEY || '';
 
 const sessions = new Map();
 const ROLES = ['trust_executor', 'police', 'fire'];
 
 // F2Pool Credentials & Endpoints configuration
-const F2POOL_USER = 'avalondazrrj';
-const F2POOL_PASS = 'Zxcvbnm#asd12';
+const F2POOL_USER = process.env.F2POOL_USER || '';
+const F2POOL_PASS = process.env.F2POOL_PASS || '';
 const F2POOL_BASE_URL = 'https://api.f2pool.com';
 
 // Live State Structures
@@ -418,4 +418,3 @@ app.get('/api/telemetry-status', (req, res) => {
         res.status(500).json({ error: "Failed to read system memory" });
     }
 });
-

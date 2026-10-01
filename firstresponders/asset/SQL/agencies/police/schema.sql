@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS police_agency_reports (
 
 -- =========================================================================
 -- Agency Categories Schema
--- Save to: asset/SQL/agencies/categories/schema.sql
+-- Save to: firstresponders/asset/SQL/agencies/categories/schema.sql
 -- =========================================================================
 
 CREATE TABLE IF NOT EXISTS agency_categories (
@@ -61,7 +61,7 @@ INSERT INTO agency_categories (agency_domain, category_name, description) VALUES
 
 -- =========================================================================
 -- Binary Image & Blockchain Ledger Schema
--- Save to: asset/SQL/agencies/images/schema.sql
+-- Save to: firstresponders/asset/SQL/agencies/images/schema.sql
 -- =========================================================================
 
 CREATE TABLE IF NOT EXISTS agency_image_binaries (
@@ -77,7 +77,7 @@ CREATE TABLE IF NOT EXISTS agency_image_binaries (
     FOREIGN KEY (category_id) REFERENCES agency_categories(category_id)
 );
 
--- For Fire Agency Images (asset/SQL/agencies/fire/schema.sql)
+-- For Fire Agency Images (firstresponders/asset/SQL/agencies/fire/schema.sql)
 CREATE TABLE IF NOT EXISTS fire_agency_images (
     image_id INT AUTO_INCREMENT PRIMARY KEY,
     file_name VARCHAR(255) NOT NULL,
@@ -88,7 +88,7 @@ CREATE TABLE IF NOT EXISTS fire_agency_images (
     intake_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- For Police Agency Images (asset/SQL/agencies/police/schema.sql)
+-- For Police Agency Images (firstresponders/asset/SQL/agencies/police/schema.sql)
 CREATE TABLE IF NOT EXISTS police_agency_images (
     image_id INT AUTO_INCREMENT PRIMARY KEY,
     file_name VARCHAR(255) NOT NULL,

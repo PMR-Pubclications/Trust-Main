@@ -3,8 +3,8 @@ Categories:
   - Security
   - Utilities
 License: GPL-3.0-only
-SourceCode: https://github.com/Tole1775/Trust
-IssueTracker: https://github.com/Tole1775/Trust/issues
+SourceCode: https://github.com/PMR-Pubclications/Trust-Main
+IssueTracker: https://github.com/PMR-Pubclications/Trust-Main/issues
 
 Summary: Mobile field tool for scene preservation and documentation
 Description: |-
@@ -12,7 +12,7 @@ Description: |-
   to assist in scene preservation and field documentation.
 
 RepoType: git
-Repo: https://github.com/Tole1775/Trust.git
+Repo: https://github.com/PMR-Pubclications/Trust-Main.git
 
 Builds:
   - versionName: 1.0.0

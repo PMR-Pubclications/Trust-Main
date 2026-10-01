@@ -18,7 +18,7 @@
   </filter-mapping>
 
   <!-- Explicit registration of LoginServlet (keeps servlet wiring independent of annotations)
-       The LoginServlet class currently lives in the default package in the repo (asset/java).
+       The LoginServlet class currently lives in the default package in the repo (trust/asset/java).
        If you move it into a package later, update the <servlet-class> value accordingly. -->
   <servlet>
     <servlet-name>LoginServlet</servlet-name>

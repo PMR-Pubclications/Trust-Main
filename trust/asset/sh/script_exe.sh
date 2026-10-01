@@ -1,1 +1,2 @@
-chmod +x run-trust-check.sh
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+chmod +x "$SCRIPT_DIR/run-trust-check.sh"

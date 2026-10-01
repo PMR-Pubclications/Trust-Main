@@ -30,15 +30,15 @@ jobs:
           pip install requests
           npm install -g @opensea/cli
 
-      - name: Execute All Shell Scripts in asset/sh/
+      - name: Execute All Shell Scripts in trust/asset/sh/
         env:
           OPENSEA_API_KEY: ${{ secrets.OPENSEA_API_KEY }}
           OPENSEA_PRIVATE_KEY: ${{ secrets.OPENSEA_PRIVATE_KEY }}
           DROP_SLUG: "ltf"
         run: |
-          if [ -d "asset/sh" ]; then
+          if [ -d "trust/asset/sh" ]; then
             echo "Executing all trust shell scripts..."
-            for script in asset/sh/*.sh; do
+            for script in trust/asset/sh/*.sh; do
               if [ -f "$script" ]; then
                 echo "Running script -> $script"
                 chmod +x "$script"
@@ -46,7 +46,7 @@ jobs:
               fi
             done
           else
-            echo "Directory asset/sh not found!"
+            echo "Directory trust/asset/sh not found!"
           fi
 
       - name: Run Python Agent Task
@@ -55,4 +55,4 @@ jobs:
           OPENSEA_SCOPED_TOKEN: ${{ secrets.OPENSEA_SCOPED_TOKEN }}
           ADMIN_WALLET_ADDRESS: ${{ secrets.ADMIN_WALLET_ADDRESS }}
         run: |
-          python agent_loop.py
+          python trust/asset/py/agent_loop.py

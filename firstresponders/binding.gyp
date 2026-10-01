@@ -3,7 +3,7 @@
     {
       "target_name": "hardware_bridge",
       "sources": [
-        "asset/cpp/hardware_bridge.cpp"
+        "asset/cpp/src/hardware_bridge.cpp"
       ],
       "include_dirs": [
         "<!@(node -p \"require('node-addon-api').include\")"

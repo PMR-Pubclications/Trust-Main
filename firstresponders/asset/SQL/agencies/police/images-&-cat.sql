@@ -1,6 +1,6 @@
 -- =========================================================================
 -- Agency Categories Schema
--- Save to: asset/SQL/agencies/categories/schema.sql
+-- Save to: firstresponders/asset/SQL/agencies/categories/schema.sql
 -- =========================================================================
 
 CREATE TABLE IF NOT EXISTS agency_categories (
@@ -23,7 +23,7 @@ INSERT INTO agency_categories (agency_domain, category_name, description) VALUES
 
 -- =========================================================================
 -- Binary Image & Blockchain Ledger Schema
--- Save to: asset/SQL/agencies/images/schema.sql
+-- Save to: firstresponders/asset/SQL/agencies/images/schema.sql
 -- =========================================================================
 
 CREATE TABLE IF NOT EXISTS agency_image_binaries (

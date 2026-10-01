@@ -4,11 +4,12 @@
  */
 
 const fs = require('fs');
+const path = require('path');
 
 function calculatePay() {
     // 1. Load configuration and active time cards
-    const payScale = JSON.parse(fs.readFileSync('./pay-scale.json', 'utf8'));
-    const timecard = JSON.parse(fs.readFileSync('./timecards/active-log.json', 'utf8'));
+    const payScale = JSON.parse(fs.readFileSync(path.join(__dirname, '../json/pay-scale.json'), 'utf8'));
+    const timecard = JSON.parse(fs.readFileSync(path.join(__dirname, '../../timecards/active-log.json'), 'utf8'));
 
     // 2. Find matching role details
     const role = payScale.roles.find(r => r.role_id === timecard.role_id);

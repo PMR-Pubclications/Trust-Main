@@ -38,7 +38,7 @@ public class LoginServlet extends HttpServlet {
                             session.setAttribute("adminRole", rs.getString("role"));
 
                             // Integrated Masked API Proxy Authorization for GitHub Access
-                            // References logic from: https://github.com/Tole1775/Trust/blob/main/asset%2Fjava%2Fmasked-api.java
+                            // References logic from: https://github.com/PMR-Pubclications/Trust-Main/blob/main/trust/asset%2Fjava%2Fmasked-api.java
                             String maskedGithubToken = MaskedApiProxyHandler.resolveServerSideToken(rs.getString("username"));
                             session.setAttribute("githubProxyAuth", maskedGithubToken);
 
