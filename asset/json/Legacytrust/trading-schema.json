@@ -70,6 +70,20 @@
       "oneOf": [
         { "required": ["quantity"] },
         { "required": ["notional"] }
+      ],
+      "allOf": [
+        {
+          "if": { "properties": { "orderType": { "const": "limit" } }, "required": ["orderType"] },
+          "then": { "required": ["limitPrice"] }
+        },
+        {
+          "if": { "properties": { "orderType": { "const": "stop" } }, "required": ["orderType"] },
+          "then": { "required": ["stopPrice"] }
+        },
+        {
+          "if": { "properties": { "orderType": { "const": "stop_limit" } }, "required": ["orderType"] },
+          "then": { "required": ["limitPrice", "stopPrice"] }
+        }
       ]
     },
     "orderExecutionResponse": {

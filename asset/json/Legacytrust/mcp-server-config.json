@@ -19,16 +19,6 @@
         "failClosedOnMissingEnv": true,
         "headerScheme": "token-prefixed Authorization header (HTTP authentication scheme), value injected from environment"
       },
-      "connection": {
-        "timeoutMs": 10000,
-        "retry": {
-          "maxAttempts": 3,
-          "backoffStrategy": "exponential",
-          "initialDelayMs": 500,
-          "maxDelayMs": 5000
-        },
-        "heartbeatIntervalMs": 30000
-      },
       "risk": {
         "autoApprove": false,
         "maxRiskLimitUSD": 250,
@@ -56,16 +46,6 @@
         "failClosedOnMissingEnv": true,
         "headerScheme": "token-prefixed Authorization header (HTTP authentication scheme), value injected from environment"
       },
-      "connection": {
-        "timeoutMs": 10000,
-        "retry": {
-          "maxAttempts": 3,
-          "backoffStrategy": "exponential",
-          "initialDelayMs": 500,
-          "maxDelayMs": 5000
-        },
-        "heartbeatIntervalMs": 30000
-      },
       "risk": {
         "autoApprove": false,
         "maxRiskLimitUSD": 100,
@@ -80,10 +60,20 @@
     }
   },
   "globalSettings": {
-    "description": "Defaults applied to all servers unless overridden per-server above.",
+    "description": "Defaults applied to all servers unless overridden per-server above. defaultConnection (timeout/retry/heartbeat) applies to every server in mcpServers unless a server defines its own 'connection' block.",
     "autoApprove": false,
     "maxRiskLimitUSD": 100,
     "requireAuditLogging": true,
-    "failClosedOnAuthError": true
+    "failClosedOnAuthError": true,
+    "defaultConnection": {
+      "timeoutMs": 10000,
+      "retry": {
+        "maxAttempts": 3,
+        "backoffStrategy": "exponential",
+        "initialDelayMs": 500,
+        "maxDelayMs": 5000
+      },
+      "heartbeatIntervalMs": 30000
+    }
   }
 }
