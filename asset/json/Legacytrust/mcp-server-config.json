@@ -1,0 +1,87 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Unified MCP (Model Context Protocol) server configuration for AI trading agents. Replaces and consolidates the legacy RobbinHood.json and Gemini-connection.json files. All credentials are injected via environment variables at runtime; no secrets are stored in this file.",
+  "protocolRef": "ai-trading-protocol.json",
+  "version": "1.0.0",
+  "mcpServers": {
+    "robinhood-trading": {
+      "url": "https://agent.robinhood.com/mcp/trading",
+      "headers": {
+        "Authorization": "${ROBINHOOD_API_KEY}",
+        "X-API-Secret": "${ROBINHOOD_API_SECRET}"
+      },
+      "auth": {
+        "strategy": "env-var-injection",
+        "requiredEnvVars": [
+          "ROBINHOOD_API_KEY",
+          "ROBINHOOD_API_SECRET"
+        ],
+        "failClosedOnMissingEnv": true,
+        "headerScheme": "token-prefixed Authorization header (HTTP authentication scheme), value injected from environment"
+      },
+      "connection": {
+        "timeoutMs": 10000,
+        "retry": {
+          "maxAttempts": 3,
+          "backoffStrategy": "exponential",
+          "initialDelayMs": 500,
+          "maxDelayMs": 5000
+        },
+        "heartbeatIntervalMs": 30000
+      },
+      "risk": {
+        "autoApprove": false,
+        "maxRiskLimitUSD": 100,
+        "inheritFrom": "ai-trading-protocol.json#/riskPolicy"
+      },
+      "logging": {
+        "enabled": true,
+        "auditHook": "audit-config.json#/eventTypes",
+        "logLevel": "info"
+      }
+    },
+    "gemini-trading": {
+      "url": "https://agent.gemini.com/mcp/trading",
+      "headers": {
+        "Authorization": "${GEMINI_API_KEY}",
+        "X-API-Secret": "${GEMINI_API_SECRET}"
+      },
+      "auth": {
+        "strategy": "env-var-injection",
+        "requiredEnvVars": [
+          "GEMINI_API_KEY",
+          "GEMINI_API_SECRET"
+        ],
+        "failClosedOnMissingEnv": true,
+        "headerScheme": "token-prefixed Authorization header (HTTP authentication scheme), value injected from environment"
+      },
+      "connection": {
+        "timeoutMs": 10000,
+        "retry": {
+          "maxAttempts": 3,
+          "backoffStrategy": "exponential",
+          "initialDelayMs": 500,
+          "maxDelayMs": 5000
+        },
+        "heartbeatIntervalMs": 30000
+      },
+      "risk": {
+        "autoApprove": false,
+        "maxRiskLimitUSD": 100,
+        "inheritFrom": "ai-trading-protocol.json#/riskPolicy"
+      },
+      "logging": {
+        "enabled": true,
+        "auditHook": "audit-config.json#/eventTypes",
+        "logLevel": "info"
+      }
+    }
+  },
+  "globalSettings": {
+    "description": "Defaults applied to all servers unless overridden per-server above.",
+    "autoApprove": false,
+    "maxRiskLimitUSD": 100,
+    "requireAuditLogging": true,
+    "failClosedOnAuthError": true
+  }
+}
