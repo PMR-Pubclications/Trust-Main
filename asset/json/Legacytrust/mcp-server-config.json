@@ -31,8 +31,9 @@
       },
       "risk": {
         "autoApprove": false,
-        "maxRiskLimitUSD": 100,
-        "inheritFrom": "ai-trading-protocol.json#/riskPolicy"
+        "maxRiskLimitUSD": 250,
+        "inheritFrom": "ai-trading-protocol.json#/riskPolicy",
+        "note": "Matches robinhood-agent.maxPerTradeNotionalUSD in agent-policies.json; keep these two values in sync."
       },
       "logging": {
         "enabled": true,
@@ -68,7 +69,8 @@
       "risk": {
         "autoApprove": false,
         "maxRiskLimitUSD": 100,
-        "inheritFrom": "ai-trading-protocol.json#/riskPolicy"
+        "inheritFrom": "ai-trading-protocol.json#/riskPolicy",
+        "note": "Matches gemini-agent.maxPerTradeNotionalUSD in agent-policies.json; keep these two values in sync."
       },
       "logging": {
         "enabled": true,

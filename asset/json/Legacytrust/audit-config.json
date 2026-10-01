@@ -62,7 +62,7 @@
     "description": "Audit records must be retained long enough to satisfy applicable financial recordkeeping requirements.",
     "minimumRetentionYears": 7,
     "immutable": true,
-    "append_only": true,
+    "appendOnly": true,
     "archival": {
       "enabled": true,
       "afterDays": 90,
