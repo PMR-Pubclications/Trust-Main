@@ -1,0 +1,17 @@
+{
+  "name": "trust-main",
+  "version": "1.0.0",
+  "private": true,
+  "main": "asset/js/server.js",
+  "scripts": {
+    "start": "node asset/js/server.js",
+    "dev": "node asset/js/server.js"
+  },
+  "dependencies": {
+    "axios": "^1.6.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "sqlite3": "^5.4.1"
+  }
+}

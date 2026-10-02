@@ -20,6 +20,9 @@ const F2POOL_USER = 'avalondazrrj';
 const F2POOL_PASS = 'Zxcvbnm#asd12';
 const F2POOL_BASE_URL = 'https://api.f2pool.com';
 
+const appRoot = path.resolve(__dirname, '..');
+const dbPath = path.join(appRoot, 'SQL', 'agencies', 'LegacyTrust');
+
 // Live State Structures
 let miningState = {
     agentStatus: "Operational",
@@ -35,10 +38,9 @@ let miningState = {
 
 app.use(express.json({ limit: '100kb' }));
 app.use(cors({ origin: true }));
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(appRoot, 'public')));
 
 // Database Setup (Governance & Legacy Trust Properties)
-const dbPath = path.resolve(__dirname, 'asset', 'SQL', 'agencies', 'LegacyTrust');
 const db = new sqlite3.Database(dbPath, (err) => {
   if (err) {
     console.error('Database connection error:', err.message);
@@ -117,6 +119,14 @@ async function initializeDatabase() {
       );
       miningState.transactions = [{ hash: "0x8f4c...3e19", timestamp: new Date().toISOString().replace('T', ' ').substring(0, 16), category: "Trust Distribution", amount: "+$45,000.00", status: "Verified" }];
   }
+
+  await run(`CREATE TABLE IF NOT EXISTS accounts_receivable (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    client_name TEXT NOT NULL,
+    amount REAL NOT NULL,
+    status TEXT NOT NULL DEFAULT 'Pending',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  )`);
 }
 
 initializeDatabase().catch((err) => {
@@ -190,7 +200,6 @@ setInterval(async () => {
     miningState.bctReserve = parseFloat((miningState.bctReserve + 0.001).toFixed(4));
 }, 30000);
 
-
 // ==================== API ENDPOINTS ====================
 
 app.get('/health', (req, res) => {
@@ -260,7 +269,7 @@ app.get('/api/f2pool/wallet-history', async (req, res) => {
 // --- PORTFOLIO & WALLET ROUTES ---
 
 app.get('/api/opensea/value', async (req, res) => {
-    const agentScript = path.resolve(__dirname, 'asset', 'py', 'opensea-agent-access.py');
+    const agentScript = path.resolve(appRoot, 'py', 'opensea-agent-access.py');
     exec(`python3 "${agentScript}"`, (err, stdout, stderr) => {
         if (err) {
             return res.json({ valuation_usd: 81250.00, eth_balance: 32.5, source: "fallback-cache" });
@@ -281,7 +290,7 @@ app.post('/api/property/add', async (req, res) => {
         const dbResult = await run(`INSERT INTO properties (property_title, valuation) VALUES (?, ?)`, [property_title, valuation || 150000.00]);
         const newId = dbResult.lastID;
 
-        const driveScript = path.resolve(__dirname, 'asset', 'py', 'access-google-drive.py');
+        const driveScript = path.resolve(appRoot, 'py', 'access-google-drive.py');
         exec(`python3 "${driveScript}" --sync-property-id ${newId}`, (err, stdout, stderr) => {
             if (err) {
                 console.warn("Google Drive sync script notice:", stderr);
@@ -307,7 +316,7 @@ app.get('/api/property/list', async (req, res) => {
 
 // Force Sync endpoint executing pipeline scripts & recording state
 app.post('/api/sync', async (req, res) => {
-  const scriptPath = path.resolve(__dirname, 'asset', 'py', 'secure-googledive-access.py');
+  const scriptPath = path.resolve(appRoot, 'py', 'secure-googledive-access.py');
   const timestamp = new Date().toISOString().replace('T', ' ').substring(0, 16);
   const generatedHash = '0x' + crypto.randomBytes(4).toString('hex') + '...' + Date.now().toString(16).slice(-4);
 
@@ -350,16 +359,6 @@ app.post('/api/sync', async (req, res) => {
   });
 });
 
-app.listen(PORT, () => {
-    console.log(`[MINING CORE DAEMON] Legacy Trust Admin Tier 1 server running live on http://localhost:${PORT}`);
-});
-  await run(`CREATE TABLE IF NOT EXISTS accounts_receivable (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    client_name TEXT NOT NULL,
-    amount REAL NOT NULL,
-    status TEXT NOT NULL DEFAULT 'Pending',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-  )`);
 // --- ACCOUNTS RECEIVABLE ROUTES (CARD 5) ---
 
 // Fetch all receivables records from Accounts-Receivable database
@@ -384,11 +383,11 @@ app.post('/api/receivables/add', async (req, res) => {
             `INSERT INTO accounts_receivable (client_name, amount, status) VALUES (?, ?, ?)`,
             [client_name, parseFloat(amount), 'Active']
         );
-        
-        res.json({ 
-            success: true, 
-            id: dbResult.lastID, 
-            message: "Receivable successfully recorded to Accounts-Receivable ledger." 
+
+        res.json({
+            success: true,
+            id: dbResult.lastID,
+            message: "Receivable successfully recorded to Accounts-Receivable ledger."
         });
     } catch (err) {
         res.status(500).json({ success: false, error: err.message });
@@ -400,7 +399,7 @@ app.get('/api/telemetry-status', (req, res) => {
     try {
         const fs = require('fs');
         const meminfo = fs.readFileSync('/proc/meminfo', 'utf8');
-        
+
         let total = 0, available = 0;
         meminfo.split('\n').forEach(line => {
             if (line.startsWith('MemTotal:')) total = parseInt(line.split(/\s+/)[1]);
@@ -411,7 +410,7 @@ app.get('/api/telemetry-status', (req, res) => {
 
         res.json({
             ramUsage: usage,
-            minerState: "ACTIVE (Throttled)", // Dynamically track via watchdog state if needed
+            minerState: "ACTIVE (Throttled)",
             watchdogState: "Armed (85% Limit)"
         });
     } catch (err) {
@@ -419,3 +418,6 @@ app.get('/api/telemetry-status', (req, res) => {
     }
 });
 
+app.listen(PORT, () => {
+    console.log(`[MINING CORE DAEMON] Legacy Trust Admin Tier 1 server running live on http://localhost:${PORT}`);
+});
