@@ -1,6 +1,12 @@
-version: "3.9"
 services:
-  av-engine:
-    build: .
-    image: ghcr.io/pmr-pubclications/audiovideoengine-cpp:latest
+  trust-main:
+    build:
+      context: .
+    image: trust-main:latest
+    container_name: trust-main
     restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+      PORT: "3000"
