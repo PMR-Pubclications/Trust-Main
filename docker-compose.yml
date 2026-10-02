@@ -1,6 +1,18 @@
-version: "3.9"
+# Integrated stack: Trust-Main (API) + AudioVideoEngine-CPP (native engine).
+# Trust-Shell (Android browser shell) is built separately and points at the API (see INTEGRATION.md).
 services:
   av-engine:
+    build: https://github.com/PMR-Pubclications/AudioVideoEngine-CPP.git
+    image: trust/av-engine:local
+    restart: unless-stopped
+
+  trust-main:
     build: .
-    image: ghcr.io/pmr-pubclications/audiovideoengine-cpp:latest
+    ports:
+      - "3000:3000"
+    environment:
+      PORT: "3000"
+      AV_ENGINE_HOST: av-engine
+    depends_on:
+      - av-engine
     restart: unless-stopped

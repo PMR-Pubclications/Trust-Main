@@ -38,7 +38,7 @@ app.use(cors({ origin: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Database Setup (Governance & Legacy Trust Properties)
-const dbPath = path.resolve(__dirname, 'asset', 'SQL', 'agencies', 'LegacyTrust');
+const dbPath = process.env.TRUST_DB_PATH || path.resolve(__dirname, '..', 'SQL', 'agencies', 'LegacyTrust', 'trust.db');
 const db = new sqlite3.Database(dbPath, (err) => {
   if (err) {
     console.error('Database connection error:', err.message);
@@ -105,6 +105,14 @@ async function initializeDatabase() {
     property_title TEXT,
     valuation REAL,
     timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+  )`);
+
+  await run(`CREATE TABLE IF NOT EXISTS accounts_receivable (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    client_name TEXT NOT NULL,
+    amount REAL NOT NULL,
+    status TEXT NOT NULL DEFAULT 'Pending',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
   )`);
 
   const existingRows = await all("SELECT tx_hash as hash, created_at as timestamp, category, amount, status FROM ledger_audit_trail ORDER BY id DESC LIMIT 10");
@@ -260,7 +268,7 @@ app.get('/api/f2pool/wallet-history', async (req, res) => {
 // --- PORTFOLIO & WALLET ROUTES ---
 
 app.get('/api/opensea/value', async (req, res) => {
-    const agentScript = path.resolve(__dirname, 'asset', 'py', 'opensea-agent-access.py');
+    const agentScript = path.resolve(__dirname, '..', 'py', 'opensea-agent-access.py');
     exec(`python3 "${agentScript}"`, (err, stdout, stderr) => {
         if (err) {
             return res.json({ valuation_usd: 81250.00, eth_balance: 32.5, source: "fallback-cache" });
@@ -281,7 +289,7 @@ app.post('/api/property/add', async (req, res) => {
         const dbResult = await run(`INSERT INTO properties (property_title, valuation) VALUES (?, ?)`, [property_title, valuation || 150000.00]);
         const newId = dbResult.lastID;
 
-        const driveScript = path.resolve(__dirname, 'asset', 'py', 'access-google-drive.py');
+        const driveScript = path.resolve(__dirname, '..', 'py', 'access-google-drive.py');
         exec(`python3 "${driveScript}" --sync-property-id ${newId}`, (err, stdout, stderr) => {
             if (err) {
                 console.warn("Google Drive sync script notice:", stderr);
@@ -307,7 +315,7 @@ app.get('/api/property/list', async (req, res) => {
 
 // Force Sync endpoint executing pipeline scripts & recording state
 app.post('/api/sync', async (req, res) => {
-  const scriptPath = path.resolve(__dirname, 'asset', 'py', 'secure-googledive-access.py');
+  const scriptPath = path.resolve(__dirname, '..', 'py', 'secure-googledive-access.py');
   const timestamp = new Date().toISOString().replace('T', ' ').substring(0, 16);
   const generatedHash = '0x' + crypto.randomBytes(4).toString('hex') + '...' + Date.now().toString(16).slice(-4);
 
@@ -350,16 +358,6 @@ app.post('/api/sync', async (req, res) => {
   });
 });
 
-app.listen(PORT, () => {
-    console.log(`[MINING CORE DAEMON] Legacy Trust Admin Tier 1 server running live on http://localhost:${PORT}`);
-});
-  await run(`CREATE TABLE IF NOT EXISTS accounts_receivable (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    client_name TEXT NOT NULL,
-    amount REAL NOT NULL,
-    status TEXT NOT NULL DEFAULT 'Pending',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-  )`);
 // --- ACCOUNTS RECEIVABLE ROUTES (CARD 5) ---
 
 // Fetch all receivables records from Accounts-Receivable database
@@ -419,3 +417,6 @@ app.get('/api/telemetry-status', (req, res) => {
     }
 });
 
+app.listen(PORT, () => {
+    console.log(`[MINING CORE DAEMON] Legacy Trust Admin Tier 1 server running live on http://localhost:${PORT}`);
+});
