@@ -65,3 +65,4 @@ coverage
 dist
 build
 .DS_Store
+asset/SQL/agencies/LegacyTrust/trust.db
