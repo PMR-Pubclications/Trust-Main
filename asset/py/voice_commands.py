@@ -23,6 +23,7 @@ from pathlib import Path
 
 FOLDER = Path(__file__).resolve().parent
 REPO_ROOT = FOLDER.parent.parent
+FERNETICS_AI_DIR = FOLDER / "ferensics-ai"
 
 
 def normalize(value: str) -> str:
@@ -39,10 +40,17 @@ def script_catalog() -> list[Path]:
     return files
 
 
+def ferensics_ai_scripts() -> list[Path]:
+    if not FERNETICS_AI_DIR.exists():
+        return []
+    return sorted([p for p in FERNETICS_AI_DIR.iterdir() if p.is_file() and p.suffix.lower() == ".py"])
+
+
 def get_script_matches(query: str) -> list[Path]:
     cleaned = normalize(query)
     matches: list[Path] = []
 
+    # Match direct folder scripts in asset/py.
     for path in script_catalog():
         target = normalize(path.stem)
         if not cleaned:
@@ -58,7 +66,25 @@ def get_script_matches(query: str) -> list[Path]:
         elif "secure" in cleaned and "secure" in target:
             matches.append(path)
 
-    # Fallback: treat command words as alias-based matches for filenames.
+    # Match scripts inside asset/py/ferensics-ai.
+    for path in ferensics_ai_scripts():
+        target = normalize(path.stem)
+        if not cleaned:
+            continue
+        if cleaned in target or target in cleaned:
+            matches.append(path)
+        elif "ballistic" in cleaned and "ballistics" in target:
+            matches.append(path)
+        elif "video" in cleaned and "video" in target:
+            matches.append(path)
+        elif "forensic" in cleaned and "forensic" in target:
+            matches.append(path)
+        elif "train" in cleaned and "train" in target:
+            matches.append(path)
+        elif "server" in cleaned and "server" in target:
+            matches.append(path)
+
+    # Fallback alias-based matches for filename routing.
     if not matches:
         alias_map = {
             "agent loop": FOLDER / "agent_loop.py",
@@ -68,18 +94,33 @@ def get_script_matches(query: str) -> list[Path]:
             "sweep ellipal": FOLDER / "sweep_to_ellipal.py",
             "etherscan": FOLDER / "etherscan-data-api.py",
             "liquid": FOLDER / "liquid-installer.py",
+            "ferensics ai server": FERNETICS_AI_DIR / "ferensicAIserver.py",
+            "video ballistics": FERNETICS_AI_DIR / "video_ballistics.py",
+            "ballistics comparator": FERNETICS_AI_DIR / "ballistics_comparator.py",
+            "forensic physics": FERNETICS_AI_DIR / "ferensics _physcs.py",
+            "train forensic slm": FERNETICS_AI_DIR / "train_forensic_slm.py",
+            "sft trainer": FERNETICS_AI_DIR / "SFTTrainer.py",
         }
         for alias, path in alias_map.items():
             if cleaned == alias or alias in cleaned:
                 if path.exists():
                     matches.append(path)
 
-    return matches
+    # De-duplicate while preserving order.
+    unique: list[Path] = []
+    seen = set()
+    for path in matches:
+        key = str(path)
+        if key not in seen:
+            seen.add(key)
+            unique.append(path)
+    return unique
 
 
 def list_scripts() -> str:
-    names = [p.name for p in script_catalog()]
-    return "Scripts available in asset/py:\n- " + "\n- ".join(names)
+    names = [p.relative_to(FOLDER).as_posix() for p in script_catalog()]
+    names.extend([p.relative_to(FOLDER).as_posix() for p in ferensics_ai_scripts()])
+    return "Scripts available in asset/py and asset/py/ferensics-ai:\n- " + "\n- ".join(names)
 
 
 def run_script(script_path: Path) -> int:
@@ -107,8 +148,12 @@ def handle_command(command: str) -> int:
             "  run opensea agent access\n"
             "  run google drive\n"
             "  run secure google drive\n"
-            "  run sweep ellipal\n"
-            "  run etherscan\n"
+            "  run ferensics ai server\n"
+            "  run video ballistics\n"
+            "  run ballistics comparator\n"
+            "  run forensic physics\n"
+            "  run train forensic slm\n"
+            "  run sft trainer\n"
             "  quit"
         )
         return 0
@@ -135,7 +180,7 @@ def handle_command(command: str) -> int:
     if len(matches) > 1:
         print("Multiple matches found:")
         for match in matches:
-            print(f"- {match.name}")
+            print(f"- {match.relative_to(REPO_ROOT)}")
         return 1
 
     return run_script(matches[0])
