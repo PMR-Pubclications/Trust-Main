@@ -1,0 +1,94 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "TrustRulesPolicy",
+  "description": "Validation schema for legacy trust spending thresholds, governance approvals, and beneficiary payouts.",
+  "type": "object",
+  "required": ["trust_id", "currency", "spending_thresholds", "governance", "beneficiary_payouts"],
+  "properties": {
+    "trust_id": { "type": "string", "pattern": "^trst_[a-zA-Z0-9_-]+$" },
+    "trust_name": { "type": "string" },
+    "version": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" },
+    "currency": { "type": "string", "length": 3, "default": "USD" },
+    
+    "spending_thresholds": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["tier", "name", "min_amount", "max_amount", "approval_type", "required_signatures"],
+        "properties": {
+          "tier": { "type": "integer", "minimum": 1 },
+          "name": { "type": "string" },
+          "min_amount": { "type": "number", "minimum": 0 },
+          "max_amount": { "type": ["number", "null"] },
+          "approval_type": { 
+            "type": "string", 
+            "enum": ["AUTO_APPROVED", "SINGLE_SIGNATURE", "MULTI_SIG", "UNANIMOUS"] 
+          },
+          "required_signatures": { "type": "integer", "minimum": 0 },
+          "allowed_roles": { 
+            "type": "array", 
+            "items": { "type": "string" } 
+          },
+          "timelock_hours": { "type": "integer", "minimum": 0, "default": 0 }
+        }
+      }
+    },
+
+    "governance": {
+      "type": "object",
+      "required": ["trustees", "multisig_quorum"],
+      "properties": {
+        "multisig_quorum": { "type": "integer", "minimum": 1 },
+        "timelock_override_allowed": { "type": "boolean", "default": false },
+        "trustees": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["id", "name", "role", "pubkey_or_address"],
+            "properties": {
+              "id": { "type": "string" },
+              "name": { "type": "string" },
+              "role": { "type": "string", "enum": ["MANAGING_TRUSTEE", "INDEPENDENT_TRUSTEE", "COMPLIANCE_OFFICER", "AUDITOR"] },
+              "pubkey_or_address": { "type": "string" },
+              "email": { "type": "string", "format": "email" }
+            }
+          }
+        }
+      }
+    },
+
+    "beneficiary_payouts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["schedule_id", "beneficiary_id", "payout_type", "calculation_method", "amount_value", "frequency"],
+        "properties": {
+          "schedule_id": { "type": "string" },
+          "beneficiary_id": { "type": "string" },
+          "beneficiary_name": { "type": "string" },
+          "payout_type": { "type": "string", "enum": ["STIPEND", "EDUCATION", "HEALTHCARE", "CAPITAL_DISTRIBUTION"] },
+          "calculation_method": { "type": "string", "enum": ["FIXED_AMOUNT", "PERCENTAGE_OF_NAV"] },
+          "amount_value": { "type": "number", "minimum": 0 },
+          "frequency": { "type": "string", "enum": ["WEEKLY", "MONTHLY", "QUARTERLY", "ANNUALLY", "MILESTONE"] },
+          "start_date": { "type": "string", "format": "date" },
+          "end_date": { "type": ["string", "null"], "format": "date" },
+          "destination_account_id": { "type": "string" },
+          "conditions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["type", "operator", "value"],
+              "properties": {
+                "type": { "type": "string", "enum": ["AGE_GTE", "MIN_GPA", "PROOFS_ATTACHED", "PORTFOLIO_NAV_GTE"] },
+                "operator": { "type": "string", "enum": [">=", "<=", "==", "IN"] },
+                "value": { "type": ["string", "number", "boolean"] }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
