@@ -27,4 +27,34 @@ cd base_model
 wget https://github.com/rhasspy/piper/releases/download/v0.1.0/model-en_US-lessac-medium.ckpt
 wget https://github.com/rhasspy/piper/releases/download/v0.1.0/model-en_US-lessac-medium.ckpt.json
 
+python3 -m piper_train.preprocess \
+    --language en-us \
+    --input-dir /path/to/custom_voice_dataset \
+    --output-dir /path/to/preprocessed_data \
+    --dataset-format ljspeech \
+    --single-speaker \
+    --sample-rate 22050
+
+python3 -m piper_train \
+    --dataset-dir /path/to/preprocessed_data \
+    --accelerator gpu \
+    --devices 1 \
+    --batch-size 16 \
+    --validation-split 0.05 \
+    --num-test-examples 5 \
+    --max_epochs 3000 \
+    --resume_from_checkpoint /path/to/base_model/model-en_US-lessac-medium.ckpt \
+    --checkpoint-epochs 100 \
+    --output-dir /path/to/training_output
+
+
+python3 -m piper_train.export_onnx \
+    /path/to/training_output/checkpoints/epoch=2500-step=15000.ckpt \
+    /path/to/custom_voice.onnx
+
+python3 -m piper_train.make_config \
+    --dataset-dir /path/to/preprocessed_data \
+    --output-config /path/to/custom_voice.onnx.json
+
+
 
