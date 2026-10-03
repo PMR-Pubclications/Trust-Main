@@ -1,0 +1,13 @@
+FROM python:3.11-slim-bookworm
+
+WORKDIR /app
+COPY asset/py/ferensics-ai/requirements.txt ./requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY asset/py ./asset/py
+EXPOSE 8000
+
+# Route commands through the voice command router, e.g.
+#   docker run --rm trust-py --command "run ferensics ai server"
+ENTRYPOINT ["python", "asset/py/voice_commands.py"]
+CMD ["--command", "run ferensics ai server"]
