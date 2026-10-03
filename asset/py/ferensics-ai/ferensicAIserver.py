@@ -1,8 +1,15 @@
+import os
 import tempfile
+from typing import Optional
+
+from fastapi import FastAPI, File, Form, HTTPException, UploadFile
+
 from video_ballistics import VideoBallisticsAnalyzer
 
 # Initialize video analyzer instance
 video_analyzer = VideoBallisticsAnalyzer()
+
+app = FastAPI(title="Ferensics AI Server")
 
 
 @app.post("/api/v1/vision/video-trajectory", tags=["Computer Vision & Video"])
@@ -53,3 +60,9 @@ async def analyze_video_trajectory(
         if 'tmp_path' in locals() and os.path.exists(tmp_path):
             os.remove(tmp_path)
         raise HTTPException(status_code=500, detail=str(e))
+
+
+if __name__ == "__main__":
+    import uvicorn
+
+    uvicorn.run(app, host=os.environ.get("HOST", "0.0.0.0"), port=int(os.environ.get("PORT", "8000")))
