@@ -59,3 +59,6 @@ python3 -m piper_train.make_config \
 
 pip install faster-whisper pydub
 
+pip install ffmpeg-python
+
+
