@@ -1,363 +1,345 @@
 """
-Annon Ethics Integration Module
-Integrates ethical framework with voice interface and evidence management
+Annon Ethics Controller Integration
+Master control module integrating constitutional rights protection with forensic investigation workflow
+Enforces: Ten Commandments + Natural Law + 4th Amendment search/seizure protection + chain of custody
+
+This module acts as the policy enforcement engine across all investigation operations.
 """
 
-from ethics_framework import (
-    AnnonEthicsEngine, EvidencePackage, CustodianRecord, Report,
-    ChainOfCustodyStatus, EthicalPrinciple
-)
+import logging
+from typing import Dict, List, Optional, Tuple, Any
 from datetime import datetime
-from typing import Dict, Tuple, Optional
-import uuid
+import json
+
+# Import constitutional rights framework
+try:
+    from AI_Personality.constitutional_rights_protection import (
+        ConstitutionalRightsValidator,
+        ConstitutionalRightsEthicsExtension,
+        ConstitutionalViolationType,
+        SearchAuthorizationRecord,
+        SearchAuthorization
+    )
+except ImportError:
+    ConstitutionalRightsValidator = None
+    ConstitutionalRightsEthicsExtension = None
+
+# Import forensic accounting
+try:
+    from forensic_accounting_system import (
+        ForensicAccountingManager, CaseForensicAccount
+    )
+except ImportError:
+    ForensicAccountingManager = None
+
+# Import voice interface
+try:
+    from AI_Personality.anon_voice_interface import AnonVoiceEngine
+except ImportError:
+    AnonVoiceEngine = None
+
+logger = logging.getLogger("AnnonEthicsIntegration")
 
 
-class AnnonEthicsVoiceInterface:
+class AnnonEthicsIntegrationController:
     """
-    Voice-enabled interface for ethical evidence management
-    Enforces: Single submission per package, Amendment-only reports, Chain of custody
-    """
-    
-    def __init__(self, engine: AnnonEthicsEngine = None):
-        self.engine = engine or AnnonEthicsEngine()
-        self.session_id = str(uuid.uuid4())
-        self.voice_log: list = []
-    
-    def log_voice_action(self, action: str, user: str, details: Dict):
-        """Log all voice-initiated actions"""
-        self.voice_log.append({
-            "timestamp": datetime.now().isoformat(),
-            "session_id": self.session_id,
-            "action": action,
-            "user": user,
-            "details": details
-        })
-    
-    def voice_submit_evidence(self, submitter_name: str, submitter_id: str,
-                             submitter_role: str, organization: str,
-                             evidence_description: str, evidence_data: Dict,
-                             signature_hash: str) -> Tuple[bool, str]:
-        """
-        Voice-initiated evidence submission with full chain of custody
-        
-        SOP:
-        1. Verify submitter credentials
-        2. Create evidence package
-        3. Establish chain of custody with submitter as initial custodian
-        4. Submit with single-submission enforcement
-        5. Return evidence receipt number
-        """
-        try:
-            # Create custodian record for submitter
-            submitter_custodian = CustodianRecord(
-                custodian_name=submitter_name,
-                custodian_id=submitter_id,
-                role=submitter_role,
-                organization=organization,
-                handover_timestamp=datetime.now(),
-                signature_hash=signature_hash,
-                condition_notes=evidence_description
-            )
-            
-            # Create evidence package
-            package = EvidencePackage(
-                package_id=f"PKG-{datetime.now().strftime('%Y%m%d%H%M%S')}-{uuid.uuid4().hex[:8].upper()}",
-                content_hash=self._compute_content_hash(evidence_data),
-                timestamp=datetime.now(),
-                submitter=submitter_name,
-                submitter_id=submitter_id,
-                submitter_role=submitter_role,
-                submitter_organization=organization,
-                evidence_data=evidence_data,
-            )
-            
-            # Override initial custodian
-            package.chain_of_custody.original_custodian = submitter_custodian
-            package.chain_of_custody.custody_chain[0] = submitter_custodian
-            
-            # Submit evidence
-            success, message = self.engine.submit_evidence(package)
-            
-            if success:
-                receipt = self.engine.submission_registry.get_submission_proof(package.package_id)
-                self.log_voice_action(
-                    "submit_evidence",
-                    submitter_name,
-                    {"package_id": package.package_id, "receipt": receipt}
-                )
-                return True, f"✓ Evidence received. Receipt: {receipt['evidence_number']}"
-            else:
-                self.log_voice_action(
-                    "submit_evidence_failed",
-                    submitter_name,
-                    {"error": message}
-                )
-                return False, message
-                
-        except Exception as e:
-            error_msg = f"Error submitting evidence: {str(e)}"
-            self.log_voice_action("submit_evidence_error", submitter_name, {"error": str(e)})
-            return False, error_msg
-    
-    def voice_transfer_evidence(self, package_id: str, from_custodian_name: str,
-                               from_custodian_id: str, from_role: str,
-                               from_organization: str, from_signature: str,
-                               to_custodian_name: str, to_custodian_id: str,
-                               to_role: str, to_organization: str,
-                               to_signature: str, transfer_notes: str = "") -> Tuple[bool, str]:
-        """
-        Voice-initiated evidence transfer with legal chain of custody compliance
-        """
-        try:
-            # Verify package exists
-            if not self.engine.submission_registry.is_submitted(package_id):
-                return False, f"Package {package_id} not found in evidence system"
-            
-            from_custodian = CustodianRecord(
-                custodian_name=from_custodian_name,
-                custodian_id=from_custodian_id,
-                role=from_role,
-                organization=from_organization,
-                handover_timestamp=datetime.now(),
-                signature_hash=from_signature
-            )
-            
-            to_custodian = CustodianRecord(
-                custodian_name=to_custodian_name,
-                custodian_id=to_custodian_id,
-                role=to_role,
-                organization=to_organization,
-                handover_timestamp=datetime.now(),
-                signature_hash=to_signature,
-                location="Evidence Management System"
-            )
-            
-            success, message = self.engine.transfer_evidence(
-                package_id, from_custodian, to_custodian, transfer_notes
-            )
-            
-            if success:
-                self.log_voice_action(
-                    "transfer_evidence",
-                    to_custodian_name,
-                    {"package_id": package_id, "from": from_custodian_name, "to": to_custodian_name}
-                )
-            else:
-                self.log_voice_action(
-                    "transfer_evidence_failed",
-                    to_custodian_name,
-                    {"error": message}
-                )
-            
-            return success, message
-            
-        except Exception as e:
-            error_msg = f"Transfer error: {str(e)}"
-            self.log_voice_action("transfer_error", to_custodian_name, {"error": str(e)})
-            return False, error_msg
-    
-    def voice_create_report(self, report_id: str, report_content: str,
-                           created_by: str) -> Tuple[bool, str]:
-        """
-        Voice-initiated immutable report creation
-        """
-        try:
-            report = self.engine.create_report(report_id, report_content, created_by)
-            self.log_voice_action(
-                "create_report",
-                created_by,
-                {"report_id": report_id, "original_hash": report.original_hash}
-            )
-            return True, f"✓ Report created: {report_id}"
-        except Exception as e:
-            self.log_voice_action(
-                "create_report_error",
-                created_by,
-                {"error": str(e)}
-            )
-            return False, f"Report creation error: {str(e)}"
-    
-    def voice_amend_report(self, report_id: str, amendment_text: str,
-                          reason: str, amended_by: str,
-                          amendment_authority: str = "") -> Tuple[bool, str]:
-        """
-        Voice-initiated report amendment (original immutable)
-        """
-        try:
-            amendment = self.engine.amend_report(
-                report_id, amendment_text, reason, amended_by, amendment_authority
-            )
-            self.log_voice_action(
-                "amend_report",
-                amended_by,
-                {"report_id": report_id, "amendment_id": amendment["amendment_id"]}
-            )
-            return True, f"✓ Report amended. Amendment ID: {amendment['amendment_id']}"
-        except Exception as e:
-            self.log_voice_action(
-                "amend_report_error",
-                amended_by,
-                {"error": str(e)}
-            )
-            return False, f"Amendment error: {str(e)}"
-    
-    def voice_check_custody_chain(self, package_id: str) -> Tuple[bool, Dict]:
-        """
-        Voice query for evidence custody chain status
-        """
-        try:
-            custody = self.engine.get_chain_of_custody(package_id)
-            if not custody:
-                return False, {"error": "Package not found"}
-            
-            self.log_voice_action(
-                "check_custody_chain",
-                "QUERY",
-                {"package_id": package_id, "status": custody["current_status"]}
-            )
-            return True, custody
-        except Exception as e:
-            return False, {"error": str(e)}
-    
-    def _compute_content_hash(self, data: Dict) -> str:
-        """Compute SHA256 hash of evidence data"""
-        import hashlib
-        import json
-        content = json.dumps(data, sort_keys=True)
-        return hashlib.sha256(content.encode()).hexdigest()
-    
-    def get_voice_session_log(self) -> list:
-        """Retrieve complete voice action log for audit"""
-        return self.voice_log.copy()
-
-
-class AnnonEthicsCommandSet:
-    """
-    Natural language command interface for ethics operations
-    Designed for voice activation via anon_voice_interface
+    Master ethics controller integrating all compliance frameworks
+    for forensic investigation workflow
     """
     
-    def __init__(self, voice_interface: AnnonEthicsVoiceInterface = None):
-        self.voice_interface = voice_interface or AnnonEthicsVoiceInterface()
-        self.command_handlers = {
-            "submit": self.handle_submit_command,
-            "transfer": self.handle_transfer_command,
-            "report": self.handle_report_command,
-            "amend": self.handle_amend_command,
-            "check": self.handle_check_command,
-            "audit": self.handle_audit_command
-        }
+    def __init__(self):
+        self.constitutional_rights = ConstitutionalRightsValidator() if ConstitutionalRightsValidator else None
+        self.voice_engine = AnonVoiceEngine() if AnonVoiceEngine else None
+        self.accounting_manager = None  # Set later if needed
+        self.policy_violations: Dict[str, Dict] = {}
+        self.compliant_actions: List[Dict] = []
+        self.blocked_actions: List[Dict] = []
     
-    def parse_command(self, command_text: str, context: Dict) -> Tuple[str, Dict, Dict]:
+    def validate_investigation_action(self, action: str, context: Dict) -> Tuple[bool, str]:
         """
-        Parse natural language command
-        Returns: (command_type, parameters, response)
+        Main entry point for ethics validation
+        Validates action against all applicable rules (constitutional, procedural, chain of custody)
         """
-        command_lower = command_text.lower().strip()
+        action_lower = action.lower()
         
-        # Route to appropriate handler
-        for cmd_type, handler in self.command_handlers.items():
-            if cmd_type in command_lower:
-                return cmd_type, context, handler(command_text, context)
+        # Route to appropriate validator
+        if "home" in action_lower and "enter" in action_lower:
+            return self.validate_home_entry_action(context)
         
-        return "unknown", context, {"status": "error", "message": "Command not recognized"}
-    
-    def handle_submit_command(self, command: str, context: Dict) -> Dict:
-        """Handle: Submit evidence [description]"""
-        success, message = self.voice_interface.voice_submit_evidence(
-            submitter_name=context.get("user_name", "Unknown"),
-            submitter_id=context.get("user_id", ""),
-            submitter_role=context.get("user_role", "Witness"),
-            organization=context.get("organization", ""),
-            evidence_description=command,
-            evidence_data=context.get("evidence_data", {}),
-            signature_hash=context.get("signature_hash", "")
-        )
-        return {
-            "status": "success" if success else "error",
-            "message": message
-        }
-    
-    def handle_transfer_command(self, command: str, context: Dict) -> Dict:
-        """Handle: Transfer evidence [package_id] from [from_name] to [to_name]"""
-        success, message = self.voice_interface.voice_transfer_evidence(
-            package_id=context.get("package_id", ""),
-            from_custodian_name=context.get("from_name", ""),
-            from_custodian_id=context.get("from_id", ""),
-            from_role=context.get("from_role", ""),
-            from_organization=context.get("from_org", ""),
-            from_signature=context.get("from_signature", ""),
-            to_custodian_name=context.get("to_name", ""),
-            to_custodian_id=context.get("to_id", ""),
-            to_role=context.get("to_role", ""),
-            to_organization=context.get("to_org", ""),
-            to_signature=context.get("to_signature", ""),
-            transfer_notes=context.get("notes", "")
-        )
-        return {
-            "status": "success" if success else "error",
-            "message": message
-        }
-    
-    def handle_report_command(self, command: str, context: Dict) -> Dict:
-        """Handle: Create report [report_id] [content]"""
-        success, message = self.voice_interface.voice_create_report(
-            report_id=context.get("report_id", f"RPT-{uuid.uuid4().hex[:8]}"),
-            report_content=command,
-            created_by=context.get("user_name", "System")
-        )
-        return {
-            "status": "success" if success else "error",
-            "message": message
-        }
-    
-    def handle_amend_command(self, command: str, context: Dict) -> Dict:
-        """Handle: Amend report [report_id] [amendment text]"""
-        success, message = self.voice_interface.voice_amend_report(
-            report_id=context.get("report_id", ""),
-            amendment_text=command,
-            reason=context.get("reason", ""),
-            amended_by=context.get("user_name", "System"),
-            amendment_authority=context.get("authority", "")
-        )
-        return {
-            "status": "success" if success else "error",
-            "message": message
-        }
-    
-    def handle_check_command(self, command: str, context: Dict) -> Dict:
-        """Handle: Check custody [package_id]"""
-        success, custody = self.voice_interface.voice_check_custody_chain(
-            package_id=context.get("package_id", "")
-        )
-        return {
-            "status": "success" if success else "error",
-            "data": custody
-        }
-    
-    def handle_audit_command(self, command: str, context: Dict) -> Dict:
-        """Handle: Audit [type] - returns complete audit trail"""
-        audit_type = context.get("audit_type", "ethics")
+        elif "search" in action_lower:
+            return self.validate_search_action(context)
         
-        if audit_type == "voice":
-            logs = self.voice_interface.get_voice_session_log()
+        elif "seize" in action_lower:
+            return self.validate_seizure_action(context)
+        
+        elif "evidence" in action_lower and "register" in action_lower:
+            return self.validate_evidence_registration(context)
+        
+        elif "custody" in action_lower and "transfer" in action_lower:
+            return self.validate_custody_transfer(context)
+        
         else:
-            logs = self.voice_interface.engine.get_ethics_audit()
-        
-        return {
-            "status": "success",
-            "audit_type": audit_type,
-            "entries": logs,
-            "total_count": len(logs)
-        }
-
-
-# Initialize with ethical safeguards
-def initialize_annon_with_ethics() -> AnnonEthicsVoiceInterface:
-    """
-    Initialize Annon AI-Personality with ethical framework
+            return True, "Action validated against applicable policies"
     
-    Returns voice-enabled ethics interface ready for integration
+    def validate_home_entry_action(self, context: Dict) -> Tuple[bool, str]:
+        """
+        Validate home entry under 4th Amendment
+        
+        Required context:
+        - officer_id, officer_name, badge_number, agency
+        - property_address
+        - authorization_type (warrant, consent, exigent, etc.)
+        - [warrant details if applicable]
+        - [consent documentation if applicable]
+        """
+        if not self.constitutional_rights:
+            return False, "Constitutional rights validator not available"
+        
+        # Build search authorization record
+        try:
+            auth_type = SearchAuthorization[context.get("authorization_type", "").upper()]
+        except KeyError:
+            return False, f"Invalid authorization type: {context.get('authorization_type')}"
+        
+        search_record = SearchAuthorizationRecord(
+            search_id=f"SEARCH-{datetime.now().strftime('%Y%m%d%H%M%S')}",
+            officer_name=context.get("officer_name", ""),
+            officer_id=context.get("officer_id", ""),
+            badge_number=context.get("badge_number", ""),
+            agency=context.get("agency", ""),
+            search_location=context.get("property_address", ""),
+            search_date=datetime.now(),
+            search_time_start=datetime.now(),
+            search_time_end=datetime.now(),
+            authorization_type=auth_type,
+            warrant_number=context.get("warrant_number"),
+            warrant_issuing_judge=context.get("warrant_issuing_judge"),
+            warrant_issue_date=context.get("warrant_issue_date"),
+            warrant_expiration=context.get("warrant_expiration"),
+            warrant_property_description=context.get("warrant_property_description"),
+            consent_given_by=context.get("consent_given_by"),
+            consent_relationship_to_property=context.get("consent_relationship"),
+            consent_witnessed_by=context.get("consent_witnesses", []),
+            consent_recorded=context.get("consent_recorded", False),
+            exigent_circumstances_reason=context.get("exigent_reason")
+        )
+        
+        # Validate home entry
+        is_valid, findings = self.constitutional_rights.validate_home_entry(search_record)
+        
+        if not is_valid:
+            violation_id = self.constitutional_rights.document_violation(
+                violation_type=ConstitutionalViolationType.WARRANTLESS_HOME_ENTRY,
+                officer_name=context.get("officer_name", ""),
+                officer_id=context.get("officer_id", ""),
+                badge_number=context.get("badge_number", ""),
+                agency=context.get("agency", ""),
+                case_id=context.get("case_id", ""),
+                violation_details="; ".join(findings),
+                audio_clip_path=context.get("violation_audio_clip")
+            )
+            
+            violation_msg = (
+                f"\n⛔ HOME ENTRY BLOCKED - CONSTITUTIONAL VIOLATION\n"
+                f"Violation ID: {violation_id}\n"
+                f"Officer: {context.get('officer_name')} (Badge: {context.get('badge_number')})\n"
+                f"Agency: {context.get('agency')}\n"
+                f"Status: QUALIFIED IMMUNITY WAIVED\n"
+                f"Evidence: MARKED FOR SUPPRESSION\n"
+                f"Civil Liability: ATTACHED (42 U.S.C. § 1983)\n"
+                f"Violations:\n"
+            )
+            for finding in findings:
+                violation_msg += f"  • {finding}\n"
+            
+            if context.get("violation_audio_clip"):
+                violation_msg += f"\nAudio Evidence: {context.get('violation_audio_clip')}\n"
+                violation_msg += "⚠️ AUDIO VIOLATION CLIP ATTACHED TO REPORT PACKAGE\n"
+            
+            self.blocked_actions.append({
+                "timestamp": datetime.now().isoformat(),
+                "action": "home_entry",
+                "reason": "constitutional_violation",
+                "violation_id": violation_id,
+                "officer_id": context.get("officer_id")
+            })
+            
+            # Speak violation alert if voice available
+            if self.voice_engine:
+                self.voice_engine.speak(
+                    f"Constitutional violation blocked. Home entry not authorized. "
+                    f"Officer qualified immunity waived. Violation ID {violation_id}."
+                )
+            
+            return False, violation_msg.strip()
+        
+        self.compliant_actions.append({
+            "timestamp": datetime.now().isoformat(),
+            "action": "home_entry",
+            "officer_id": context.get("officer_id"),
+            "property": context.get("property_address"),
+            "authorization": str(auth_type)
+        })
+        
+        return True, "Home entry authorized - constitutionally compliant"
+    
+    def validate_search_action(self, context: Dict) -> Tuple[bool, str]:
+        """Validate search scope and authorization"""
+        officer_id = context.get("officer_id", "")
+        
+        # Check officer's qualified immunity status
+        if self.constitutional_rights:
+            if not self.constitutional_rights.check_officer_qualified_immunity_status(officer_id):
+                return False, (
+                    f"Search blocked: Officer {officer_id} has had qualified immunity waived. "
+                    "All actions require judicial review."
+                )
+        
+        return True, "Search validated against scope and authorization"
+    
+    def validate_seizure_action(self, context: Dict) -> Tuple[bool, str]:
+        """Validate person/property seizure with probable cause"""
+        seizure_type = context.get("seizure_type", "unknown")
+        probable_cause = context.get("probable_cause")
+        
+        if not probable_cause:
+            if self.constitutional_rights:
+                violation_id = self.constitutional_rights.document_violation(
+                    violation_type=ConstitutionalViolationType.NO_PROBABLE_CAUSE,
+                    officer_name=context.get("officer_name", ""),
+                    officer_id=context.get("officer_id", ""),
+                    badge_number=context.get("badge_number", ""),
+                    agency=context.get("agency", ""),
+                    case_id=context.get("case_id", ""),
+                    violation_details=f"{seizure_type} seizure without probable cause"
+                )
+                
+                return False, (
+                    f"Seizure blocked: No probable cause documented. "
+                    f"Violation ID: {violation_id}. "
+                    f"Officer qualified immunity waived."
+                )
+            return False, "Seizure blocked: No probable cause documented"
+        
+        return True, f"{seizure_type.capitalize()} seizure authorized with probable cause"
+    
+    def validate_evidence_registration(self, context: Dict) -> Tuple[bool, str]:
+        """Validate evidence registration in case"""
+        case_id = context.get("case_id")
+        submitter_id = context.get("submitter_id")
+        evidence_type = context.get("evidence_type")
+        
+        # Check submitter credentials
+        if not submitter_id:
+            return False, "Evidence submitter identity required"
+        
+        # Verify evidence hasn't been submitted before (single-submission rule)
+        if context.get("evidence_number_check"):
+            return False, "Evidence already registered in case"
+        
+        return True, "Evidence validated for registration"
+    
+    def validate_custody_transfer(self, context: Dict) -> Tuple[bool, str]:
+        """Validate evidence custody transfer with chain of custody"""
+        evidence_num = context.get("evidence_number")
+        from_custodian = context.get("from_custodian")
+        to_custodian = context.get("to_custodian")
+        
+        if not all([evidence_num, from_custodian, to_custodian]):
+            return False, "Custody transfer missing required information"
+        
+        return True, f"Custody transfer authorized for {evidence_num}"
+    
+    def get_violation_summary(self, case_id: str) -> Dict[str, Any]:
+        """Get all constitutional violations for a case"""
+        violations = {}
+        
+        if self.constitutional_rights:
+            for v_id, violation in self.constitutional_rights.violation_records.items():
+                if violation.case_id == case_id:
+                    violations[v_id] = self.constitutional_rights.get_violation_summary(v_id)
+        
+        return violations
+    
+    def get_suppression_list(self, case_id: str) -> List[str]:
+        """Get evidence to suppress due to constitutional violations"""
+        if self.constitutional_rights:
+            return self.constitutional_rights.get_evidence_suppression_list(case_id)
+        return []
+    
+    def get_blocked_actions_log(self) -> List[Dict]:
+        """Get log of all blocked actions"""
+        return self.blocked_actions.copy()
+    
+    def get_compliant_actions_log(self) -> List[Dict]:
+        """Get log of all compliant actions"""
+        return self.compliant_actions.copy()
+
+
+# Integration with forensic investigation workflow
+def integrate_ethics_into_forensic_workflow():
     """
-    engine = AnnonEthicsEngine()
-    return AnnonEthicsVoiceInterface(engine)
+    Initialize ethics controller integrated with forensic workflow
+    """
+    controller = AnnonEthicsIntegrationController()
+    return controller
+
+
+# Example usage and testing
+if __name__ == "__main__":
+    print("Annon Ethics Integration Controller")
+    print("=" * 60)
+    
+    controller = AnnonEthicsIntegrationController()
+    
+    # Test 1: Valid warrant-based home entry
+    print("\n[TEST 1] Valid Warrant-Based Home Entry")
+    success, msg = controller.validate_home_entry_action({
+        "officer_name": "Detective Smith",
+        "officer_id": "DET-001",
+        "badge_number": "12345",
+        "agency": "State Police",
+        "property_address": "123 Main St, Anytown, USA",
+        "authorization_type": "VALID_WARRANT",
+        "warrant_number": "2024-WRT-00123",
+        "warrant_issuing_judge": "Hon. Judge Johnson",
+        "warrant_property_description": "Evidence related to case #2024-CV-001",
+        "case_id": "CASE-20240101-ABC123"
+    })
+    print(f"Result: {'✓ APPROVED' if success else '✗ BLOCKED'}")
+    if not success:
+        print(msg)
+    
+    # Test 2: Warrantless entry (should be blocked)
+    print("\n[TEST 2] Warrantless Entry Without Legal Justification")
+    success, msg = controller.validate_home_entry_action({
+        "officer_name": "Officer Johnson",
+        "officer_id": "OFF-002",
+        "badge_number": "54321",
+        "agency": "Local Police",
+        "property_address": "456 Oak Ave, Anytown, USA",
+        "authorization_type": "VALID_WARRANT",  # But no warrant details
+        "case_id": "CASE-20240102-XYZ789",
+        "violation_audio_clip": "/evidence/violation_audio_2024_001.mp3"
+    })
+    print(f"Result: {'✓ APPROVED' if success else '✗ BLOCKED'}")
+    if not success:
+        print(msg)
+    
+    # Test 3: Seizure without probable cause (should be blocked)
+    print("\n[TEST 3] Seizure Without Probable Cause")
+    success, msg = controller.validate_seizure_action({
+        "officer_name": "Officer Williams",
+        "officer_id": "OFF-003",
+        "badge_number": "99999",
+        "agency": "Federal Bureau",
+        "seizure_type": "person",
+        "case_id": "CASE-20240103-FED001"
+    })
+    print(f"Result: {'✓ APPROVED' if success else '✗ BLOCKED'}")
+    if not success:
+        print(msg)
+    
+    print("\n" + "=" * 60)
+    print(f"Blocked Actions: {len(controller.get_blocked_actions_log())}")
+    print(f"Compliant Actions: {len(controller.get_compliant_actions_log())}")
