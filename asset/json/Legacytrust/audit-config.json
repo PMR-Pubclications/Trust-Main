@@ -1,0 +1,142 @@
+{
+  "description": "Audit logging and compliance configuration for the AI trading protocol. Every trade lifecycle transition and risk decision must emit an event conforming to this spec.",
+  "protocolRef": "ai-trading-protocol.json",
+  "version": "1.0.0",
+  "eventTypes": [
+    {
+      "name": "trade_submitted",
+      "description": "Emitted when an agent creates a new trade intent.",
+      "fields": [
+        "tradeId",
+        "agentId",
+        "symbol",
+        "side",
+        "quantityOrNotional",
+        "orderType",
+        "timestamp"
+      ]
+    },
+    {
+      "name": "trade_validated",
+      "description": "Emitted after risk policy validation completes, pass or fail.",
+      "fields": [
+        "tradeId",
+        "ruleResults",
+        "passed",
+        "timestamp"
+      ]
+    },
+    {
+      "name": "trade_pending_approval",
+      "description": "Emitted when a trade is routed for human approval.",
+      "fields": [
+        "tradeId",
+        "requiredApprovers",
+        "reason",
+        "timestamp"
+      ]
+    },
+    {
+      "name": "trade_approved",
+      "description": "Emitted when a human approver signs off on a trade.",
+      "fields": [
+        "tradeId",
+        "approverId",
+        "rationale",
+        "timestamp"
+      ]
+    },
+    {
+      "name": "trade_rejected",
+      "description": "Emitted when a trade is rejected, whether by risk policy or a human approver.",
+      "fields": [
+        "tradeId",
+        "code",
+        "reason",
+        "rejectedBy",
+        "timestamp"
+      ]
+    },
+    {
+      "name": "trade_executed",
+      "description": "Emitted when an order is submitted to the venue and receives an execution response.",
+      "fields": [
+        "tradeId",
+        "orderId",
+        "status",
+        "filledQuantity",
+        "averageFillPrice",
+        "venue",
+        "timestamp"
+      ]
+    },
+    {
+      "name": "trade_settled",
+      "description": "Emitted when a trade reaches its terminal settled state.",
+      "fields": [
+        "tradeId",
+        "orderId",
+        "totalFees",
+        "timestamp"
+      ]
+    },
+    {
+      "name": "trade_error",
+      "description": "Emitted for any unexpected failure during trade processing (connectivity, auth, venue outage, etc).",
+      "fields": [
+        "tradeId",
+        "code",
+        "reason",
+        "retryable",
+        "timestamp"
+      ]
+    }
+  ],
+  "logDestinations": [
+    {
+      "type": "file",
+      "path": "./logs/trading-audit.log",
+      "format": "jsonl",
+      "enabled": true
+    },
+    {
+      "type": "stdout",
+      "format": "jsonl",
+      "enabled": true
+    }
+  ],
+  "retentionPolicy": {
+    "description": "Audit records must be retained long enough to satisfy applicable financial recordkeeping requirements.",
+    "minimumRetentionYears": 7,
+    "immutable": true,
+    "appendOnly": true,
+    "archival": {
+      "enabled": true,
+      "afterDays": 90,
+      "destination": "cold-storage"
+    }
+  },
+  "complianceReporting": {
+    "description": "Periodic reporting requirements derived from accumulated audit events.",
+    "dailySummaryReport": true,
+    "monthlyComplianceReport": true,
+    "reportFields": [
+      "totalTradesSubmitted",
+      "totalTradesExecuted",
+      "totalTradesRejected",
+      "riskLimitBreaches",
+      "humanApprovalsRequired",
+      "humanApprovalsGranted",
+      "averageApprovalLatencySeconds"
+    ],
+    "alerting": {
+      "onRiskLimitBreach": true,
+      "onRepeatedRejections": true,
+      "onAuthenticationFailure": true,
+      "channels": [
+        "email",
+        "webhook"
+      ]
+    }
+  }
+}
