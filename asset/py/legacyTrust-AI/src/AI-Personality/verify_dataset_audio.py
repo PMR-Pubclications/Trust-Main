@@ -4,16 +4,13 @@ import subprocess
 from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-# ==========================================
-# VERIFICATION TARGET SPECIFICATIONS
-# ==========================================
-WAV_DIR = Path("custom_voice_dataset/wavs")
+import config
 
-TARGET_I = -20.0        # Target Integrated Loudness (LUFS)
-I_TOLERANCE = 1.0       # Acceptable range: -21.0 to -19.0 LUFS
-MAX_TRUE_PEAK = -1.0    # Maximum allowed True Peak (dBFS)
-MAX_WORKERS = 8         # Parallel analysis threads
-# ==========================================
+WAV_DIR = config.WAV_DIR
+TARGET_I = config.TARGET_I
+I_TOLERANCE = config.I_TOLERANCE
+MAX_TRUE_PEAK = config.MAX_TRUE_PEAK
+MAX_WORKERS = config.VERIFY_MAX_WORKERS
 
 
 def analyze_audio_file(file_path: Path) -> dict:
@@ -25,7 +22,7 @@ def analyze_audio_file(file_path: Path) -> dict:
         "ffmpeg",
         "-hide_banner",
         "-i", str(file_path),
-        "-af", "loudnorm=print_format=json",
+        "-af", f"loudnorm=I={TARGET_I}:TP={config.TARGET_TP}:LRA={config.TARGET_LRA}:print_format=json",
         "-f", "null",
         "-"
     ]

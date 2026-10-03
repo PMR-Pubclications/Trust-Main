@@ -1,16 +1,10 @@
-import io
 import os
 import time
 import logging
 import numpy as np
-import sounddevice as sd
-import onnxruntime as ort
 from typing import Optional
-from piper import PiperVoice
 
-# Imports from previous modules
-from anon_cuda_whisper import AnonCudaWhisperListener
-from anon_system_partner import AnonSystemPartner
+import config
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger("AnonPiperVoice")
@@ -24,7 +18,7 @@ class AnonPiperEngine:
 
     def __init__(
         self,
-        model_path: str = "en_US-ryan-medium.onnx",
+        model_path: str = config.PIPER_MODEL_PATH,
         config_path: Optional[str] = None,
         use_cuda: bool = True
     ):
@@ -40,10 +34,8 @@ class AnonPiperEngine:
         logger.info(f"Loading local Piper neural voice model ('{model_path}')...")
         t_start = time.perf_counter()
 
-        # Configure ONNX Runtime execution providers
-        providers = ["CUDAExecutionProvider", "CPUExecutionProvider"] if use_cuda else ["CPUExecutionProvider"]
-        
         # Initialize Piper voice model directly in memory
+        from piper import PiperVoice
         self.voice = PiperVoice.load(
             model_path,
             config_path=config_path,
@@ -57,10 +49,18 @@ class AnonPiperEngine:
         # Warm up CUDA engine with short dummy text
         self._warmup_gpu()
 
+    def _synthesize_pcm_chunks(self, text: str):
+        """Yields 16-bit PCM byte chunks across piper-tts API generations."""
+        if hasattr(self.voice, "synthesize_stream_raw"):  # piper-tts 1.2.x
+            yield from self.voice.synthesize_stream_raw(text)
+        else:  # piper-tts >= 1.3 yields AudioChunk objects
+            for chunk in self.voice.synthesize(text):
+                yield chunk.audio_int16_bytes
+
     def _warmup_gpu(self):
         """Pre-allocates CUDA tensors and warm-compiles ONNX execution graph."""
         start = time.perf_counter()
-        _ = list(self.voice.synthesize_stream_raw("Ready."))
+        _ = list(self._synthesize_pcm_chunks("Ready."))
         warmup_ms = (time.perf_counter() - start) * 1000
         logger.info(f"Piper CUDA engine warm-up completed in {warmup_ms:.1f} ms.")
 
@@ -75,7 +75,7 @@ class AnonPiperEngine:
         try:
             # Synthesize raw PCM audio in-memory (16-bit mono PCM)
             audio_bytes = bytearray()
-            for chunk in self.voice.synthesize_stream_raw(text):
+            for chunk in self._synthesize_pcm_chunks(text):
                 audio_bytes.extend(chunk)
 
             synth_latency_ms = (time.perf_counter() - t_start) * 1000
@@ -86,6 +86,7 @@ class AnonPiperEngine:
             logger.info(f"TTS Synthesis Latency: {synth_latency_ms:.1f} ms ({len(audio_array)} samples)")
 
             # Stream directly to audio hardware without writing temporary disk files
+            import sounddevice as sd
             sd.play(audio_array, samplerate=self.sample_rate)
             sd.wait()  # Wait until playback completes
 
@@ -102,8 +103,10 @@ class FullyOfflineLocalVoiceBridge:
     def __init__(
         self,
         whisper_model: str = "distil-small.en",
-        piper_model: str = "en_US-ryan-medium.onnx"
+        piper_model: str = config.PIPER_MODEL_PATH
     ):
+        from anon_cuda_whisper import AnonCudaWhisperListener
+        from anon_system_partner import AnonSystemPartner
         self.partner = AnonSystemPartner()
         self.stt = AnonCudaWhisperListener(model_size=whisper_model, device="cuda")
         self.tts = AnonPiperEngine(model_path=piper_model, use_cuda=True)
@@ -145,7 +148,7 @@ class FullyOfflineLocalVoiceBridge:
 
 if __name__ == "__main__":
     # Ensure model exists before running harness
-    model_file = "en_US-ryan-medium.onnx"
+    model_file = config.PIPER_MODEL_PATH
     if os.path.exists(model_file):
         bridge = FullyOfflineLocalVoiceBridge(whisper_model="distil-small.en", piper_model=model_file)
         bridge.start_loop()
