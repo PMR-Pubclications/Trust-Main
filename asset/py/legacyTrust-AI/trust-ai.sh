@@ -20,4 +20,11 @@ source piper_env/bin/activate
 pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
 pip install piper-train
 
+mkdir -p base_model
+cd base_model
+
+# Download a medium quality English base checkpoint (e.g., Lessac)
+wget https://github.com/rhasspy/piper/releases/download/v0.1.0/model-en_US-lessac-medium.ckpt
+wget https://github.com/rhasspy/piper/releases/download/v0.1.0/model-en_US-lessac-medium.ckpt.json
+
 
