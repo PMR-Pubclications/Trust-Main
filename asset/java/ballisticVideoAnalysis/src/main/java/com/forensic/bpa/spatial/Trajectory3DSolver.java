@@ -41,6 +41,10 @@ public class Trajectory3DSolver {
      * Projects shooter trajectory line backward from impact point along mean vector.
      */
     public static Ray3D extrapolateShooterVector(Point3D areaOfOrigin, List<Ray3D> rays) {
+        if (rays == null || rays.isEmpty()) {
+            return new Ray3D(areaOfOrigin, new Point3D(0, 0, 0));
+        }
+
         double avgDx = 0, avgDy = 0, avgDz = 0;
         for (Ray3D r : rays) {
             avgDx += r.direction().x();
