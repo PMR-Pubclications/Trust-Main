@@ -57,4 +57,5 @@ python3 -m piper_train.make_config \
     --output-config /path/to/custom_voice.onnx.json
 
 
+pip install faster-whisper pydub
 
