@@ -419,3 +419,27 @@ app.get('/api/telemetry-status', (req, res) => {
     }
 });
 
+
+
+const { exec } = require('child_process');
+const fs = require('fs');
+
+const FLAG_FILE = './.initialized';
+
+function checkFirstLaunch() {
+    if (!fs.existsSync(FLAG_FILE)) {
+        console.log('First launch: Running image setup script...');
+        
+        exec('python3 remove_bg.py', (error, stdout, stderr) => {
+            if (error) {
+                console.error(`Execution error: ${error}`);
+                return;
+            }
+            console.log(`Setup complete: ${stdout}`);
+            fs.writeFileSync(FLAG_FILE, 'true');
+        });
+    }
+}
+
+// Run during app startup
+checkFirstLaunch();
