@@ -61,4 +61,7 @@ pip install faster-whisper pydub
 
 pip install ffmpeg-python
 
+g++ -O3 -shared -std=c++17 -fPIC $(python3 -m pybind11 --includes) \
+    engine_wrapper.cpp -o audio_video_engine$(python3-config --extension-suffix)
+
 
