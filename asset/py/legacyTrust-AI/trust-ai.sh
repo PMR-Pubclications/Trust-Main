@@ -67,4 +67,6 @@ g++ -O3 -shared -std=c++17 -fPIC $(python3 -m pybind11 --includes) \
 
 docker compose up -d --build
 
+pip install -e .
+
 
