@@ -1,0 +1,117 @@
+trust_id: "trst_legacy_alpha_01"
+trust_name: "The Legacy Trust For The Future"
+version: "1.0.0"
+currency: "USD"
+
+# -----------------------------------------------------------------------------
+# SPENDING THRESHOLDS & APPROVAL TIER RULES
+# -----------------------------------------------------------------------------
+spending_thresholds:
+  - tier: 1
+    name: "Automated Operational Disbursements"
+    min_amount: 0.00
+    max_amount: 1000.00
+    approval_type: "AUTO_APPROVED"
+    required_signatures: 0
+    allowed_roles: []
+    timelock_hours: 0
+
+  - tier: 2
+    name: "Standard Discretionary & Utility Outlays"
+    min_amount: 1000.01
+    max_amount: 10000.00
+    approval_type: "SINGLE_SIGNATURE"
+    required_signatures: 1
+    allowed_roles:
+      - "MANAGING_TRUSTEE"
+      - "INDEPENDENT_TRUSTEE"
+    timelock_hours: 0
+
+  - tier: 3
+    name: "Major Capital Expenditures & Payouts"
+    min_amount: 10000.01
+    max_amount: 100000.00
+    approval_type: "MULTI_SIG"
+    required_signatures: 2
+    allowed_roles:
+      - "MANAGING_TRUSTEE"
+      - "INDEPENDENT_TRUSTEE"
+      - "COMPLIANCE_OFFICER"
+    timelock_hours: 24
+
+  - tier: 4
+    name: "Structural Portfolio Liquidation or Trust Amendment"
+    min_amount: 100000.01
+    max_amount: null # Unlimited
+    approval_type: "UNANIMOUS"
+    required_signatures: 3
+    allowed_roles:
+      - "MANAGING_TRUSTEE"
+      - "INDEPENDENT_TRUSTEE"
+      - "COMPLIANCE_OFFICER"
+    timelock_hours: 72
+
+# -----------------------------------------------------------------------------
+# GOVERNANCE & MULTI-SIG TRUSTEE CONFIGURATION
+# -----------------------------------------------------------------------------
+governance:
+  multisig_quorum: 2
+  timelock_override_allowed: false
+  trustees:
+    - id: "tru_01"
+      name: "Managing Trustee"
+      role: "MANAGING_TRUSTEE"
+      pubkey_or_address: "0x71C7656EC7ab88b098defB751B7401B5f6d8976F"
+      email: "managing@legacytrust.org"
+
+    - id: "tru_02"
+      name: "Fiduciary Council Trustee"
+      role: "INDEPENDENT_TRUSTEE"
+      pubkey_or_address: "0x2546BcD33B7f16463F15302306386522c07019fE"
+      email: "fiduciary@legacytrust.org"
+
+    - id: "tru_03"
+      name: "Compliance Officer"
+      role: "COMPLIANCE_OFFICER"
+      pubkey_or_address: "0xF39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+      email: "compliance@legacytrust.org"
+
+# -----------------------------------------------------------------------------
+# BENEFICIARY PAYOUT SCHEDULES & CONDITIONS
+# -----------------------------------------------------------------------------
+beneficiary_payouts:
+  - schedule_id: "sched_monthly_stipend_01"
+    beneficiary_id: "ben_youth_foster_01"
+    beneficiary_name: "Youth Transition Allowance"
+    payout_type: "STIPEND"
+    calculation_method: "FIXED_AMOUNT"
+    amount_value: 1200.00
+    frequency: "MONTHLY"
+    start_date: "2026-10-01"
+    end_date: "2028-10-01"
+    destination_account_id: "acc_bank_beneficiary_01"
+    conditions:
+      - type: "AGE_GTE"
+        operator: ">="
+        value: 18
+      - type: "PORTFOLIO_NAV_GTE"
+        operator: ">="
+        value: 250000.00 # Ensures trust retains minimum capital buffer
+
+  - schedule_id: "sched_tuition_reimbursement"
+    beneficiary_id: "ben_education_grant"
+    beneficiary_name: "Vocational & Higher Ed Grant"
+    payout_type: "EDUCATION"
+    calculation_method: "FIXED_AMOUNT"
+    amount_value: 5000.00
+    frequency: "QUARTERLY"
+    start_date: "2026-10-01"
+    end_date: null
+    destination_account_id: "acc_bank_registrar_direct"
+    conditions:
+      - type: "MIN_GPA"
+        operator: ">="
+        value: 3.0
+      - type: "PROOFS_ATTACHED"
+        operator: "=="
+        value: true # Requires verified transcript or tuition invoice in OCR pipeline
