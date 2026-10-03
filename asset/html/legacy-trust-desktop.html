@@ -216,23 +216,27 @@
       color: var(--text-muted);
       margin-right: 0.5rem;
     }
+  .skip-link { position: absolute; left: 8px; top: -60px; background: #f8fafc; color: #020617; padding: 10px 16px; border-radius: 4px; z-index: 100; }
+    .skip-link:focus { top: 8px; }
+    :focus-visible { outline: 3px solid #fbbf24; outline-offset: 2px; }
   </style>
 </head>
 <body>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
 
   <header>
     <div class="brand">
       <h1>Trust Telemetry Console</h1>
     </div>
     <div class="system-status">
-      <span class="status-dot"></span>
-      <span>DAEMON ONLINE</span>
+      <span class="status-dot" aria-hidden="true"></span>
+      <span role="status">DAEMON ONLINE</span>
     </div>
   </header>
 
-  <main>
+  <main id="main-content" tabindex="-1">
     <!-- Metric Cards Overview -->
-    <div class="metrics-grid">
+    <div class="metrics-grid" role="region" aria-label="Metrics overview">
       <div class="card">
         <span class="card-title">Active Workers</span>
         <span class="card-value" id="val-workers">--</span>
@@ -262,19 +266,19 @@
     <div class="section-container">
       <div class="section-header">
         <h2>Worker Telemetry Overview</h2>
-        <span style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-muted);" id="last-updated">Updating...</span>
+        <span style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-muted);" id="last-updated" role="status">Updating...</span>
       </div>
       
       <div class="table-wrapper">
-        <table>
+        <table aria-label="Worker telemetry">
           <thead>
             <tr>
-              <th>Worker ID</th>
-              <th>IP Address</th>
-              <th>Current Hashrate</th>
-              <th>Shares (A/R)</th>
-              <th>Status</th>
-              <th>Last Ping</th>
+              <th scope="col">Worker ID</th>
+              <th scope="col">IP Address</th>
+              <th scope="col">Current Hashrate</th>
+              <th scope="col">Shares (A/R)</th>
+              <th scope="col">Status</th>
+              <th scope="col">Last Ping</th>
             </tr>
           </thead>
           <tbody id="worker-table-body">
@@ -291,7 +295,7 @@
       <div class="section-header">
         <h2>Mining Daemon Console Log</h2>
       </div>
-      <div class="terminal-box" id="terminal-log">
+      <div class="terminal-box" id="terminal-log" role="log" aria-live="polite" aria-label="Mining daemon console log" tabindex="0">
         <div class="terminal-line"><span class="timestamp">[00:00:00]</span> Initializing AdminCounsel Telemetry Dashboard...</div>
       </div>
     </div>

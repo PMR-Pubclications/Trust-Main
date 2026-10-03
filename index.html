@@ -19,7 +19,6 @@
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('/sw.js')
-        .then(reg => console.log('Service Worker registered!', reg))
         .catch(err => console.error('Service Worker registration failed: ', err));
     });
   }
@@ -40,7 +39,6 @@
     // 2. Encrypt string
     const secretMessage = "Confidential data payload";
     const { cipherText, iv } = await encryptData(secretMessage, key);
-    console.log("Encrypted Bytes:", new Uint8Array(cipherText));
 
     // 3. Export key to JWK and re-import
     const exportedJwk = await exportCryptoKey(key, 'jwk');
@@ -48,7 +46,7 @@
 
     // 4. Decrypt string using imported key
     const originalText = await decryptData(cipherText, importedKey, iv);
-    console.log("Decrypted Text:", originalText);
+    void originalText;
   }
 
   runDemo();
@@ -59,6 +57,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Automated Report Generator | Forensic Intelligence</title>
     <style>
+        .skip-link { position: absolute; left: 8px; top: -60px; z-index: 10000; background: #f8fafc; color: #020617; padding: 10px 16px; border-radius: 4px; font-weight: bold; text-decoration: none; }
+        .skip-link:focus { top: 8px; }
+        a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, [tabindex]:focus-visible { outline: 3px solid #fbbf24; outline-offset: 2px; }
+        .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+        .link-button { background: none; border: none; color: #38bdf8; font-size: 11px; cursor: pointer; text-decoration: underline; }
+        @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
         :root {
             --bg-deep: #020617;
             --panel-main: #0f172a;
@@ -66,10 +70,10 @@
             --border-line: #475569;
             --text-primary: #f8fafc;
             --text-secondary: #94a3b8;
-            --accent-green: #16a34a;
-            --accent-hover: #22c55e;
+            --accent-green: #15803d;
+            --accent-hover: #166534;
             --accent-red: #dc2626;
-            --accent-info: #0284c7;
+            --accent-info: #0369a1;
         }
 
         body {
@@ -225,7 +229,7 @@
             flex-direction: column;
         }
 
-        .card h3 {
+        .card h3, .card h2.card-title {
             margin-top: 0;
             font-size: 16px;
             border-bottom: 2px solid var(--border-line);
@@ -381,9 +385,10 @@
 
 </head>
 <body>
+<a class="skip-link" href="#main-content">Skip to main content</a>
 
-<div class="workspace-card telemetry-card">
-    <h3>System Resource Governance</h3>
+<aside class="workspace-card telemetry-card" aria-label="System resource governance telemetry">
+    <h2>System Resource Governance</h2>
     <div class="telemetry-row">
         <span>RAM Usage:</span>
         <span id="ramUsageVal" class="metric-value">--%</span>
@@ -396,7 +401,7 @@
         <span>Watchdog State:</span>
         <span id="watchdogStateVal" class="metric-value">Armed (85% Limit)</span>
     </div>
-</div>
+</aside>
 
 <style>
 .telemetry-card {
@@ -420,19 +425,19 @@
 
 
     <!-- Layer 1 Flash Screen Background Overlay -->
-    <div id="flash-screen-overlay"></div>
+    <div id="flash-screen-overlay" aria-hidden="true"></div>
 
     <!-- Pocket System Lockout Overlay -->
-    <div id="pocket-lockout-screen">
-        <div class="swipe-unlock-container" id="swipe-container">
+    <div id="pocket-lockout-screen" role="region" aria-label="Pocket lockout">
+        <div class="swipe-unlock-container" id="swipe-container" aria-hidden="true">
             <div class="swipe-unlock-track">Swipe RIGHT to stop REC ➔</div>
             <div class="swipe-unlock-handle" id="swipe-handle">➔</div>
         </div>
     </div>
 
-    <div class="reports-container">
+    <main class="reports-container" id="main-content" tabindex="-1">
         <!-- Header -->
-        <div class="reports-header">
+        <header class="reports-header">
             <div>
                 <h1>AUTOMATED FORENSIC REPORT GENERATOR</h1>
                 <div class="reports-sub">Trust Governance Framework • Vancouver, Washington</div>
@@ -440,14 +445,14 @@
             <div>
                 <a href="index.html" class="btn btn-secondary" style="width: auto; padding: 8px 18px; margin: 0;">⬅ Return to Control Center</a>
             </div>
-        </div>
+        </header>
 
         <!-- Body Layout -->
         <div class="reports-body">
             
             <!-- Sidebar: Report Generator Control Panel -->
-            <div class="card">
-                <h3>Report Parameters</h3>
+            <section class="card" aria-labelledby="report-params-heading">
+                <h2 id="report-params-heading" class="card-title">Report Parameters</h2>
                 <p style="font-size: 13px; color: var(--text-secondary);">Select report type and target date to pull and compile intelligence packages.</p>
                 
                 <div class="form-group" style="margin-top: 10px;">
@@ -465,17 +470,17 @@
                     <input type="date" id="target-date">
                 </div>
 
-                <button class="btn btn-secondary" onclick="reportsApp.fetchAndCompileReport()">📊 Submit & Compile Report</button>
-                <button class="btn" style="background-color: #d97706; margin-top: 10px;" onclick="reportsApp.exportReportJSON()">💾 Export Report File (JSON)</button>
+                <button class="btn btn-secondary" id="btn-compile-report" type="button">📊 Submit & Compile Report</button>
+                <button class="btn" id="btn-export-report" type="button" style="background-color: #b45309; margin-top: 10px;">💾 Export Report File (JSON)</button>
             
                 <!-- Active Station Cases Frame -->
                 <div style="border-top: 2px solid var(--border-line); margin-top: 20px; padding-top: 15px;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                         <h3 style="font-size: 14px; margin: 0; border: none; padding: 0;">🚨 Station API Cases</h3>
-                        <button onclick="stationCasesApp.fetchStationCases()" style="background: none; border: none; color: #38bdf8; font-size: 11px; cursor: pointer; text-decoration: underline;">Refresh</button>
+                        <button id="btn-refresh-cases" type="button" class="link-button" aria-label="Refresh station API cases">Refresh</button>
                     </div>
                     <p style="font-size: 11px; color: var(--text-secondary); margin-bottom: 10px;">Real-time CAD/RMS active case dispatch feed.</p>
-                    <div id="station-cases-container" style="max-height: 180px; overflow-y: auto; padding-right: 2px;">
+                    <div id="station-cases-container" role="log" aria-live="polite" aria-label="Station API cases" tabindex="0" style="max-height: 180px; overflow-y: auto; padding-right: 2px;">
                         <div class="station-case-item" style="color: var(--text-secondary);">Connecting to station API gateway...</div>
                     </div>
                 </div>
@@ -483,13 +488,13 @@
                 <!-- Magazine Feeder Node -->
                 <div style="border-top: 2px solid var(--border-line); margin-top: 15px; padding-top: 15px;">
                     <h3 style="font-size: 14px;">📚 Latest Publication Feed</h3>
-                    <div id="magazine-node-container" style="background: var(--bg-deep); padding: 10px; border-radius: 6px; border: 1px solid var(--border-line);">
+                    <div id="magazine-node-container" aria-live="polite" style="background: var(--bg-deep); padding: 10px; border-radius: 6px; border: 1px solid var(--border-line);">
                         <div style="font-size: 12px; color: var(--text-primary);" id="mag-title-display">Loading latest issue...</div>
                         <div style="font-size: 11px; color: #38bdf8; margin-top: 3px;" id="mag-issue-display"></div>
-                        <a id="mag-buy-link" href="#" target="_blank" class="btn" style="margin-top: 8px; font-size: 12px; padding: 6px; display: none; background-color: var(--accent-info);">📖 Purchase Issue on MagCloud</a>
+                        <a id="mag-buy-link" href="#" target="_blank" rel="noopener noreferrer" class="btn" style="margin-top: 8px; font-size: 12px; padding: 6px; display: none; background-color: var(--accent-info);">📖 Purchase Issue on MagCloud<span class="sr-only"> (opens in a new tab)</span></a>
                     </div>
                 </div>
-            </div>
+            </section>
 
             <!-- Main Panel: Live Formatted Report Output -->
             <div style="display: flex; flex-direction: column; gap: 20px;">
@@ -498,7 +503,7 @@
                 <div class="card" style="border-color: var(--accent-green); background-color: rgba(6, 78, 59, 0.3); padding: 15px;">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
                         <h3 style="margin: 0; color: #34d399; border: none; padding: 0; font-size: 15px;">⚖️ Trust Judicial Report Generator</h3>
-                        <span id="recording-status-badge" style="font-size: 11px; background-color: #475569; color: #f8fafc; padding: 3px 8px; border-radius: 4px; font-weight: bold;">CAMERA STANDBY</span>
+                        <span id="recording-status-badge" role="status" style="font-size: 11px; background-color: #475569; color: #f8fafc; padding: 3px 8px; border-radius: 4px; font-weight: bold;">CAMERA STANDBY</span>
                     </div>
                     <p id="recording-status-text" style="font-size: 13px; color: var(--text-secondary); margin: 8px 0 0 0;">
                         Official Daubert-compliant, LSU-resistant forensic report generation engine. Unified multi-layer recording is currently paused (Camera off).
@@ -509,13 +514,13 @@
                 <div class="card" style="padding: 15px;">
                     <h3 style="font-size: 14px; margin-bottom: 10px; border: none; padding: 0;">⚖️ Trust Judicial System Toolbars</h3>
                     <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
-                        <button class="btn" style="background-color: var(--accent-green); margin: 0;" onclick="alert('Generate report action triggered.')">
+                        <button class="btn" id="btn-tjrg" type="button" style="background-color: var(--accent-green); margin: 0;">
                             ⚖️ TJRG<br><span style="font-size: 10px; font-weight: normal; opacity: 0.85;">Generate Report</span>
                         </button>
-                        <button class="btn btn-secondary" style="margin: 0;" onclick="alert('Dispatch package action triggered.')">
+                        <button class="btn btn-secondary" id="btn-madt" type="button" style="margin: 0;">
                             🚀 MADT<br><span style="font-size: 10px; font-weight: normal; opacity: 0.85;">Dispatch Package</span>
                         </button>
-                        <button class="btn btn-secondary" style="background-color: #d97706; margin: 0;" onclick="alert('[CBMD] Linear Sequential Unmasking (LSU) defense protocols active.')">
+                        <button class="btn btn-secondary" id="btn-cbmd" type="button" style="background-color: #b45309; margin: 0;">
                             🛡️ CBMD<br><span style="font-size: 10px; font-weight: normal; opacity: 0.85;">Verify LSU Shield</span>
                         </button>
                     </div>
@@ -525,61 +530,58 @@
                 <div class="card" style="border-color: var(--accent-info); padding: 15px;">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
                         <h3 style="margin: 0; color: var(--text-primary); border: none; padding: 0; font-size: 15px;">🔴 Master Workflow Recording Hub</h3>
-                        <span id="layer-status-badge" style="font-size: 11px; background-color: #475569; color: #f8fafc; padding: 3px 8px; border-radius: 4px; font-weight: bold;">LAYERS: STANDBY</span>
+                        <span id="layer-status-badge" role="status" style="font-size: 11px; background-color: #475569; color: #f8fafc; padding: 3px 8px; border-radius: 4px; font-weight: bold;">LAYERS: STANDBY</span>
                     </div>
                     <p style="font-size: 13px; color: var(--text-secondary); margin: 8px 0 12px 0;">
                         Single-click execution. Automates permissions, camera telemetry, spatial mapping, and thermal sensors.
                     </p>
 
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                        <button id="btn-master-start" class="btn" style="background-color: var(--accent-green); margin: 0;" onclick="unifiedWorkflow.startMasterWorkflow()">
+                        <button id="btn-master-start" type="button" class="btn" style="background-color: var(--accent-green); margin: 0;">
                             🔴 Start Unified Recording
                         </button>
-                        <button id="btn-master-stop" class="btn" style="background-color: var(--accent-red); margin: 0; opacity: 0.5; cursor: not-allowed;" disabled onclick="unifiedWorkflow.stopMasterWorkflow()">
+                        <button id="btn-master-stop" type="button" class="btn" style="background-color: var(--accent-red); margin: 0; opacity: 0.5; cursor: not-allowed;" disabled>
                             ⏹️ Stop & Finalize
                         </button>
                     </div>
 
-                    <div id="master-console" style="margin-top: 12px; font-family: monospace; font-size: 11px; color: #38bdf8; background: var(--bg-deep); padding: 10px; border-radius: 6px; border: 1px solid var(--border-line);">
+                    <div id="master-console" role="log" aria-live="polite" aria-label="Workflow console" style="margin-top: 12px; font-family: monospace; font-size: 11px; color: #38bdf8; background: var(--bg-deep); padding: 10px; border-radius: 6px; border: 1px solid var(--border-line);">
                         [WORKFLOW] System primed. Click 'Start Unified Recording' to engage all layers automatically.
                     </div>
                 </div>
 
                 <!-- Intelligence Report Viewer -->
                 <div class="card" style="flex-grow: 1;">
-                    <h3 style="font-size: 15px;">Intelligence Report Viewer</h3>
+                    <h2 class="card-title" style="font-size: 15px;">Intelligence Report Viewer</h2>
                     <p style="font-size: 13px; color: var(--text-secondary);">Structured data stream pulled directly from repository records.</p>
-                    <div id="report-output" class="report-preview-box">
+                    <div id="report-output" class="report-preview-box" role="region" aria-live="polite" aria-label="Report output" tabindex="0">
 // [SYSTEM] Ready for report generation. Select classification and target date, then click 'Submit & Compile Report'.
                     </div>
                 </div>
 
             </div>
         </div>
-    </div>
+    </main>
 
     <!-- Dynamic Copyright / Swipe-Up Trigger Tab -->
-    <div class="swipe-trigger-tab" id="drawer-trigger" 
-         onclick="toggleSupervisorDrawer()"
-         onmouseenter="this.innerText='▲ Supervisor Access (Swipe Up)'"
-         onmouseleave="this.innerText='Project: Trust & Automated Governance Framework | © 2026 PMR Publications'">
+    <div class="swipe-trigger-tab" id="drawer-trigger" role="button" tabindex="0" aria-expanded="false" aria-controls="supervisor-drawer">
         Project: Trust & Automated Governance Framework | © 2026 PMR Publications
     </div>
 
     <!-- Supervisor Admin Drawer Overlay -->
-    <div id="supervisor-drawer">
-        <div class="drawer-handle-bar" onclick="toggleSupervisorDrawer()"></div>
+    <div id="supervisor-drawer" role="dialog" aria-modal="false" aria-labelledby="supervisor-drawer-heading">
+        <div class="drawer-handle-bar" id="drawer-handle" role="button" tabindex="0" aria-label="Toggle supervisor drawer"></div>
         <div style="max-width: 600px; width: 100%; text-align: center;">
-            <h3 style="color: var(--text-primary); margin-top: 0; font-size: 16px;">🔐 Supervisor Administrative Portal Gateway</h3>
+            <h2 id="supervisor-drawer-heading" style="color: var(--text-primary); margin-top: 0; font-size: 16px;">🔐 Supervisor Administrative Portal Gateway</h2>
             <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 15px;">
                 Authorized personnel link hub. Configure or access your primary administrative page below.
             </p>
             <div style="display: flex; gap: 10px; justify-content: center;">
-                <input type="text" id="admin-url-input" placeholder="Paste your admin page link here (e.g., https://your-admin-site.com)" style="flex-grow: 1; padding: 10px; background: var(--bg-deep); border: 1px solid var(--border-line); color: white; border-radius: 5px; font-size: 13px;">
-                <button class="btn btn-secondary" style="width: auto; margin: 0; padding: 10px 20px;" onclick="saveAndLaunchAdmin()">Launch & Save</button>
+                <input type="url" id="admin-url-input" aria-label="Admin page link" placeholder="Paste your admin page link here (e.g., https://your-admin-site.com)" style="flex-grow: 1; padding: 10px; background: var(--bg-deep); border: 1px solid var(--border-line); color: white; border-radius: 5px; font-size: 13px;">
+                <button class="btn btn-secondary" id="btn-save-admin" type="button" style="width: auto; margin: 0; padding: 10px 20px;">Launch & Save</button>
             </div>
             <div style="margin-top: 15px;">
-                <a id="saved-admin-link" href="#" target="_blank" class="btn" style="background-color: var(--accent-green); display: none; font-size: 13px; padding: 10px;">🚀 Open Saved Admin Console</a>
+                <a id="saved-admin-link" href="#" target="_blank" rel="noopener noreferrer" class="btn" style="background-color: var(--accent-green); display: none; font-size: 13px; padding: 10px;">🚀 Open Saved Admin Console</a>
             </div>
         </div>
     </div>
@@ -909,6 +911,42 @@
         };
 
         window.addEventListener('DOMContentLoaded', () => {
+            const on = (id, fn) => { const el = document.getElementById(id); if (el) el.addEventListener('click', fn); };
+            on('btn-compile-report', () => reportsApp.fetchAndCompileReport());
+            on('btn-export-report', () => reportsApp.exportReportJSON());
+            on('btn-refresh-cases', () => stationCasesApp.fetchStationCases());
+            on('btn-tjrg', () => alert('Generate report action triggered.'));
+            on('btn-madt', () => alert('Dispatch package action triggered.'));
+            on('btn-cbmd', () => alert('[CBMD] Linear Sequential Unmasking (LSU) defense protocols active.'));
+            on('btn-master-start', () => unifiedWorkflow.startMasterWorkflow());
+            on('btn-master-stop', () => unifiedWorkflow.stopMasterWorkflow());
+            on('btn-save-admin', () => saveAndLaunchAdmin());
+            const trigger = document.getElementById('drawer-trigger');
+            const handle = document.getElementById('drawer-handle');
+            const defaultLabel = trigger ? trigger.textContent : '';
+            const hoverLabel = '▲ Supervisor Access (Swipe Up)';
+            const toggle = () => {
+                toggleSupervisorDrawer();
+                const drawer = document.getElementById('supervisor-drawer');
+                if (trigger && drawer) trigger.setAttribute('aria-expanded', String(drawer.classList.contains('open')));
+            };
+            const keyActivate = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); } };
+            if (trigger) {
+                trigger.addEventListener('click', toggle);
+                trigger.addEventListener('keydown', keyActivate);
+                trigger.addEventListener('mouseenter', () => { trigger.textContent = hoverLabel; });
+                trigger.addEventListener('mouseleave', () => { trigger.textContent = defaultLabel; });
+                trigger.addEventListener('focus', () => { trigger.textContent = hoverLabel; });
+                trigger.addEventListener('blur', () => { trigger.textContent = defaultLabel; });
+            }
+            if (handle) {
+                handle.addEventListener('click', toggle);
+                handle.addEventListener('keydown', keyActivate);
+            }
+            document.addEventListener('keydown', e => {
+                const drawer = document.getElementById('supervisor-drawer');
+                if (e.key === 'Escape' && drawer && drawer.classList.contains('open')) { toggle(); if (trigger) trigger.focus(); }
+            });
             reportsApp.init();
             loadMagazineData();
             stationCasesApp.fetchStationCases();
