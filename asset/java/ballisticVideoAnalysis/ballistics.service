@@ -1,0 +1,20 @@
+[Unit]
+Description=Ballistic Video Analysis TCP Service
+After=network.target
+
+[Service]
+Type=simple
+User=ballistics
+Group=ballistics
+WorkingDirectory=/opt/ballistics-video-analysis
+ExecStart=/usr/bin/java -Dballistics.config=/etc/ballistics-video-analysis/application.properties -jar /opt/ballistics-video-analysis/ballistic-video-analysis.jar
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/log/ballistics-video-analysis
+
+[Install]
+WantedBy=multi-user.target
