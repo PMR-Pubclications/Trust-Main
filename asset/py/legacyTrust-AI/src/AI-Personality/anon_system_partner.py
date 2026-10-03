@@ -1,27 +1,22 @@
 import logging
 from typing import Dict, List, Optional
-from dataclasses import dataclass
 
-# Imports from previous diagnostic & dead-man switch modules
-from trust_system_diagnostics_remediated import (
+from config import AnonPersonaConfig
+from diagnostics_compat import (
     TrustEngineSelfDiagnostic,
     SystemHealthReport,
-    CheckStatus
-)
-from trust_dead_man_switch import (
+    CheckStatus,
     TrustEngineDeadManSwitch,
-    SwitchState
+    SwitchState,
 )
 
 logger = logging.getLogger("AnonPartner")
 
-
-@dataclass
-class AnonPersonaConfig:
-    name: str = "Anon"
-    origin: str = "Midwest"
-    archetype: str = "Systems Partner & Ranch Hand Engineer"
-    tagline: str = "Measure twice, cut once."
+STATUS_KEYWORDS = (
+    "status", "health", "diagnostic", "system looking", "how's the system",
+    "hows the system", "how is the system", "how are things", "all clear",
+    "system check", "everything ok",
+)
 
 
 class AnonSystemPartner:
@@ -39,15 +34,23 @@ class AnonSystemPartner:
         self.diagnostic_engine = diagnostic_engine or TrustEngineSelfDiagnostic()
         self.dead_man_switch = dead_man_switch or TrustEngineDeadManSwitch()
         self.config = config or AnonPersonaConfig()
+        self.last_report: Optional[SystemHealthReport] = None
 
     # ---------------------------------------------------------
     # Operational Routines (Anon's Voice)
     # ---------------------------------------------------------
     def run_routine_check(self) -> str:
         """Runs a diagnostic sweep and returns a plain-spoken status summary."""
+        if self.dead_man_switch.current_state == SwitchState.LOCKED_DOWN and self.last_report is not None:
+            # Frozen: don't re-run diagnostics, report what tripped the switch.
+            return self.format_health_report_as_anon(self.last_report, SwitchState.LOCKED_DOWN)
         report = self.diagnostic_engine.run_full_diagnostic_suite()
-        switch_state = self.dead_man_switch.process_health_report(report)
+        return self.ingest_report(report)
 
+    def ingest_report(self, report: SystemHealthReport) -> str:
+        """Feeds an existing report through the dead-man switch and summarizes it."""
+        self.last_report = report
+        switch_state = self.dead_man_switch.process_health_report(report)
         return self.format_health_report_as_anon(report, switch_state)
 
     def format_health_report_as_anon(self, report: SystemHealthReport, switch_state: SwitchState) -> str:
@@ -60,9 +63,11 @@ class AnonSystemPartner:
             lines.append("I went ahead and froze Tier 3 and 4 releases to keep the fence line secure.")
             lines.append("We'll need dual trustee signatures on the override nonce to open the gate again.\n")
             lines.append("Here's what tripped the wire:")
-            for check in report.results:
-                if check.status == CheckStatus.CRITICAL_FAILURE:
-                    lines.append(f"  • {check.check_name}: {check.message}")
+            failed = [c for c in report.results if c.status == CheckStatus.CRITICAL_FAILURE]
+            for check in failed:
+                lines.append(f"  • {check.check_name}: {check.message}")
+            if not failed:
+                lines.append("  • (no per-check details were recorded)")
             return "\n".join(lines)
 
         if report.overall_status == CheckStatus.PASSED:
@@ -101,7 +106,7 @@ class AnonSystemPartner:
         """Sample conversational router for user queries in Anon's persona."""
         topic_lower = topic.lower()
 
-        if "status" in topic_lower or "health" in topic_lower:
+        if any(k in topic_lower for k in STATUS_KEYWORDS):
             return self.run_routine_check()
 
         if "override" in topic_lower or "reset" in topic_lower:
@@ -118,4 +123,4 @@ class AnonSystemPartner:
                 "measure twice, cut once. What module are we working on next?"
             )
 
-        return f"Fair enough. Let me line that up for you and we'll get it sorted out."
+        return "Fair enough. Let me line that up for you and we'll get it sorted out."

@@ -1,82 +1,66 @@
 import re
-import asyncio
 import json
-import numpy as np
-import onnxruntime as ort
-import pyaudio
-import websockets
+import asyncio
+from pathlib import Path
 
-# ==========================================
-# CONFIGURATION
-# ==========================================
-MODEL_PATH = "my_custom_voice.onnx"
-SAMPLE_RATE = 22050  # Must match Piper model config (usually 16000 or 22050 Hz)
+import numpy as np
+
+import config
+from audio_utils import chunk_text_stream
+from piper_session import create_optimized_piper_session, synthesize_phonemes
+
 CHANNELS = 1
-SAMPLE_WIDTH = 2     # 16-bit PCM (2 bytes per sample)
-# ==========================================
+SAMPLE_WIDTH = 2  # 16-bit PCM (2 bytes per sample)
+
+BOS, EOS, PAD = "^", "$", "_"
 
 
 class PiperStreamingSynthesizer:
-    def __init__(self, model_path: str):
-        # Configure ONNX Runtime session for fast GPU/CPU inference
-        opts = ort.SessionOptions()
-        opts.graph_optimization_level = ort.GraphOptimizationLevel.ORT_ENABLE_ALL
-        opts.execution_mode = ort.ExecutionMode.ORT_SEQUENTIAL
-        
-        providers = ["CUDAExecutionProvider", "CPUExecutionProvider"]
-        self.session = ort.InferenceSession(model_path, opts, providers=providers)
-        
-        # Simple character/phoneme ID map stub (replace with piper_phonemize/espeak)
-        # In production, use `piper_phonemize.phonemize_espeak(text, 'en-us')`
-        self.phoneme_id_map = {c: idx + 1 for idx, c in enumerate("abcdefghijklmnopqrstuvwxyz .?!,")}
+    """Streams Piper audio using the model's own .onnx.json (sample rate, phoneme map, scales)."""
 
-    def text_to_phoneme_ids(self, text: str) -> list[int]:
-        """Converts text string to sequence of phoneme IDs."""
-        text_clean = text.lower().strip()
-        return [self.phoneme_id_map.get(char, 1) for char in text_clean]
+    def __init__(self, model_path: str = config.PIPER_MODEL_PATH, config_path: str = None, device: str = "cuda"):
+        config_path = config_path or f"{model_path}.json"
+        if not Path(config_path).exists():
+            raise FileNotFoundError(f"Piper model config not found: {config_path}")
+        with open(config_path, "r", encoding="utf-8") as f:
+            self.model_config = json.load(f)
+
+        self.sample_rate = int(self.model_config.get("audio", {}).get("sample_rate", config.DEFAULT_SAMPLE_RATE))
+        self.phoneme_id_map = self.model_config["phoneme_id_map"]
+        self.espeak_voice = self.model_config.get("espeak", {}).get("voice", "en-us")
+        inference = self.model_config.get("inference", {})
+        self.noise_scale = inference.get("noise_scale", 0.667)
+        self.length_scale = inference.get("length_scale", 1.0)
+        self.noise_w = inference.get("noise_w", 0.8)
+
+        self.session = create_optimized_piper_session(model_path, device=device)
+
+    def text_to_phoneme_ids(self, text: str) -> list:
+        """Phonemizes with espeak (piper_phonemize) and maps to the model's phoneme IDs."""
+        try:
+            from piper_phonemize import phonemize_espeak
+        except ImportError as e:
+            raise RuntimeError("piper_phonemize is required for real Piper phonemization (pip install piper-phonemize)") from e
+
+        ids = []
+        for sentence in phonemize_espeak(text.strip(), self.espeak_voice):
+            ids.extend(self.phoneme_id_map[BOS])
+            for ph in sentence:
+                if ph in self.phoneme_id_map:
+                    ids.extend(self.phoneme_id_map[ph])
+                    ids.extend(self.phoneme_id_map[PAD])
+            ids.extend(self.phoneme_id_map[EOS])
+        return ids
 
     def synthesize_chunk_to_pcm(self, text_chunk: str) -> bytes:
         """Runs ONNX inference on a text chunk and returns 16-bit PCM bytes."""
         phoneme_ids = self.text_to_phoneme_ids(text_chunk)
         if not phoneme_ids:
             return b""
-
-        x = np.array([phoneme_ids], dtype=np.int64)
-        x_lengths = np.array([len(phoneme_ids)], dtype=np.int64)
-        scales = np.array([0.667, 1.0, 0.8], dtype=np.float32)
-
-        inputs = {
-            "input": x,
-            "input_lengths": x_lengths,
-            "scales": scales,
-        }
-
-        outputs = self.session.run(None, inputs)
-        audio_float32 = outputs[0].squeeze()
-
-        # Scale float32 (-1.0 to 1.0) to 16-bit signed PCM integers
-        audio_int16 = (audio_float32 * 32767).clip(-32768, 32767).astype(np.int16)
-        return audio_int16.tobytes()
-
-
-def chunk_text_stream(text: str, min_words: int = 3):
-    """
-    Splits text on clause and sentence boundaries (. , ! ? ; :)
-    to yield short phrases suitable for sub-200ms latency synthesis.
-    """
-    pattern = re.compile(r'(?<=[.!?;,:])\s+')
-    parts = pattern.split(text)
-
-    buffer = ""
-    for part in parts:
-        buffer = f"{buffer} {part}".strip() if buffer else part
-        # Yield if we have reached a reasonable word threshold
-        if len(buffer.split()) >= min_words:
-            yield buffer
-            buffer = ""
-
-    if buffer:
-        yield buffer
+        audio, _ = synthesize_phonemes(
+            self.session, phoneme_ids, self.noise_scale, self.length_scale, self.noise_w
+        )
+        return (audio * 32767).clip(-32768, 32767).astype(np.int16).tobytes()
 
 
 # =====================================================================
@@ -84,11 +68,12 @@ def chunk_text_stream(text: str, min_words: int = 3):
 # =====================================================================
 def stream_to_local_speakers(synth: PiperStreamingSynthesizer, full_text: str):
     """Synthesizes and plays audio chunks progressively using PyAudio."""
+    import pyaudio
     p = pyaudio.PyAudio()
     audio_stream = p.open(
         format=pyaudio.paInt16,
         channels=CHANNELS,
-        rate=SAMPLE_RATE,
+        rate=synth.sample_rate,
         output=True,
         frames_per_buffer=1024
     )
@@ -138,11 +123,12 @@ async def websocket_handler(websocket, synth: PiperStreamingSynthesizer):
             print(f"WebSocket Error: {e}")
 
 
-async def start_websocket_server(synth: PiperStreamingSynthesizer, host="0.0.0.0", port=8765):
+async def start_websocket_server(synth: PiperStreamingSynthesizer, host="127.0.0.1", port=8765):
     """Launches an async WebSocket server for low-latency remote client streaming."""
+    import websockets
     server = await websockets.serve(
-        lambda ws: websocket_handler(ws, synth), 
-        host, 
+        lambda ws: websocket_handler(ws, synth),
+        host,
         port
     )
     print(f"Piper WebSocket Server listening on ws://{host}:{port}")
@@ -150,7 +136,7 @@ async def start_websocket_server(synth: PiperStreamingSynthesizer, host="0.0.0.0
 
 
 if __name__ == "__main__":
-    synthesizer = PiperStreamingSynthesizer(MODEL_PATH)
+    synthesizer = PiperStreamingSynthesizer()
     
     sample_text = (
         "Welcome to real-time speech synthesis! By chunking the input text into small clauses, "
