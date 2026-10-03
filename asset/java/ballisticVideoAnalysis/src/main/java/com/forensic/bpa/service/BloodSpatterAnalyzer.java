@@ -8,11 +8,13 @@ import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.*;
 import org.bytedeco.javacv.FFmpegFrameGrabber;
 import org.bytedeco.javacv.OpenCVFrameConverter;
+import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+@Service
 public class BloodSpatterAnalyzer {
 
     static {
@@ -21,36 +23,40 @@ public class BloodSpatterAnalyzer {
 
     public ForensicAnalysisResult analyzeVideo(File videoFile) throws Exception {
         FFmpegFrameGrabber grabber = new FFmpegFrameGrabber(videoFile);
-        grabber.start();
+        boolean started = false;
+        try {
+            grabber.start();
+            started = true;
 
-        OpenCVFrameConverter.ToMat converter = new OpenCVFrameConverter.ToMat();
-        org.bytedeco.javacv.Frame frame;
+            OpenCVFrameConverter.ToMat converter = new OpenCVFrameConverter.ToMat();
+            org.bytedeco.javacv.Frame frame;
 
-        List<DropletMetrics> detectedDroplets = new ArrayList<>();
-        int frameCount = 0;
+            List<DropletMetrics> detectedDroplets = new ArrayList<>();
+            int frameCount = 0;
 
-        while ((frame = grabber.grabImage()) != null) {
-            frameCount++;
-            // Sample every Nth frame to optimize processing
-            if (frameCount % 5 != 0) continue;
+            while ((frame = grabber.grabImage()) != null) {
+                frameCount++;
+                if (frameCount % 5 != 0) continue;
 
-            Mat matFrame = converter.convert(frame);
-            if (matFrame == null || matFrame.empty()) continue;
+                Mat matFrame = converter.convert(frame);
+                if (matFrame == null || matFrame.empty()) continue;
 
-            List<DropletMetrics> frameDroplets = extractBloodstains(matFrame);
-            detectedDroplets.addAll(frameDroplets);
+                List<DropletMetrics> frameDroplets = extractBloodstains(matFrame);
+                detectedDroplets.addAll(frameDroplets);
+            }
+
+            Vector3D areaOfOrigin = calculateAreaOfOrigin(detectedDroplets);
+            String energyRegime = classifyEnergyRegime(detectedDroplets);
+            return new ForensicAnalysisResult(detectedDroplets.size(), areaOfOrigin, energyRegime);
+        } finally {
+            try {
+                if (started) {
+                    grabber.stop();
+                }
+            } finally {
+                grabber.release();
+            }
         }
-
-        grabber.stop();
-        grabber.release();
-
-        // Compute 3D Area of Origin via ray convergence
-        Vector3D areaOfOrigin = calculateAreaOfOrigin(detectedDroplets);
-        
-        // Classify Kinetic Energy Regime (Gunshot vs Blunt Force)
-        String energyRegime = classifyEnergyRegime(detectedDroplets);
-
-        return new ForensicAnalysisResult(detectedDroplets.size(), areaOfOrigin, energyRegime);
     }
 
     private List<DropletMetrics> extractBloodstains(Mat src) {
