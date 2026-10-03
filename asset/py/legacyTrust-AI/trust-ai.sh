@@ -69,4 +69,11 @@ docker compose up -d --build
 
 pip install -e .
 
+# Run CLI
+annon --status
+
+# Run Background IPC Daemon for Trust-Shell
+annon-daemon
+
+
 
