@@ -12,3 +12,19 @@
     "node": ">=18"
   }
 }
+
+
+{
+  "name": "api-scrambler-relay",
+  "version": "1.0.0",
+  "description": "Lightweight API relay wrapper for local obfuscation engine",
+  "main": "relay.js",
+  "scripts": {
+    "start": "node relay.js"
+  },
+  "dependencies": {
+    "axios": "^1.6.0",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2"
+  }
+}
