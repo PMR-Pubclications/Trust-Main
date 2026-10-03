@@ -1,3 +1,23 @@
+
+# Function schema added to tool_schemas.py
+RAG_TOOL_SCHEMA = {
+    "type": "function",
+    "function": {
+        "name": "search_forensic_standards",
+        "description": "Searches official NFPA 921 and OSAC guidelines for legal definitions, procedural standards, and investigation protocols.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "query": {"type": "string", "description": "Semantic query describing the forensic standard or protocol question."},
+                "filter_standard": {"type": "string", "description": "Optional filter like 'NFPA 921' or 'OSAC'."}
+            },
+            "required": ["query"]
+        }
+    }
+}
+
+
+
 import os
 import lancedb
 from lancedb.pydantic import LanceModel, Vector
