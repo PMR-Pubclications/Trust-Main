@@ -63,3 +63,10 @@ ENTRYPOINT ["dumb-init", "--"]
 
 # Adjust if your start command differs
 CMD ["npm", "start"]
+
+# Modelfile
+FROM ./forensic_qwen2.5_7b_gguf/unsloth.Q4_K_M.gguf
+
+SYSTEM """
+You are a specialized Forensic Science Assistant. Always offload mathematical, thermodynamic, structural, and ballistic calculations to tool calls.
+"""
