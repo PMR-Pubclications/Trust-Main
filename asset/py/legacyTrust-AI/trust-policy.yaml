@@ -115,3 +115,59 @@ beneficiary_payouts:
       - type: "PROOFS_ATTACHED"
         operator: "=="
         value: true # Requires verified transcript or tuition invoice in OCR pipeline
+
+
+if __name__ == "__main__":
+    # Initialize engine with $5M activation threshold
+    enforcer = TrustRuleEnforcer(
+        policy_yaml_path="trust-policy.yaml",
+        activation_threshold=Decimal("5000000.00")
+    )
+
+    # Sample Disbursement: $25,000 Capital Transfer
+    disbursement = ProposedDisbursement(
+        disbursement_id="tx_capital_outlay_101",
+        amount=Decimal("25000.00"),
+        description="Property Upgrade Invoice #402",
+        beneficiary_id="ben_youth_foster_01",
+        beneficiary_age=20,
+        has_attached_proofs=True
+    )
+
+    # -------------------------------------------------------------
+    # CASE 1: Account balances total $3.2 Million (Below $5M Threshold)
+    # -------------------------------------------------------------
+    low_nav_accounts = [
+        AccountBalance(account_id="acc_1", account_name="Plaid Checking", balance=Decimal("200000.00")),
+        AccountBalance(account_id="acc_2", account_name="Alpaca Treasury", balance=Decimal("3000000.00"))
+    ]
+
+    result_case1 = enforcer.evaluate_disbursement(disbursement, low_nav_accounts)
+    
+    print("=== CASE 1: NAV BELOW $5M (DORMANT MODE) ===")
+    print(f"Total Trust NAV:     ${result_case1.total_trust_nav:,.2f}")
+    print(f"Engine State:        {result_case1.engine_state.value}")
+    print(f"Decision:            {result_case1.decision.value}")
+    print(f"Signatures Needed:   {result_case1.required_signatures}")
+    print(f"Reason:              {result_case1.reason}\n")
+
+    # -------------------------------------------------------------
+    # CASE 2: Account balances total $6.5 Million (Above $5M Threshold)
+    # -------------------------------------------------------------
+    high_nav_accounts = [
+        AccountBalance(account_id="acc_1", account_name="Plaid Checking", balance=Decimal("500000.00")),
+        AccountBalance(account_id="acc_2", account_name="Alpaca Treasury", balance=Decimal("6000000.00"))
+    ]
+
+    result_case2 = enforcer.evaluate_disbursement(disbursement, high_nav_accounts)
+
+    print("=== CASE 2: NAV ABOVE $5M (ACTIVE ENFORCEMENT) ===")
+    print(f"Total Trust NAV:     ${result_case2.total_trust_nav:,.2f}")
+    print(f"Engine State:        {result_case2.engine_state.value}")
+    print(f"Decision:            {result_case2.decision.value}")
+    print(f"Applied Tier:        Tier {result_case2.applied_tier}")
+    print(f"Signatures Needed:   {result_case2.required_signatures}")
+    print(f"Allowed Roles:       {result_case2.allowed_roles}")
+    print(f"Timelock Hours:      {result_case2.timelock_hours}")
+    print(f"Reason:              {result_case2.reason}")
+
