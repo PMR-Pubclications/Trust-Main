@@ -65,3 +65,10 @@ coverage
 dist
 build
 .DS_Store
+
+
+node_modules/
+.env
+*.log
+local-config.json
+
