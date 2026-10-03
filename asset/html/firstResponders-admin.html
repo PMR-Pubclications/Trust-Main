@@ -7,63 +7,67 @@
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-slate-900 text-slate-100 font-sans min-h-screen p-6">
+    <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:bg-white focus:text-slate-900 focus:p-2 focus:rounded">Skip to main content</a>
     <div class="max-w-4xl mx-auto space-y-8">
         
         <!-- Header -->
         <header class="border-b border-slate-700 pb-4">
             <h1 class="text-2xl font-bold tracking-wide">First Response Admin Console</h1>
-            <p class="text-sm text-slate-400">Department Unit Telemetry, Chain-of-Custody & API Configuration</p>
+            <p class="text-sm text-slate-300">Department Unit Telemetry, Chain-of-Custody & API Configuration</p>
         </header>
+
+        <main id="main-content" class="space-y-8" tabindex="-1">
 
         <!-- Department Configuration Section -->
         <section class="bg-slate-800 p-6 rounded-lg border border-slate-700 shadow-xl">
             <h2 class="text-lg font-semibold mb-4 text-emerald-400">Department Configuration & Priority APIs</h2>
-            <form id="configForm" class="space-y-4">
+            <form id="configForm" class="space-y-4" aria-label="Department configuration">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-xs font-medium uppercase tracking-wider text-slate-400 mb-1">Department ID</label>
+                        <label for="deptId" class="block text-xs font-medium uppercase tracking-wider text-slate-300 mb-1">Department ID</label>
                         <input type="text" id="deptId" required class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm focus:outline-none focus:border-emerald-500" placeholder="e.g. PD-WA-104">
                     </div>
                     <div>
-                        <label class="block text-xs font-medium uppercase tracking-wider text-slate-400 mb-1">Receiver Notification Email</label>
+                        <label for="receiverEmail" class="block text-xs font-medium uppercase tracking-wider text-slate-300 mb-1">Receiver Notification Email</label>
                         <input type="email" id="receiverEmail" required class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm focus:outline-none focus:border-emerald-500" placeholder="admin@department.gov">
                     </div>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-xs font-medium uppercase tracking-wider text-slate-400 mb-1">Priority API Endpoint</label>
+                        <label for="priorityApiEndpoint" class="block text-xs font-medium uppercase tracking-wider text-slate-300 mb-1">Priority API Endpoint</label>
                         <input type="url" id="priorityApiEndpoint" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm focus:outline-none focus:border-emerald-500" placeholder="https://api.department.gov/v1/ingest">
                     </div>
                     <div>
-                        <label class="block text-xs font-medium uppercase tracking-wider text-slate-400 mb-1">API Secret / Auth Token</label>
+                        <label for="apiSecretToken" class="block text-xs font-medium uppercase tracking-wider text-slate-300 mb-1">API Secret / Auth Token</label>
                         <input type="password" id="apiSecretToken" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm focus:outline-none focus:border-emerald-500" placeholder="Bearer Token or Key">
                     </div>
                 </div>
-                <button type="submit" class="bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-sm px-4 py-2 rounded transition">Save Configuration</button>
+                <button type="submit" class="bg-emerald-700 hover:bg-emerald-600 text-white font-medium text-sm px-4 py-2 rounded transition">Save Configuration</button>
             </form>
         </section>
 
         <!-- Individual Unit Telemetry Export Section -->
         <section class="bg-slate-800 p-6 rounded-lg border border-slate-700 shadow-xl">
             <h2 class="text-lg font-semibold mb-4 text-cyan-400">Individual Unit Telemetry Package Export</h2>
-            <form id="exportForm" class="space-y-4">
+            <form id="exportForm" class="space-y-4" aria-label="Telemetry export">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-xs font-medium uppercase tracking-wider text-slate-400 mb-1">Target Department ID</label>
+                        <label for="exportDeptId" class="block text-xs font-medium uppercase tracking-wider text-slate-300 mb-1">Target Department ID</label>
                         <input type="text" id="exportDeptId" required class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm focus:outline-none focus:border-cyan-500" placeholder="e.g. PD-WA-104">
                     </div>
                     <div>
-                        <label class="block text-xs font-medium uppercase tracking-wider text-slate-400 mb-1">Unit ID / Mobile Terminal</label>
+                        <label for="unitId" class="block text-xs font-medium uppercase tracking-wider text-slate-300 mb-1">Unit ID / Mobile Terminal</label>
                         <input type="text" id="unitId" required class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm focus:outline-none focus:border-cyan-500" placeholder="e.g. Unit-Alpha-03">
                     </div>
                 </div>
-                <button type="submit" class="bg-cyan-600 hover:bg-cyan-500 text-white font-medium text-sm px-4 py-2 rounded transition">Package & Dispatch Telemetry ZIP</button>
+                <button type="submit" class="bg-cyan-700 hover:bg-cyan-600 text-white font-medium text-sm px-4 py-2 rounded transition">Package & Dispatch Telemetry ZIP</button>
             </form>
         </section>
 
         <!-- Status Notification Box -->
-        <div id="statusBox" class="hidden p-4 rounded text-sm font-medium border"></div>
+        <div id="statusBox" role="status" aria-live="polite" class="hidden p-4 rounded text-sm font-medium border"></div>
 
+        </main>
     </div>
 
     <script>
