@@ -10,4 +10,6 @@ pip install speechrecognition pyaudio edge-tts pygame
 
 pip install faster-whisper pyaudio speechrecognition pygame
 
+pip install piper-tts onnxruntime-gpu sounddevice numpy
+
 
