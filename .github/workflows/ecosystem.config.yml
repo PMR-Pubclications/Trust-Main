@@ -1,0 +1,14 @@
+apps:
+  - name: "legacyTrust-AI"
+    script: "main.py"
+    cwd: "./asset/py/legacyTrust-AI"
+    interpreter: "python3"
+    autorestart: true
+    watch: false
+    max_restarts: 10
+    restart_delay: 2000
+    env:
+      PYTHONUNBUFFERED: "1"
+      NODE_ENV: "production"
+    error_file: "./asset/py/legacyTrust-AI/logs/err.log"
+    out_file: "./asset/py/legacyTrust-AI/logs/out.log"
