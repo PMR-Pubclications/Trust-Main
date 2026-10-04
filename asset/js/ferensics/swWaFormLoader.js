@@ -1,3 +1,5 @@
+const schema = require('./command-schema.json');
+
 const fs = require('fs');
 const { parseStringPromise } = require('xml2js');
 
