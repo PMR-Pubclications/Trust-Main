@@ -1,3 +1,6 @@
+const schema = require('./command-schema.json');
+
+
 /**
  * Executes the secure exit sequence from the crime scene.
  * @param {string} caseNumber - The active case identifier (e.g., "VAN-2026-0926")
