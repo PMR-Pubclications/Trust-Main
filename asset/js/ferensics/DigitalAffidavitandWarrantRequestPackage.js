@@ -1,3 +1,6 @@
+const schema = require('./command-schema.json');
+
+
 /**
  * Evaluates the evidence collection threshold and triggers the judicial 
  * warrant application workflow only when 10 or more significant items are logged.
