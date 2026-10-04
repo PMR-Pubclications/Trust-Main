@@ -1,3 +1,6 @@
+const schema = require('./command-schema.json');
+
+
 const fs = require('fs');
 const crypto = require('crypto');
 
