@@ -40,10 +40,16 @@ public class BloodSpatterAnalyzer {
                 if (frameCount % 5 != 0) continue;
 
                 Mat matFrame = converter.convert(frame);
-                if (matFrame == null || matFrame.empty()) continue;
+                try {
+                    if (matFrame == null || matFrame.empty()) continue;
 
-                List<DropletMetrics> frameDroplets = extractBloodstains(matFrame);
-                detectedDroplets.addAll(frameDroplets);
+                    List<DropletMetrics> frameDroplets = extractBloodstains(matFrame);
+                    detectedDroplets.addAll(frameDroplets);
+                } finally {
+                    if (matFrame != null) {
+                        matFrame.release();
+                    }
+                }
             }
         } finally {
             try {
@@ -74,37 +80,61 @@ public class BloodSpatterAnalyzer {
         Mat mask1 = new Mat();
         Mat mask2 = new Mat();
         Mat redMask = new Mat();
-
-        // Convert to HSV for red blood color segmentation
-        opencv_imgproc.cvtColor(src, hsv, opencv_imgproc.COLOR_BGR2HSV);
-
-        // Red hue spans two ranges in HSV space
-        opencv_core.inRange(hsv, new Mat(1, 1, opencv_core.CV_8UC3, new Scalar(0, 70, 50, 0)),
-                                 new Mat(1, 1, opencv_core.CV_8UC3, new Scalar(10, 255, 255, 0)), mask1);
-        opencv_core.inRange(hsv, new Mat(1, 1, opencv_core.CV_8UC3, new Scalar(170, 70, 50, 0)),
-                                 new Mat(1, 1, opencv_core.CV_8UC3, new Scalar(180, 255, 255, 0)), mask2);
-        opencv_core.add(mask1, mask2, redMask);
-
-        // Find stain contours
+        Mat lowerRed1 = new Mat(1, 1, opencv_core.CV_8UC3, new Scalar(0, 70, 50, 0));
+        Mat upperRed1 = new Mat(1, 1, opencv_core.CV_8UC3, new Scalar(10, 255, 255, 0));
+        Mat lowerRed2 = new Mat(1, 1, opencv_core.CV_8UC3, new Scalar(170, 70, 50, 0));
+        Mat upperRed2 = new Mat(1, 1, opencv_core.CV_8UC3, new Scalar(180, 255, 255, 0));
         MatVector contours = new MatVector();
         Mat hierarchy = new Mat();
-        opencv_imgproc.findContours(redMask, contours, hierarchy, opencv_imgproc.RETR_EXTERNAL, opencv_imgproc.CHAIN_APPROX_SIMPLE);
 
-        for (long i = 0; i < contours.size(); i++) {
-            Mat contour = contours.get(i);
-            double area = opencv_imgproc.contourArea(contour);
+        try {
+            // Convert to HSV for red blood color segmentation
+            opencv_imgproc.cvtColor(src, hsv, opencv_imgproc.COLOR_BGR2HSV);
 
-            // Filter out noise and massive pools (require single-droplet area thresholds)
-            if (area > 5 && area < 1500 && contour.rows() >= 5) {
-                RotatedRect ellipse = opencv_imgproc.fitEllipse(contour);
+            // Red hue spans two ranges in HSV space
+            opencv_core.inRange(hsv, lowerRed1, upperRed1, mask1);
+            opencv_core.inRange(hsv, lowerRed2, upperRed2, mask2);
+            opencv_core.add(mask1, mask2, redMask);
 
-                double width = Math.min(ellipse.size().width(), ellipse.size().height());
-                double length = Math.max(ellipse.size().width(), ellipse.size().height());
-                double angle = ellipse.angle(); // Orientation angle
+            // Find stain contours
+            opencv_imgproc.findContours(redMask, contours, hierarchy, opencv_imgproc.RETR_EXTERNAL, opencv_imgproc.CHAIN_APPROX_SIMPLE);
 
-                DropletMetrics metrics = new DropletMetrics(width, length, angle, new Vector3D(0, 0, 0));
-                droplets.add(metrics);
+            for (long i = 0; i < contours.size(); i++) {
+                Mat contour = contours.get(i);
+                if (contour == null || contour.empty()) continue;
+                double area = opencv_imgproc.contourArea(contour);
+
+                // Filter out noise and massive pools (require single-droplet area thresholds)
+                if (area > 5 && area < 1500 && contour.rows() >= 5) {
+                    try {
+                        RotatedRect ellipse = opencv_imgproc.fitEllipse(contour);
+                        if (ellipse == null || ellipse.size() == null) continue;
+
+                        double width = Math.min(ellipse.size().width(), ellipse.size().height());
+                        double length = Math.max(ellipse.size().width(), ellipse.size().height());
+                        double angle = ellipse.angle(); // Orientation angle
+                        if (!Double.isFinite(width) || !Double.isFinite(length) || width <= 0 || length <= 0) {
+                            continue;
+                        }
+
+                        DropletMetrics metrics = new DropletMetrics(width, length, angle, new Vector3D(0, 0, 0));
+                        droplets.add(metrics);
+                    } catch (RuntimeException ignored) {
+                        // Ignore contours that OpenCV cannot fit reliably.
+                    }
+                }
             }
+        } finally {
+            hsv.release();
+            mask1.release();
+            mask2.release();
+            redMask.release();
+            lowerRed1.release();
+            upperRed1.release();
+            lowerRed2.release();
+            upperRed2.release();
+            hierarchy.release();
+            contours.close();
         }
 
         return droplets;
