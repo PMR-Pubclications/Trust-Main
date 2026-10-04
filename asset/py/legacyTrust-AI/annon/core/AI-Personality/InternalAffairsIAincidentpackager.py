@@ -54,7 +54,7 @@ class RollingAudioBuffer:
             removed = self._buffer.popleft()
             self._current_bytes -= len(removed)
 
-    def freeze_and_package((self) -> Tuple[bytes, str]:
+    def freeze_and_package(self) -> Tuple[bytes, str]:
         """
         Locks the current 15-minute buffer, concatenates PCM stream,
         and computes a SHA-256 cryptographic signature.
