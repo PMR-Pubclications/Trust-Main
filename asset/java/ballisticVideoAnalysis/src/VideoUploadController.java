@@ -16,18 +16,24 @@ public class ForensicVideoController {
 
     @PostMapping("/analyze-spatter")
     public ResponseEntity<ForensicAnalysisResult> uploadAndAnalyzeVideo(@RequestParam("file") MultipartFile file) {
+        if (file == null || file.isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }
+        File tempFile = null;
         try {
-            File tempFile = File.createTempFile("forensic_vid_", ".mp4");
+            tempFile = File.createTempFile("forensic_vid_", ".mp4");
             file.transferTo(tempFile);
 
             ForensicAnalysisResult result = analyzer.analyzeVideo(tempFile);
-            
-            tempFile.delete();
             return ResponseEntity.ok(result);
 
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.internalServerError().build();
+        } finally {
+            if (tempFile != null) {
+                tempFile.delete();
+            }
         }
     }
 }

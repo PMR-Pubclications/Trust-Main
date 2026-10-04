@@ -44,6 +44,10 @@ public class ReportPackagePublisher {
             BloodSpatterAnalyzer.ForensicAnalysisResult analysisResult,
             String reportPackageEndpointUrl
     ) throws Exception {
+        if (sourceVideo == null || analysisResult == null
+                || reportPackageEndpointUrl == null || reportPackageEndpointUrl.isBlank()) {
+            throw new IllegalArgumentException("Video, analysis result, and report endpoint are required.");
+        }
 
         // 1. Calculate 3D Spatial Origin and Shooter Line-of-Fire Vector
         Point3D origin = Trajectory3DSolver.computeAreaOfOrigin(spatterRays);
@@ -51,17 +55,21 @@ public class ReportPackagePublisher {
 
         // 2. Export 3D Scene Geometry to Temporary OBJ File
         File tempObjFile = File.createTempFile("scene_3d_", ".obj");
-        Scene3DObjExporter.exportSceneToObj(
-                tempObjFile.getAbsolutePath(),
-                spatterRays,
-                origin,
-                shooterRay,
-                15.0 // 15m shooter line extrapolation
-        );
+        String objBase64;
+        try {
+            Scene3DObjExporter.exportSceneToObj(
+                    tempObjFile.getAbsolutePath(),
+                    spatterRays,
+                    origin,
+                    shooterRay,
+                    15.0 // 15m shooter line extrapolation
+            );
 
-        byte[] objBytes = Files.readAllBytes(tempObjFile.toPath());
-        String objBase64 = Base64.getEncoder().encodeToString(objBytes);
-        tempObjFile.delete();
+            byte[] objBytes = Files.readAllBytes(tempObjFile.toPath());
+            objBase64 = Base64.getEncoder().encodeToString(objBytes);
+        } finally {
+            Files.deleteIfExists(tempObjFile.toPath());
+        }
 
         // 3. Convert 3D Direction Vector to Spherical Coordinates (Azimuth & Elevation)
         Point3D dir = shooterRay.direction();

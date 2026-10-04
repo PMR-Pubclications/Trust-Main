@@ -20,29 +20,40 @@ public class BloodSpatterAnalyzer {
     }
 
     public ForensicAnalysisResult analyzeVideo(File videoFile) throws Exception {
-        FFmpegFrameGrabber grabber = new FFmpegFrameGrabber(videoFile);
-        grabber.start();
-
-        OpenCVFrameConverter.ToMat converter = new OpenCVFrameConverter.ToMat();
-        org.bytedeco.javacv.Frame frame;
-
-        List<DropletMetrics> detectedDroplets = new ArrayList<>();
-        int frameCount = 0;
-
-        while ((frame = grabber.grabImage()) != null) {
-            frameCount++;
-            // Sample every Nth frame to optimize processing
-            if (frameCount % 5 != 0) continue;
-
-            Mat matFrame = converter.convert(frame);
-            if (matFrame == null || matFrame.empty()) continue;
-
-            List<DropletMetrics> frameDroplets = extractBloodstains(matFrame);
-            detectedDroplets.addAll(frameDroplets);
+        if (videoFile == null || !videoFile.isFile()) {
+            throw new IllegalArgumentException("A readable video file is required.");
         }
+        FFmpegFrameGrabber grabber = new FFmpegFrameGrabber(videoFile);
+        List<DropletMetrics> detectedDroplets = new ArrayList<>();
+        boolean started = false;
+        try {
+            grabber.start();
+            started = true;
 
-        grabber.stop();
-        grabber.release();
+            OpenCVFrameConverter.ToMat converter = new OpenCVFrameConverter.ToMat();
+            org.bytedeco.javacv.Frame frame;
+            int frameCount = 0;
+
+            while ((frame = grabber.grabImage()) != null) {
+                frameCount++;
+                // Sample every Nth frame to optimize processing
+                if (frameCount % 5 != 0) continue;
+
+                Mat matFrame = converter.convert(frame);
+                if (matFrame == null || matFrame.empty()) continue;
+
+                List<DropletMetrics> frameDroplets = extractBloodstains(matFrame);
+                detectedDroplets.addAll(frameDroplets);
+            }
+        } finally {
+            try {
+                if (started) {
+                    grabber.stop();
+                }
+            } finally {
+                grabber.release();
+            }
+        }
 
         // Compute 3D Area of Origin via ray convergence
         Vector3D areaOfOrigin = calculateAreaOfOrigin(detectedDroplets);
@@ -55,6 +66,9 @@ public class BloodSpatterAnalyzer {
 
     private List<DropletMetrics> extractBloodstains(Mat src) {
         List<DropletMetrics> droplets = new ArrayList<>();
+        if (src == null || src.empty()) {
+            return droplets;
+        }
 
         Mat hsv = new Mat();
         Mat mask1 = new Mat();
@@ -97,13 +111,16 @@ public class BloodSpatterAnalyzer {
     }
 
     private Vector3D calculateAreaOfOrigin(List<DropletMetrics> droplets) {
-        if (droplets.isEmpty()) return new Vector3D(0, 0, 0);
+        if (droplets == null || droplets.isEmpty()) return new Vector3D(0, 0, 0);
 
         // Least-Squares Line Intersection Algorithm for 3D Ray Convergence
         double sumX = 0, sumY = 0, sumZ = 0;
         int validRays = 0;
 
         for (DropletMetrics d : droplets) {
+            if (d == null || d.getTrajectoryRay() == null) {
+                continue;
+            }
             Vector3D ray = d.getTrajectoryRay();
             // Simple spatial back-projection estimate
             sumX += ray.x;
@@ -112,13 +129,20 @@ public class BloodSpatterAnalyzer {
             validRays++;
         }
 
-        return new Vector3D(sumX / validRays, sumY / validRays, sumZ / validRays);
+        return validRays == 0
+                ? new Vector3D(0, 0, 0)
+                : new Vector3D(sumX / validRays, sumY / validRays, sumZ / validRays);
     }
 
     private String classifyEnergyRegime(List<DropletMetrics> droplets) {
-        if (droplets.isEmpty()) return "INSUFFICIENT_DATA";
+        if (droplets == null || droplets.isEmpty()) return "INSUFFICIENT_DATA";
 
-        double avgWidth = droplets.stream().mapToDouble(DropletMetrics::getWidth).average().orElse(0);
+        double avgWidth = droplets.stream()
+                .filter(java.util.Objects::nonNull)
+                .mapToDouble(DropletMetrics::getWidth)
+                .filter(Double::isFinite)
+                .average().orElse(Double.NaN);
+        if (!Double.isFinite(avgWidth)) return "INSUFFICIENT_DATA";
 
         // High-Velocity Impact Spatter (HVIS) typically yields micro-droplets (< 1mm)
         if (avgWidth < 15.0) { // Pixel threshold scaled to resolution
