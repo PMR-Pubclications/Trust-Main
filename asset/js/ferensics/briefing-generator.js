@@ -1,3 +1,6 @@
+
+const schema = require('./command-schema.json');
+
             // Compile a formal briefing package for watch commanders and investigative supervisors
             generateCommanderBriefingPackage() {
                 if (this.spatialTrail.length === 0) {
