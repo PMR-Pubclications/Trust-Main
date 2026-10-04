@@ -99,6 +99,15 @@ registerCommand({
     action: async (session) => await SystemModule.pauseMic(session, 'PERSONAL_BREAK'),
     audioResponse: () => "Microphone muted. Personal break logged to timecard."
 });
+// ---Trust Accounts Access
+
+registerCommand({
+    tag: '@tag:trust.legacy.open_accounts',
+    commandId: 'CMD_OPEN_TRUST_ACCOUNTS',
+    phrasePattern: /annon,?\s+open\s+trust\s+accounts/i,
+    action: async (session) => await legacyTrustAI.activateAnnon(session),
+    audioResponse: (data) => "Legacy Trust account management protocol initiated."
+});
 
 // --- LAW ENFORCEMENT & FORENSICS ---
 registerCommand({
