@@ -227,3 +227,4 @@ if __name__ == "__main__":
         acoustic_trigger_flag=True,  # Simulate simultaneous acoustic hit
         current_gps=(45.6312, -122.6716)
     )
+
