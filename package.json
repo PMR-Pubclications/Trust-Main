@@ -6,7 +6,7 @@
   "scripts": {
     "lint": "echo 'No automated lint configuration configured for this repository yet.'",
     "test": "echo 'No automated test suite configured for this repository yet.'",
-    "start": "echo 'Static repository; open the HTML entry points directly in a browser or serve with a static web server.'"
+    "start": "node server.js"
   },
   "engines": {
     "node": ">=18"
