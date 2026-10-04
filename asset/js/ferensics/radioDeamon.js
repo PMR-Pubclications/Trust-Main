@@ -1,3 +1,6 @@
+const schema = require('./command-schema.json');
+
+
 const RadioDaemon = require('../daemons/radioDaemon');
 const radioListener = new RadioDaemon();
 
