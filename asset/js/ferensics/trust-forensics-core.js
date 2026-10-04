@@ -1,3 +1,6 @@
+
+const schema = require('./command-schema.json');
+
 /**
  * TRUST FORENSICS PLATFORM - CORE ENGINE & ANNON VOICE INTERFACE
  * Version: 2026.1.0-PRODUCTION
