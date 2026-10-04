@@ -1,3 +1,6 @@
+const schema = require('./command-schema.json');
+
+
 const express = require('express');
 const router = express.Router();
 
