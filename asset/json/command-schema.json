@@ -1,0 +1,11 @@
+{
+  "commands": [
+    {
+      "tag": "@tag:forensics.ingress.witness_share",
+      "commandId": "CMD_ACTIVATE_EVIDENCE_SHARE",
+      "phrasePattern": "annon activate evidence share",
+      "module": "ForensicsModule",
+      "method": "activateWitnessShare"
+    }
+  ]
+}
