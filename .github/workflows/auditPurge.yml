@@ -1,0 +1,9 @@
+script_name: |
+  #!/usr/bin/env bash
+  set -euo pipefail
+
+  echo "[INFO] Running setup task..."
+  
+  if [ -d "/var/lib/trust_shell" ]; then
+      echo "[INFO] Directory exists."
+  fi
