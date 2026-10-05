@@ -5,8 +5,8 @@
  * 
  * Clearance Level: SOLE TRUST ADMIN ONLY
  * Features: Live stream inspection, SHA-256 verification hash checks,
- * filtering by log source, real-time client-side keyword search, log clearing,
- * plain text download, and AJAX auto-polling.
+ * filtering by log source, real-time client-side keyword search, JSON export 
+ * of filtered results, log clearing, plain text download, and AJAX auto-polling.
  */
 
 if (session_status() === PHP_SESSION_NONE) {
@@ -181,11 +181,19 @@ $lineCount = file_exists($logPath) ? count(array_filter(explode("\n", trim(file_
         <span id="pollPulseTag" class="live-stream-tag" style="font-size: 0.75rem;">&#9673; LIVE STREAM ACTIVE</span>
     </div>
 
-    <!-- Live Client-Side Search Bar -->
-    <div style="display: flex; gap: 10px; align-items: center; padding: 10px; background-color: var(--term-bg-dark); border-bottom: 1px solid var(--term-green-dark); margin-bottom: 10px;">
+    <!-- Live Client-Side Search & Export Bar -->
+    <div style="display: flex; gap: 10px; align-items: center; padding: 10px; background-color: var(--term-bg-dark); border-bottom: 1px solid var(--term-green-dark); margin-bottom: 10px; flex-wrap: wrap;">
         <span style="color: var(--term-green); font-size: 0.85rem; font-weight: bold; white-space: nowrap;">&gt; FILTER STREAM:</span>
-        <input type="text" id="logSearchInput" placeholder="Enter keyword (e.g., RECEIVABLE, ACH_SWEEP, TX_HASH, 2026)..." oninput="filterLogLines();" style="flex: 1; background-color: #000; color: var(--term-green); border: 1px solid var(--term-green-dark); padding: 6px 12px; font-family: var(--font-terminal); font-size: 0.85rem; outline: none;">
-        <button class="blue-link" onclick="clearLogFilter();" style="background: none; border: 1px solid var(--term-green-dark); padding: 5px 10px; font-size: 0.8rem; cursor: pointer; white-space: nowrap;">[ CLEAR ]</button>
+        <input type="text" id="logSearchInput" placeholder="Enter keyword (e.g., RECEIVABLE, ACH_SWEEP, TX_HASH, 2026)..." oninput="filterLogLines();" style="flex: 1; min-width: 200px; background-color: #000; color: var(--term-green); border: 1px solid var(--term-green-dark); padding: 6px 12px; font-family: var(--font-terminal); font-size: 0.85rem; outline: none;">
+        
+        <button class="blue-link" onclick="clearLogFilter();" style="background: none; border: 1px solid var(--term-green-dark); padding: 5px 10px; font-size: 0.8rem; cursor: pointer; white-space: nowrap;">
+            [ CLEAR ]
+        </button>
+
+        <button class="blue-link" onclick="exportFilteredJson();" style="background: none; border: 1px solid var(--term-blue); color: var(--term-blue) !important; padding: 5px 10px; font-size: 0.8rem; cursor: pointer; white-space: nowrap;">
+            [ EXPORT FILTERED JSON ]
+        </button>
+
         <span id="matchCountBadge" style="font-size: 0.8rem; color: var(--term-blue); white-space: nowrap;">[ MATCHES: ALL ]</span>
     </div>
 
@@ -205,7 +213,7 @@ $lineCount = file_exists($logPath) ? count(array_filter(explode("\n", trim(file_
     </div>
 </div>
 
-<!-- AJAX Polling & Live Search Script -->
+<!-- AJAX Polling, Live Search & JSON Export Script -->
 <script>
     const currentLogKey = "<?= $selectedLog ?>";
     let isPolling = true;
@@ -253,6 +261,62 @@ $lineCount = file_exists($logPath) ? count(array_filter(explode("\n", trim(file_
             inputElem.value = '';
             filterLogLines();
         }
+    }
+
+    // Export currently visible filtered log entries as structured JSON
+    function exportFilteredJson() {
+        const visibleLines = document.querySelectorAll('#terminalWindow .log-line:not([style*="display: none"])');
+        
+        if (visibleLines.length === 0) {
+            alert('NO MATCHING LOG ENTRIES AVAILABLE TO EXPORT.');
+            return;
+        }
+
+        const queryVal = document.getElementById('logSearchInput')?.value.trim() || 'ALL';
+        const timestampIso = new Date().toISOString();
+        
+        const exportPayload = {
+            metadata: {
+                system: "TRUST_ADMIN_TELEMETRY",
+                source_log: currentLogKey,
+                exported_at: timestampIso,
+                filter_query: queryVal,
+                total_records: visibleLines.length
+            },
+            records: []
+        };
+
+        visibleLines.forEach(line => {
+            const rawText = line.textContent || line.innerText || '';
+            const pipeIndex = rawText.indexOf('|');
+            
+            let lineNum = null;
+            let entryContent = rawText;
+
+            if (pipeIndex !== -1) {
+                lineNum = rawText.substring(0, pipeIndex).trim();
+                entryContent = rawText.substring(pipeIndex + 1).trim();
+            }
+
+            exportPayload.records.push({
+                line: lineNum ? parseInt(lineNum, 10) : null,
+                raw_entry: entryContent
+            });
+        });
+
+        const jsonString = JSON.stringify(exportPayload, null, 2);
+        const blob = new Blob([jsonString], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        
+        const fileNameStamp = timestampIso.replace(/[:.]/g, '-');
+        const downloadAnchor = document.createElement('a');
+        downloadAnchor.href = url;
+        downloadAnchor.download = `audit_log_${currentLogKey}_filtered_${fileNameStamp}.json`;
+        
+        document.body.appendChild(downloadAnchor);
+        downloadAnchor.click();
+        document.body.removeChild(downloadAnchor);
+        URL.revokeObjectURL(url);
     }
 
     function toggleAutoPoll() {
