@@ -1,0 +1,23 @@
+{
+  "module": "EMS",
+  "export_timestamp": "2026-10-05T19:02:15Z",
+  "timecard": {
+    "shift_id": "SHF_20261005_E412",
+    "badge_id": "MEDIC-810",
+    "agency_id": "METRO_EMS",
+    "clock_in": "2026-10-05T07:00:00Z",
+    "clock_out": "2026-10-05T19:00:00Z",
+    "breaks": [
+      { "break_type": "MEAL", "start": "2026-10-05T12:00:00Z", "end": "2026-10-05T12:30:00Z", "duration_minutes": 30 }
+    ],
+    "net_payable_hours": 11.5
+  },
+  "shift_activity_reports": {
+    "epcr_transports_completed": 6,
+    "treatments_administered_count": 8,
+    "controlled_substances_logged": [
+      { "medication": "Fentanyl", "dosage": "100 mcg", "time": "2026-10-05T10:14:00Z" }
+    ],
+    "thermal_arterial_alerts": 2
+  }
+}
