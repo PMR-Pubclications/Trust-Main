@@ -1,0 +1,22 @@
+[Unit]
+Description=Trust Platform - First Responder Hardware Daemon
+After=network.target local-fs.target
+Wants=network.target
+
+[Service]
+Type=simple
+User=root
+Group=root
+WorkingDirectory=/opt/trust/modules/firstResponder
+ExecStart=/usr/bin/python3 /opt/trust/modules/firstResponder/src/first_responder_daemon.py
+Restart=always
+RestartSec=3s
+
+# Environment & Resource Security
+Environment=PYTHONUNBUFFERED=1
+RuntimeDirectory=trust
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
