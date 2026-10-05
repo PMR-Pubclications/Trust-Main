@@ -1,0 +1,21 @@
+[Unit]
+Description=Trust Platform - Fire & Hazmat Service
+After=trust-firstresponder.service
+Wants=trust-firstresponder.service
+
+[Service]
+Type=simple
+User=trust
+Group=trust
+WorkingDirectory=/opt/trust/modules/fire
+ExecStart=/usr/bin/python3 /opt/trust/modules/fire/fire_service.py
+Restart=always
+RestartSec=3s
+
+# Process Environment
+Environment=PYTHONUNBUFFERED=1
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
