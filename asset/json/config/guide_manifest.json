@@ -1,66 +1,65 @@
 {
   "app_name": "Trust-Shell",
-  "current_version": "2.5.0",
-  "last_updated": "2026-10-05",
+  "version": "1.2.0",
   "categories": [
     {
-      "id": "core_ops",
-      "title": "Core Field Operations"
+      "id": "forensics",
+      "title": "Forensic & Evidence Logging"
     },
     {
-      "id": "security",
-      "title": "Hardware & Cryptography"
+      "id": "telemetry",
+      "title": "Telemetry & Dead Man Switch"
     },
     {
-      "id": "sync_purge",
-      "title": "Queue & Zero-Retention Sync"
+      "id": "communications",
+      "title": "Secure Comms & Obfuscation"
     }
   ],
-  "features": [
+  "modules": [
     {
-      "id": "offline_buffering",
-      "category": "core_ops",
-      "title": "Offline SQLite Queueing",
-      "added_in_version": "1.0.0",
-      "last_updated_version": "2.4.0",
-      "roles": ["POLICE", "FIRE", "EMS", "DOT", "LIFEGUARD"],
-      "summary": "Automatically captures and holds encrypted telemetry and photos during network blackouts.",
-      "instructions": [
-        "Initiate scene recording via the primary shell command or interface.",
-        "If network connectivity drops, the header telemetry indicator shifts to 'OFFLINE_BUFFER'.",
-        "Do not forcibly power off device while 'Pending Queue' count is above 0."
+      "title": "Automated Scene Capture & Chain of Custody",
+      "category_id": "forensics",
+      "roles": ["POLICE", "FIRE"],
+      "version": "1.2.0",
+      "badge": "CRITICAL",
+      "description": "Initiates high-priority forensic recording, biometric hashing, and immediate chain-of-custody timestamping for field scene documentation.",
+      "steps": [
+        "Verify lens clearance and active GPS/telemetry feed.",
+        "Execute scene capture with full cryptographic payload signing.",
+        "Confirm payload receipt and local vault sync before ending session."
       ],
-      "troubleshooting": "If queue fails to flush upon reconnecting, run `trust-shell sync --force` from local console."
+      "command_example": "trust-cli record --mode=forensic --hash-sha256 --seal-custody",
+      "troubleshooting": "If cryptographic verification fails on initial handshake, clear local lockfile at /tmp/trust_lock and re-authenticate."
     },
     {
-      "id": "tpm_signing",
-      "category": "security",
-      "title": "TPM 2.0 / Secure Enclave Signing",
-      "added_in_version": "2.1.0",
-      "last_updated_version": "2.5.0",
-      "roles": ["POLICE", "FIRE", "EMS"],
-      "summary": "Binds every payload and scene photo to hardware cryptoprocessor keys before writing to buffer.",
-      "instructions": [
-        "Verify system startup shows 'HARDWARE_BOUND' status on boot.",
-        "All generated HMAC signatures are auto-appended to payload metadata headers.",
-        "If hardware key context breaks, the app switches to software fallback mode with an audit flag."
+      "title": "Telemetry Heartbeat & Dead Man's Switch",
+      "category_id": "telemetry",
+      "roles": ["ALL"],
+      "version": "1.1.4",
+      "badge": "SYSTEM",
+      "description": "Monitors operator ping telemetry. Automatically triggers encrypted emergency fallback procedures if heartbeat signal drops beyond threshold.",
+      "steps": [
+        "Configure ping intervals in local runtime settings (default: 300s).",
+        "Verify handshake sync through the transparent Trust-Shell barrier.",
+        "Set failover emergency alert routing and local key-wipe parameters."
       ],
-      "troubleshooting": "Re-run `trust-shell-tpm-init` if hardware context path `/var/lib/trust_shell/tpm_hmac.ctx` is lost."
+      "command_example": "trust-daemon --heartbeat=30 --deadman-enable --ttl=120",
+      "troubleshooting": "Ensure socket port 8443 remains unblocked across local network routing."
     },
     {
-      "id": "audit_syslog",
-      "category": "sync_purge",
-      "title": "Journald Audit Logging & Local Purge",
-      "added_in_version": "2.5.0",
-      "last_updated_version": "2.5.0",
-      "roles": ["POLICE", "FIRE", "EMS", "DOT", "LIFEGUARD"],
-      "summary": "Writes cryptographically verified delivery receipts to systemd journald before zero-filling local SQLite records.",
-      "instructions": [
-        "Upon receipt of valid server signature (X-Trust-Main-Signature), payload is logged to journald.",
-        "Local SQLite row is immediately deleted via `DELETE FROM payload_queue`.",
-        "No manual intervention required; purge is fully automated."
+      "title": "API Obfuscation & Relay Switch",
+      "category_id": "communications",
+      "roles": ["POLICE", "DOT"],
+      "version": "1.0.8",
+      "badge": "UPDATE",
+      "description": "Reroutes field telemetry through multi-layer obfuscation relays to prevent signal intercept and traffic pattern analysis.",
+      "steps": [
+        "Select active relay proxy profile from menu.",
+        "Initialize multi-hop payload encryption.",
+        "Confirm zero-knowledge log status on server response."
       ],
-      "troubleshooting": "Inspect audit logs via `sudo journalctl -u trust-shell.service -g TRUST-AUDIT`."
+      "command_example": "trust-relay --obfuscate --hops=3 --protocol=v3",
+      "troubleshooting": "Latency exceeding 250ms indicates hop saturation. Force node rotation using --rotate-nodes."
     }
   ]
 }
