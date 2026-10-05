@@ -105,3 +105,6 @@ fi
 
 log_succ "Build process complete! You can now run the EMS loop:"
 echo -e "      ${YELLOW}cd $PROJECT_ROOT/python && python3 ems_ai_module.py${NC}"
+
+python3 test_pyboson.py
+
