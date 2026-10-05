@@ -7,13 +7,50 @@ $pageTitle = $pageTitle ?? ($manifest['app_name'] . ' // Operations & Software G
 $activeRole = $activeRole ?? 'POLICE';
 $searchQuery = $searchQuery ?? '';
 $selectedCategory = $selectedCategory ?? 'all';
+
+// Build Full Canonical URL for Share Preview Tags
+$protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
+$currentUrl = htmlspecialchars($protocol . ($_SERVER['HTTP_HOST'] ?? 'localhost') . ($_SERVER['REQUEST_URI'] ?? ''));
+$ogDescription = "Trust-Shell Operational Software & Field Directives Guide - Filtered for " . htmlspecialchars($activeRole) . " operations.";
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- Core Encoding & Responsive Viewport -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <!-- Application & Author Metadata -->
     <title><?= htmlspecialchars($pageTitle) ?></title>
+    <meta name="description" content="<?= $ogDescription ?>">
+    <meta name="author" content="PMR Publications">
+    <meta name="application-name" content="<?= htmlspecialchars($manifest['app_name'] ?? 'Trust-Shell') ?>">
+
+    <!-- Open Graph (OG) Social / Internal Link Sharing -->
+    <meta property="og:title" content="<?= htmlspecialchars($pageTitle) ?>">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="<?= $currentUrl ?>">
+    <meta property="og:image" content="asset/trust-shell-card.png">
+    <meta property="og:description" content="<?= $ogDescription ?>">
+    <meta property="og:site_name" content="<?= htmlspecialchars($manifest['app_name'] ?? 'Trust-Shell') ?> | PMR Publications">
+
+    <!-- Twitter Card Meta -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="<?= htmlspecialchars($pageTitle) ?>">
+    <meta name="twitter:description" content="<?= $ogDescription ?>">
+    <meta name="twitter:image" content="asset/trust-shell-card.png">
+
+    <!-- Mobile & PWA Theme Integration -->
+    <meta name="theme-color" content="#070a12">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+    <!-- Cache Control for Live Field Directives -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+
     <style>
         /* Tactical Red, White, and Blue Theme */
         :root {
