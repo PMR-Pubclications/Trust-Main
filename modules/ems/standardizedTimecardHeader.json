@@ -1,0 +1,19 @@
+{
+  "timecard": {
+    "shift_id": "SHF_20261005_9021",
+    "badge_id": "BDG-4092",
+    "agency_id": "AGENCY_TYPE",
+    "clock_in": "2026-10-05T06:00:00Z",
+    "clock_out": "2026-10-05T18:00:00Z",
+    "total_shift_seconds": 43200,
+    "breaks": [
+      {
+        "break_type": "MEAL",
+        "start": "2026-10-05T12:00:00Z",
+        "end": "2026-10-05T12:30:00Z",
+        "duration_minutes": 30
+      }
+    ],
+    "net_payable_hours": 11.5
+  }
+}
