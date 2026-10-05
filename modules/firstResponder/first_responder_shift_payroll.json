@@ -1,0 +1,21 @@
+{
+  "module": "FIRST_RESPONDER",
+  "export_timestamp": "2026-10-05T18:00:05Z",
+  "timecard": {
+    "shift_id": "SHF_20261005_FR01",
+    "badge_id": "UNIT-109",
+    "agency_id": "FIELD_OPS",
+    "clock_in": "2026-10-05T06:00:00Z",
+    "clock_out": "2026-10-05T18:00:00Z",
+    "breaks": [
+      { "break_type": "MEAL", "start": "2026-10-05T12:00:00Z", "end": "2026-10-05T12:45:00Z", "duration_minutes": 45 }
+    ],
+    "net_payable_hours": 11.25
+  },
+  "shift_activity_reports": {
+    "flir_sensor_runtime_hours": 9.4,
+    "telemetry_frames_captured": 169200,
+    "storage_bytes_generated": 482104930,
+    "ipc_socket_uptime_percent": 99.8
+  }
+}
