@@ -1,0 +1,23 @@
+{
+  "module": "FIRE",
+  "export_timestamp": "2026-10-05T18:00:45Z",
+  "timecard": {
+    "shift_id": "SHF_20261005_F881",
+    "badge_id": "ENG-302",
+    "agency_id": "FIRE_DEPT_DIST_4",
+    "clock_in": "2026-10-05T06:00:00Z",
+    "clock_out": "2026-10-05T18:00:00Z",
+    "breaks": [
+      { "break_type": "MEAL", "start": "2026-10-05T13:00:00Z", "end": "2026-10-05T14:00:00Z", "duration_minutes": 60 }
+    ],
+    "net_payable_hours": 11.0
+  },
+  "shift_activity_reports": {
+    "incidents_responded": 4,
+    "scba_air_time_minutes": 85,
+    "hazmat_exposures_recorded": [
+      { "incident_id": "INC-441", "co_max_ppm": 110.0, "duration_min": 18 }
+    ],
+    "flashover_risk_alerts_triggered": 0
+  }
+}
