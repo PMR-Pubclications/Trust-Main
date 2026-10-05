@@ -43,3 +43,15 @@ else
     echo "[ERROR] Compilation finished but pyboson binary missing in build folder."
     exit 1
 fi
+
+# Start firstResponder hardware service independently
+python3 modules/firstResponder/src/first_responder_daemon.py &
+
+# Start EMS AI service independently
+python3 modules/ems/ems_service.py &
+
+# Start Fire service independently
+python3 modules/fire/fire_service.py &
+
+# Start Police service independently
+python3 modules/police/police_service.py &
