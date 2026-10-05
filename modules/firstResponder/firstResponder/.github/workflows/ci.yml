@@ -1,0 +1,66 @@
+name: FirstResponder C++ Native Engine & pyboson CI
+
+on:
+  push:
+    branches: [ "main", "master", "develop" ]
+  pull_request:
+    branches: [ "main", "master", "develop" ]
+
+jobs:
+  build-and-test:
+    name: Build Native C++ Engine & Execute Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout repository including recursive submodules (AudioVideoEngine-CPP)
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: 'recursive'
+          fetch-depth: 0
+
+      # 2. Configure Python environment
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      # 3. Install System Tooling & Video Capture Libraries
+      - name: Install Linux Build Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential \
+            cmake \
+            g++ \
+            libv4l-dev \
+            pkg-config
+
+      # 4. Install Python Build Dependencies
+      - name: Install Python Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pybind11 numpy
+
+      # 5. Make Build Script Executable & Run Compilation Pipeline
+      - name: Build AudioVideoEngine-CPP & pyboson
+        run: |
+          if [ -d "firstResponder" ]; then
+            cd firstResponder
+            chmod +x build_first_responder.sh
+            ./build_first_responder.sh
+          else
+            chmod +x build_first_responder.sh
+            ./build_first_responder.sh
+          fi
+
+      # 6. Execute Native Python Unit Tests
+      - name: Run pyboson Matrix Extraction Unit Tests
+        run: |
+          if [ -d "firstResponder/python" ]; then
+            cd firstResponder/python
+            python3 test_pyboson.py
+          else
+            cd python
+            python3 test_pyboson.py
+          fi
