@@ -117,6 +117,156 @@ require_once __DIR__ . '/includes/header.php';
 
 <!-- Grid Layout for Personnel Cards -->
 <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px;">
+
+<!-- Real-Time Microphone Telemetry Sine Wave Visualizer -->
+<div class="card mic-telemetry-card" style="margin-top: 20px; background-color: var(--term-black, #050b05); border: 1px solid var(--term-green-dark, #003311); padding: 12px; position: relative; overflow: hidden;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+        <span style="font-size: 0.78rem; color: var(--term-green-dim, #009933); font-family: var(--font-terminal, monospace); font-weight: bold;">
+            &gt; MIC AUDIO TELEMETRY GAIN
+        </span>
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <span id="micDbReadout" style="font-size: 0.75rem; color: var(--term-blue, #00ccff); font-family: var(--font-terminal, monospace);">
+                [ GAIN: 0.0 dB ]
+            </span>
+            <button id="startMicBtn" onclick="initMicTelemetry()" style="background: none; border: 1px solid var(--term-green, #00ff66); color: var(--term-green, #00ff66); font-family: var(--font-terminal, monospace); font-size: 0.75rem; padding: 2px 8px; cursor: pointer;">
+                [ START MIC ]
+            </button>
+        </div>
+    </div>
+
+    <!-- Responsive Waveform Canvas Container -->
+    <div style="width: 100%; height: 80px; position: relative; background-color: #010801; border: 1px solid var(--term-green-dark, #003311);">
+        <canvas id="micWaveformCanvas" style="width: 100%; height: 100%; display: block;"></canvas>
+    </div>
+</div>
+
+<script>
+    let audioCtx = null;
+    let analyser = null;
+    let micStream = null;
+    let dataArray = null;
+    let isMicActive = false;
+    let phase = 0;
+
+    const canvas = document.getElementById('micWaveformCanvas');
+    const ctx = canvas.getContext('2d');
+    const micDbReadout = document.getElementById('micDbReadout');
+    const startMicBtn = document.getElementById('startMicBtn');
+
+    // Handle high-DPI and responsive window resizing
+    function resizeCanvas() {
+        if (!canvas) return;
+        const rect = canvas.getBoundingClientRect();
+        canvas.width = rect.width * window.devicePixelRatio;
+        canvas.height = rect.height * window.devicePixelRatio;
+        ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+    }
+
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    async function initMicTelemetry() {
+        if (isMicActive) return;
+
+        try {
+            micStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            
+            const source = audioCtx.createMediaStreamSource(micStream);
+            analyser = audioCtx.createAnalyser();
+            analyser.fftSize = 512;
+            analyser.smoothingTimeConstant = 0.8;
+
+            source.connect(analyser);
+
+            const bufferLength = analyser.frequencyBinCount;
+            dataArray = new Uint8Array(bufferLength);
+
+            isMicActive = true;
+            startMicBtn.innerText = '[ MIC ACTIVE ]';
+            startMicBtn.style.borderColor = 'var(--term-blue, #00ccff)';
+            startMicBtn.style.color = 'var(--term-blue, #00ccff)';
+
+            drawWaveform();
+        } catch (err) {
+            console.error('Microphone access denied or unsupported:', err);
+            startMicBtn.innerText = '[ PERMISSION DENIED ]';
+            startMicBtn.style.borderColor = 'var(--term-red, #ff3333)';
+            startMicBtn.style.color = 'var(--term-red, #ff3333)';
+        }
+    }
+
+    function drawWaveform() {
+        requestAnimationFrame(drawWaveform);
+
+        const width = canvas.getBoundingClientRect().width;
+        const height = canvas.getBoundingClientRect().height;
+        const centerY = height / 2;
+
+        ctx.clearRect(0, 0, width, height);
+
+        // Draw background grid lines (Terminal style)
+        ctx.strokeStyle = 'rgba(0, 51, 17, 0.4)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(0, centerY);
+        ctx.lineTo(width, centerY);
+        ctx.stroke();
+
+        let volumeRms = 0;
+
+        if (isMicActive && analyser) {
+            analyser.getByteFrequencyData(dataArray);
+
+            // Compute Root Mean Square (RMS) volume level
+            let sum = 0;
+            for (let i = 0; i < dataArray.length; i++) {
+                sum += dataArray[i] * dataArray[i];
+            }
+            volumeRms = Math.sqrt(sum / dataArray.length);
+
+            // Update dB Gain Display
+            const dbVal = Math.min(Math.round((volumeRms / 255) * 100), 100);
+            micDbReadout.innerText = `[ GAIN: ${dbVal.toFixed(1)} dB ]`;
+        }
+
+        // Render Sine Wave
+        ctx.beginPath();
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = isMicActive ? '#00ff66' : '#003311';
+        ctx.shadowBlur = isMicActive ? 8 : 0;
+        ctx.shadowColor = '#00ff66';
+
+        // Amplitude scales smoothly with mic volume
+        const maxAmplitude = height * 0.4;
+        const targetAmplitude = (volumeRms / 128) * maxAmplitude;
+        const baseBaselineAmp = isMicActive ? Math.max(3, targetAmplitude) : 1;
+
+        phase += 0.08;
+
+        for (let x = 0; x < width; x++) {
+            // Complex multi-frequency sine equation for organic oscilloscope appearance
+            const freq1 = 0.02;
+            const freq2 = 0.04;
+            const sineY = Math.sin(x * freq1 + phase) * baseBaselineAmp 
+                        + Math.sin(x * freq2 - phase * 0.5) * (baseBaselineAmp * 0.3);
+
+            const y = centerY + sineY;
+
+            if (x === 0) {
+                ctx.moveTo(x, y);
+            } else {
+                ctx.lineTo(x, y);
+            }
+        }
+
+        ctx.stroke();
+    }
+
+    // Initial render call to show stationary baseline
+    drawWaveform();
+</script>
+
     <?php if (empty($filteredRoster)): ?>
         <div class="feature-card" style="grid-column: 1 / -1;">
             <div class="feature-title" style="color: var(--accent-red);">No Active Personnel Found</div>
