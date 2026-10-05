@@ -1,76 +1,224 @@
 <?php
 /**
- * Shared Admin Header - Access Controlled & Expanded Navigation
- * Path: includes/adminHeader.php
+ * Trust Administrator - Core Layout Header & Side Navigation
+ * Path: trust-main/includes/adminHeader.php
  */
 
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
-// Strict Access Guard: Only TRUST_ADMIN is permitted.
-// Non-admin or unauthenticated requests are redirected immediately to the First Responder interface.
-$userRole = $_SESSION['user']['role'] ?? null;
-
-if (!isset($_SESSION['user']) || $userRole !== 'TRUST_ADMIN') {
-    header('Location: /responder/index.php');
-    exit;
-}
-
-$adminName      = $_SESSION['user']['name'] ?? 'TRUST ADMINISTRATOR';
-$loginTimestamp = $_SESSION['user']['login_time'] ?? time();
-$loginFormatted = date('Y-m-d H:i:s T', $loginTimestamp);
-
-// Active tab highlighting helper
-$currentScript = basename($_SERVER['PHP_SELF']);
+$currentPage = basename($_SERVER['PHP_SELF']);
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= htmlspecialchars($pageTitle ?? 'TRUST ADMIN // TERMINAL CONSOLE') ?></title>
+    <title><?= $pageTitle ?? 'TRUST ADMIN CONSOLE' ?></title>
+    <style>
+        :root {
+            --term-green: #00ff66;
+            --term-green-dim: #009933;
+            --term-green-dark: #003311;
+            --term-blue: #00ccff;
+            --term-red: #ff3333;
+            --term-black: #050b05;
+            --term-bg-dark: #0a140a;
+            --term-glow: rgba(0, 255, 102, 0.2);
+            --font-terminal: 'Courier New', Courier, monospace;
+        }
 
-    <!-- Shared 1980s Terminal Stylesheet -->
-    <link rel="stylesheet" href="/css/style.css">
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--term-black);
+            color: var(--term-green);
+            font-family: var(--font-terminal);
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Side Menu Layout */
+        .admin-sidebar {
+            width: 260px;
+            background-color: var(--term-bg-dark);
+            border-right: 2px solid var(--term-green-dark);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 20px 0;
+            flex-shrink: 0;
+        }
+
+        .sidebar-brand {
+            padding: 0 20px 20px 20px;
+            border-bottom: 1px solid var(--term-green-dark);
+            margin-bottom: 20px;
+        }
+
+        .sidebar-brand h1 {
+            font-size: 1.1rem;
+            letter-spacing: 1px;
+            color: var(--term-green);
+        }
+
+        .sidebar-brand span {
+            font-size: 0.75rem;
+            color: var(--term-green-dim);
+            display: block;
+            margin-top: 4px;
+        }
+
+        .nav-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            padding: 0 10px;
+        }
+
+        .nav-item a {
+            display: flex;
+            align-items: center;
+            padding: 10px 14px;
+            color: var(--term-green-dim);
+            text-decoration: none;
+            font-size: 0.88rem;
+            border: 1px solid transparent;
+            transition: all 0.15s ease-in-out;
+        }
+
+        .nav-item a:hover {
+            color: var(--term-green);
+            background-color: rgba(0, 255, 102, 0.05);
+            border-color: var(--term-green-dark);
+        }
+
+        .nav-item.active a {
+            color: var(--term-black);
+            background-color: var(--term-green);
+            font-weight: bold;
+            border-color: var(--term-green);
+            box-shadow: 0 0 8px var(--term-glow);
+        }
+
+        .nav-item.active-blue a {
+            color: var(--term-black);
+            background-color: var(--term-blue);
+            font-weight: bold;
+            border-color: var(--term-blue);
+        }
+
+        .sidebar-footer {
+            padding: 15px 20px 0 20px;
+            border-top: 1px solid var(--term-green-dark);
+            font-size: 0.75rem;
+            color: var(--term-green-dim);
+        }
+
+        /* Main Content Viewport */
+        .admin-main-viewport {
+            flex: 1;
+            padding: 24px;
+            overflow-y: auto;
+            background-color: var(--term-black);
+        }
+
+        /* Shared UI Cards & Utility CSS */
+        .card {
+            background-color: var(--term-bg-dark);
+            border: 1px solid var(--term-green-dark);
+            padding: 16px;
+            border-radius: 2px;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--term-green-dark);
+        }
+
+        .card-title {
+            font-size: 0.95rem;
+            color: var(--term-green);
+        }
+
+        .blue-link {
+            color: var(--term-blue) !important;
+            text-decoration: none;
+        }
+
+        .blue-link:hover {
+            text-decoration: underline;
+        }
+
+        .btn-terminal {
+            background-color: var(--term-black);
+            border: 1px solid var(--term-green);
+            color: var(--term-green);
+            font-family: var(--font-terminal);
+            cursor: pointer;
+        }
+
+        .live-stream-tag {
+            color: var(--term-green);
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.3; }
+            100% { opacity: 1; }
+        }
+    </style>
 </head>
 <body>
 
-    <!-- Upper Admin Navigation Header -->
-    <header class="admin-header">
-        <div class="admin-meta-box">
-            <div class="admin-name">
-                &#9889; TRUST-MAIN <span style="color: var(--term-green-dim);">//</span> ADMIN CONSOLE
-                <span class="admin-badge">SOLE TRUST ADMIN</span>
-            </div>
-            <div class="session-stats">
-                ADMIN: <span style="color: var(--term-green);"><?= htmlspecialchars($adminName) ?></span> &bull; 
-                LOGGED IN: <span><?= $loginFormatted ?></span> &bull; 
-                SESSION DURATION: <span id="sessionTimerHeader" class="session-timer">00:00:00</span>
-            </div>
+<!-- Side Navigation Menu -->
+<aside class="admin-sidebar">
+    <div>
+        <div class="sidebar-brand">
+            <h1>&gt; TRUST_ADMIN</h1>
+            <span>VERSION 2.6.0 // SECURE</span>
         </div>
 
-        <nav style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
-            <div class="live-stream-tag">&#9673; RESTRICTED ADMIN FEED</div>
-            
-            <!-- Dynamic Navigation Tabs -->
-            <div style="font-size: 0.82rem; display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end;">
-                <a href="trust-admin.php" class="blue-link <?= $currentScript === 'trust-admin.php' ? 'nav-active' : '' ?>">[ CONSOLE ]</a>
-                <a href="accounts-manager.php" class="blue-link <?= $currentScript === 'accounts-manager.php' ? 'nav-active' : '' ?>">[ ACCOUNTS ]</a>
-                <a href="audit-logs.php" class="blue-link <?= $currentScript === 'audit-logs.php' ? 'nav-active' : '' ?>">[ AUDIT LOGS ]</a>
-                <a href="roster.php" class="blue-link <?= $currentScript === 'roster.php' ? 'nav-active' : '' ?>">[ ROSTER ]</a>
-                <a href="guide.php" class="blue-link <?= $currentScript === 'guide.php' ? 'nav-active' : '' ?>">[ MANUAL ]</a>
-                <a href="logout.php" class="blue-link" style="color: var(--term-red) !important;">[ LOG OUT ]</a>
-            </div>
-        </nav>
-    </header>
+        <ul class="nav-list">
+            <li class="nav-item <?= $currentPage === 'dashboard.php' || $currentPage === 'index.php' ? 'active' : '' ?>">
+                <a href="dashboard.php">&gt; DASHBOARD</a>
+            </li>
 
-    <!-- Voice Activation Banner -->
-    <div class="voice-marquee-container">
-        <div class="voice-marquee-text">
-            &#9888;&#65039; THIS APP IS COMPLETELY VOICE ACTIVATED. PLEASE REFER TO THE USER'S MANUAL. &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &#9888;&#65039; THIS APP IS COMPLETELY VOICE ACTIVATED. PLEASE REFER TO THE USER'S MANUAL.
-        </div>
+            <li class="nav-item <?= $currentPage === 'accounts.php' ? 'active' : '' ?>">
+                <a href="accounts.php">&gt; ACCOUNTS &amp; YIELD</a>
+            </li>
+
+            <!-- Added Audit Logs Item -->
+            <li class="nav-item <?= $currentPage === 'audit-logs.php' ? 'active-blue' : '' ?>">
+                <a href="audit-logs.php" style="<?= $currentPage === 'audit-logs.php' ? '' : 'color: var(--term-blue);' ?>">
+                    &gt; AUDIT &amp; TELEMETRY
+                </a>
+            </li>
+
+            <li class="nav-item <?= $currentPage === 'cron-settings.php' ? 'active' : '' ?>">
+                <a href="cron-settings.php">&gt; CRON ENGINE</a>
+            </li>
+
+            <li class="nav-item <?= $currentPage === 'security.php' ? 'active' : '' ?>">
+                <a href="security.php">&gt; SYSTEM SECURITY</a>
+            </li>
+        </ul>
     </div>
 
-    <!-- Main Content Wrapper -->
-    <main class="main-content-wrapper">
+    <div class="sidebar-footer">
+        <div>USER: <?= htmlspecialchars($_SESSION['user']['username'] ?? 'ADMIN') ?></div>
+        <div style="margin-top: 6px;">
+            <a href="/responder/logout.php" style="color: var(--term-red); text-decoration: none;">[ LOGOUT ]</a>
+        </div>
+    </div>
+</aside>
+
+<!-- Main Page Viewport Container Starts Here -->
+<main class="admin-main-viewport">
