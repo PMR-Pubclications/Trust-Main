@@ -4,7 +4,7 @@
   "private": true,
   "description": "Trust-Main automated trust and governance framework",
   "scripts": {
-    "lint": "echo 'No automated lint configuration configured for this repository yet.'",
+    "lint": "npx --yes htmlhint index.html asset/html/onboarding.html asset/html/firstResponders-admin.html asset/html/legacy-trust-desktop.html asset/html/First-Responder-Scene-login.html",
     "test": "echo 'No automated test suite configured for this repository yet.'",
     "start": "echo 'Static repository; open the HTML entry points directly in a browser or serve with a static web server.'"
   },
