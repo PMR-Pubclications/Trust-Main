@@ -26,6 +26,23 @@ REPO_ROOT = FOLDER.parent.parent
 FERNETICS_AI_DIR = FOLDER / "ferensics-ai"
 
 
+ALIAS_MAP = {
+    "agent loop": FOLDER / "agent_loop.py",
+    "opensea": FOLDER / "opensea-agent-access.py",
+    "google drive": FOLDER / "access-google-drive.py",
+    "secure google drive": FOLDER / "secure-googledive-access.py",
+    "sweep ellipal": FOLDER / "sweep_to_ellipal.py",
+    "etherscan": FOLDER / "etherscan-data-api.py",
+    "liquid": FOLDER / "liquid-installer.py",
+    "ferensics ai server": FERNETICS_AI_DIR / "ferensicAIserver.py",
+    "video ballistics": FERNETICS_AI_DIR / "video_ballistics.py",
+    "ballistics comparator": FERNETICS_AI_DIR / "ballistics_comparator.py",
+    "forensic physics": FERNETICS_AI_DIR / "forensic_physics.py",
+    "train forensic slm": FERNETICS_AI_DIR / "train_forensic_slm.py",
+    "sft trainer": FERNETICS_AI_DIR / "SFTTrainer.py",
+}
+
+
 def normalize(value: str) -> str:
     return "".join(ch.lower() for ch in value if ch.isalnum() or ch in {"-", "_", " "}).replace("  ", " ").strip()
 
@@ -49,6 +66,14 @@ def ferensics_ai_scripts() -> list[Path]:
 def get_script_matches(query: str) -> list[Path]:
     cleaned = normalize(query)
     matches: list[Path] = []
+
+    # An exact alias or script name wins over fuzzy keyword matching.
+    for alias, path in ALIAS_MAP.items():
+        if cleaned == alias and path.exists():
+            return [path]
+    for path in script_catalog() + ferensics_ai_scripts():
+        if cleaned and cleaned == normalize(path.stem).replace("-", " ").replace("_", " "):
+            return [path]
 
     # Match direct folder scripts in asset/py.
     for path in script_catalog():
@@ -86,21 +111,7 @@ def get_script_matches(query: str) -> list[Path]:
 
     # Fallback alias-based matches for filename routing.
     if not matches:
-        alias_map = {
-            "agent loop": FOLDER / "agent_loop.py",
-            "opensea": FOLDER / "opensea-agent-access.py",
-            "google drive": FOLDER / "access-google-drive.py",
-            "secure google drive": FOLDER / "secure-googledive-access.py",
-            "sweep ellipal": FOLDER / "sweep_to_ellipal.py",
-            "etherscan": FOLDER / "etherscan-data-api.py",
-            "liquid": FOLDER / "liquid-installer.py",
-            "ferensics ai server": FERNETICS_AI_DIR / "ferensicAIserver.py",
-            "video ballistics": FERNETICS_AI_DIR / "video_ballistics.py",
-            "ballistics comparator": FERNETICS_AI_DIR / "ballistics_comparator.py",
-            "forensic physics": FERNETICS_AI_DIR / "ferensics _physcs.py",
-            "train forensic slm": FERNETICS_AI_DIR / "train_forensic_slm.py",
-            "sft trainer": FERNETICS_AI_DIR / "SFTTrainer.py",
-        }
+        alias_map = ALIAS_MAP
         for alias, path in alias_map.items():
             if cleaned == alias or alias in cleaned:
                 if path.exists():
@@ -129,7 +140,7 @@ def run_script(script_path: Path) -> int:
         return 1
 
     print(f"Running: {script_path.relative_to(REPO_ROOT)}")
-    result = subprocess.run([sys.executable, str(script_path)], cwd=str(FOLDER))
+    result = subprocess.run([sys.executable, str(script_path)], cwd=str(script_path.parent))
     return result.returncode
 
 

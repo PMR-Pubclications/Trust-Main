@@ -20,7 +20,7 @@ jobs:
           
       - name: Build C++ Engine
         run: |
-          cd audio_video_engine
+          cd asset/cpp
           cmake -B build -DCMAKE_BUILD_TYPE=Release
           cmake --build build --config Release
 
@@ -39,5 +39,5 @@ jobs:
 
       - name: Build Java Package (FAT JAR)
         run: |
-          cd ballistics_analysis
+          cd asset/java/ballisticVideoAnalysis
           mvn clean package
