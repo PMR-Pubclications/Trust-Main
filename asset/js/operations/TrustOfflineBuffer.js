@@ -273,3 +273,37 @@ class TrustOfflineBuffer {
         return this.keyManager.signPayload(jsonString);
     }
 }
+
+// Inside TrustOfflineBuffer.js
+const TrustDatabaseMaintenance = require('./TrustDatabaseMaintenance');
+
+class TrustOfflineBuffer {
+    constructor(dbPath = '/var/lib/trust_shell/trust_shell_queue.db', trustMainEndpoint) {
+        this.dbPath = dbPath;
+        this.trustMainEndpoint = trustMainEndpoint;
+        this.db = new Database(this.dbPath);
+
+        // Attach database storage maintenance
+        this.maintenance = new TrustDatabaseMaintenance(this.db, {
+            journalSizeLimit: 16 * 1024 * 1024, // 16MB WAL limit
+            checkpointIntervalMs: 15 * 60 * 1000 // Run every 15 minutes
+        });
+
+        this._initDatabase();
+        this.maintenance.startScheduledMaintenance();
+    }
+
+    /**
+     * Trigger explicit checkpoint after large sync batches to keep disk footprint small
+     */
+    async processQueue(maxRetries = 5) {
+        const result = await super.processQueue(maxRetries);
+
+        // Force WAL truncation after processing queued records
+        if (result.synced > 0) {
+            this.maintenance.checkpointWal();
+        }
+
+        return result;
+    }
+}
