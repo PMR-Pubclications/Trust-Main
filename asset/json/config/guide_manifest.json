@@ -1,0 +1,66 @@
+{
+  "app_name": "Trust-Shell",
+  "current_version": "2.5.0",
+  "last_updated": "2026-10-05",
+  "categories": [
+    {
+      "id": "core_ops",
+      "title": "Core Field Operations"
+    },
+    {
+      "id": "security",
+      "title": "Hardware & Cryptography"
+    },
+    {
+      "id": "sync_purge",
+      "title": "Queue & Zero-Retention Sync"
+    }
+  ],
+  "features": [
+    {
+      "id": "offline_buffering",
+      "category": "core_ops",
+      "title": "Offline SQLite Queueing",
+      "added_in_version": "1.0.0",
+      "last_updated_version": "2.4.0",
+      "roles": ["POLICE", "FIRE", "EMS", "DOT", "LIFEGUARD"],
+      "summary": "Automatically captures and holds encrypted telemetry and photos during network blackouts.",
+      "instructions": [
+        "Initiate scene recording via the primary shell command or interface.",
+        "If network connectivity drops, the header telemetry indicator shifts to 'OFFLINE_BUFFER'.",
+        "Do not forcibly power off device while 'Pending Queue' count is above 0."
+      ],
+      "troubleshooting": "If queue fails to flush upon reconnecting, run `trust-shell sync --force` from local console."
+    },
+    {
+      "id": "tpm_signing",
+      "category": "security",
+      "title": "TPM 2.0 / Secure Enclave Signing",
+      "added_in_version": "2.1.0",
+      "last_updated_version": "2.5.0",
+      "roles": ["POLICE", "FIRE", "EMS"],
+      "summary": "Binds every payload and scene photo to hardware cryptoprocessor keys before writing to buffer.",
+      "instructions": [
+        "Verify system startup shows 'HARDWARE_BOUND' status on boot.",
+        "All generated HMAC signatures are auto-appended to payload metadata headers.",
+        "If hardware key context breaks, the app switches to software fallback mode with an audit flag."
+      ],
+      "troubleshooting": "Re-run `trust-shell-tpm-init` if hardware context path `/var/lib/trust_shell/tpm_hmac.ctx` is lost."
+    },
+    {
+      "id": "audit_syslog",
+      "category": "sync_purge",
+      "title": "Journald Audit Logging & Local Purge",
+      "added_in_version": "2.5.0",
+      "last_updated_version": "2.5.0",
+      "roles": ["POLICE", "FIRE", "EMS", "DOT", "LIFEGUARD"],
+      "summary": "Writes cryptographically verified delivery receipts to systemd journald before zero-filling local SQLite records.",
+      "instructions": [
+        "Upon receipt of valid server signature (X-Trust-Main-Signature), payload is logged to journald.",
+        "Local SQLite row is immediately deleted via `DELETE FROM payload_queue`.",
+        "No manual intervention required; purge is fully automated."
+      ],
+      "troubleshooting": "Inspect audit logs via `sudo journalctl -u trust-shell.service -g TRUST-AUDIT`."
+    }
+  ]
+}
