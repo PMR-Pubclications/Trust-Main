@@ -1,0 +1,21 @@
+[Unit]
+Description=Trust Platform - EMS AI Service
+After=trust-firstresponder.service
+Wants=trust-firstresponder.service
+
+[Service]
+Type=simple
+User=trust
+Group=trust
+WorkingDirectory=/opt/trust/modules/ems
+ExecStart=/usr/bin/python3 /opt/trust/modules/ems/ems_service.py
+Restart=always
+RestartSec=3s
+
+# Process Environment
+Environment=PYTHONUNBUFFERED=1
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
