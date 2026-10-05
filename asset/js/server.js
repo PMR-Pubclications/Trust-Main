@@ -443,3 +443,106 @@ function checkFirstLaunch() {
 
 // Run during app startup
 checkFirstLaunch();
+
+
+// Trust-Main: routes/deviceProvisioning.js
+const express = require('express');
+const router = express.Router();
+const db = require('../db'); // Database pool connection
+const jwt = require('jsonwebtoken');
+
+/**
+ * Step 1: Handshake check on every App Launch / Reinstall
+ */
+router.post('/api/v1/device/handshake', async (req, res) => {
+    const { hardware_uuid } = req.body;
+    const client_ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+
+    if (!hardware_uuid) {
+        return res.status(400).json({ error: "HARDWARE_UUID_REQUIRED" });
+    }
+
+    try {
+        // Query device lock state in Trust-Main
+        const query = 'SELECT agency_id, status FROM registered_devices WHERE hardware_uuid = $1';
+        const result = await db.query(query, [hardware_uuid]);
+
+        if (result.rows.length === 0) {
+            // Device has never been provisioned
+            return res.json({
+                provisioned: false,
+                status: "UNPROVISIONED",
+                message: "Device requires initial agency authentication."
+            });
+        }
+
+        const device = result.rows[0];
+
+        // Audit IP update on Trust-Main
+        await db.query(
+            'UPDATE registered_devices SET last_known_ip = $1 WHERE hardware_uuid = $2',
+            [client_ip, hardware_uuid]
+        );
+
+        // Issue signed, agency-restricted session token
+        const agencyToken = jwt.sign(
+            { 
+                hardware_uuid, 
+                agency: device.agency_id, 
+                locked: true 
+            },
+            process.env.TRUST_MAIN_PRIVATE_KEY,
+            { expiresIn: '30d' }
+        );
+
+        return res.json({
+            provisioned: true,
+            status: "LOCKED",
+            agency: device.agency_id,
+            token: agencyToken
+        });
+
+    } catch (err) {
+        console.error("Handshake error:", err);
+        return res.status(500).json({ error: "INTERNAL_TRUST_MAIN_ERROR" });
+    }
+});
+
+/**
+ * Step 2: One-time Agency Bind (First Boot Only)
+ */
+router.post('/api/v1/device/provision', async (req, res) => {
+    const { hardware_uuid, agency_credentials, requested_agency } = req.body;
+    const client_ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+
+    // Verify agency auth credentials (e.g., Badge/Admin token)
+    const isValidAgencyAuth = await verifyAgencyAuth(agency_credentials, requested_agency);
+    if (!isValidAgencyAuth) {
+        return res.status(401).json({ error: "INVALID_AGENCY_CREDENTIALS" });
+    }
+
+    try {
+        // Insert device binding into Trust-Main DB
+        const insertQuery = `
+            INSERT INTO registered_devices (hardware_uuid, agency_id, initial_ip, last_known_ip)
+            VALUES ($1, $2, $3, $3)
+            RETURNING agency_id;
+        `;
+        const result = await db.query(insertQuery, [hardware_uuid, requested_agency, client_ip]);
+
+        return res.json({
+            success: true,
+            status: "PERMANENTLY_LOCKED",
+            agency: result.rows[0].agency_id
+        });
+
+    } catch (err) {
+        if (err.code === '23505') { // Unique constraint violation
+            return res.status(409).json({ error: "DEVICE_ALREADY_BOUND_TO_AGENCY" });
+        }
+        return res.status(500).json({ error: "PROVISIONING_FAILED" });
+    }
+});
+
+module.exports = router;
+
