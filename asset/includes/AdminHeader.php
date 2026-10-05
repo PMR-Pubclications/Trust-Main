@@ -1,6 +1,6 @@
 <?php
 /**
- * Shared Admin Header - Access Controlled
+ * Shared Admin Header - Access Controlled & Expanded Navigation
  * Path: includes/adminHeader.php
  */
 
@@ -9,7 +9,7 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 // Strict Access Guard: Only TRUST_ADMIN is permitted.
-// Anyone else (or unauthenticated users) is immediately redirected to the First Responder interface.
+// Non-admin or unauthenticated requests are redirected immediately to the First Responder interface.
 $userRole = $_SESSION['user']['role'] ?? null;
 
 if (!isset($_SESSION['user']) || $userRole !== 'TRUST_ADMIN') {
@@ -20,6 +20,9 @@ if (!isset($_SESSION['user']) || $userRole !== 'TRUST_ADMIN') {
 $adminName      = $_SESSION['user']['name'] ?? 'TRUST ADMINISTRATOR';
 $loginTimestamp = $_SESSION['user']['login_time'] ?? time();
 $loginFormatted = date('Y-m-d H:i:s T', $loginTimestamp);
+
+// Active tab highlighting helper
+$currentScript = basename($_SERVER['PHP_SELF']);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -33,7 +36,7 @@ $loginFormatted = date('Y-m-d H:i:s T', $loginTimestamp);
 </head>
 <body>
 
-    <!-- Upper Left Admin Navigation Header -->
+    <!-- Upper Admin Navigation Header -->
     <header class="admin-header">
         <div class="admin-meta-box">
             <div class="admin-name">
@@ -47,12 +50,16 @@ $loginFormatted = date('Y-m-d H:i:s T', $loginTimestamp);
             </div>
         </div>
 
-        <nav style="display: flex; flex-direction: column; align-items: flex-end; gap: 6px;">
+        <nav style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
             <div class="live-stream-tag">&#9673; RESTRICTED ADMIN FEED</div>
-            <div style="font-size: 0.85rem; display: flex; gap: 15px;">
-                <a href="trust-admin.php" class="blue-link">[ ADMIN CONSOLE ]</a>
-                <a href="roster.php" class="blue-link">[ DUTY ROSTER ]</a>
-                <a href="guide.php" class="blue-link">[ USER MANUAL ]</a>
+            
+            <!-- Dynamic Navigation Tabs -->
+            <div style="font-size: 0.82rem; display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end;">
+                <a href="trust-admin.php" class="blue-link <?= $currentScript === 'trust-admin.php' ? 'nav-active' : '' ?>">[ CONSOLE ]</a>
+                <a href="accounts-manager.php" class="blue-link <?= $currentScript === 'accounts-manager.php' ? 'nav-active' : '' ?>">[ ACCOUNTS ]</a>
+                <a href="audit-logs.php" class="blue-link <?= $currentScript === 'audit-logs.php' ? 'nav-active' : '' ?>">[ AUDIT LOGS ]</a>
+                <a href="roster.php" class="blue-link <?= $currentScript === 'roster.php' ? 'nav-active' : '' ?>">[ ROSTER ]</a>
+                <a href="guide.php" class="blue-link <?= $currentScript === 'guide.php' ? 'nav-active' : '' ?>">[ MANUAL ]</a>
                 <a href="logout.php" class="blue-link" style="color: var(--term-red) !important;">[ LOG OUT ]</a>
             </div>
         </nav>
