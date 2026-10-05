@@ -5,7 +5,8 @@
  * 
  * Clearance Level: SOLE TRUST ADMIN ONLY
  * Features: Live stream inspection, SHA-256 verification hash checks,
- * filtering by log source, log clearing, plain text download, and AJAX auto-polling.
+ * filtering by log source, real-time client-side keyword search, log clearing,
+ * plain text download, and AJAX auto-polling.
  */
 
 if (session_status() === PHP_SESSION_NONE) {
@@ -67,7 +68,7 @@ function renderFormattedLogEntries($path) {
     $html = '';
     foreach ($logLines as$index => $line) {$formattedLine = htmlspecialchars($line);$formattedLine = preg_replace('/(TX_HASH:[a-f0-9\.\.]+)/i', '<span style="color: var(--term-blue); font-weight: bold;">$1</span>', $formattedLine);$formattedLine = preg_replace('/(\[\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\])/', '<span style="color: var(--term-green-dim);">$1</span>', $formattedLine);$formattedLine = preg_replace('/(TYPE:RECEIVABLE)/', '<span style="color: var(--term-green); font-weight: bold;">$1</span>', $formattedLine);$formattedLine = preg_replace('/(TYPE:LIABLE)/', '<span style="color: var(--term-red); font-weight: bold;">$1</span>',$formattedLine);
 
-        $html .= '<div style="margin-bottom: 4px; white-space: pre-wrap; word-break: break-all;">'
+        $html .= '<div class="log-line" style="margin-bottom: 4px; white-space: pre-wrap; word-break: break-all;">'
               . '<span style="color: var(--term-green-dark); margin-right: 8px;">' . sprintf('%04d', $index + 1) . '|</span>' 
               . $formattedLine 
               . '</div>';
@@ -173,11 +174,19 @@ $lineCount = file_exists($logPath) ? count(array_filter(explode("\n", trim(file_
     </div>
 </div>
 
-<!-- Terminal CRT Output Window -->
+<!-- Terminal CRT Output Window Container -->
 <div class="card" style="background-color: var(--term-black); border: 2px solid var(--term-green); box-shadow: 0 0 12px var(--term-glow);">
     <div class="card-header">
         <h2 class="card-title">&gt; STREAM: <?= $currentLog['name'] ?></h2>
         <span id="pollPulseTag" class="live-stream-tag" style="font-size: 0.75rem;">&#9673; LIVE STREAM ACTIVE</span>
+    </div>
+
+    <!-- Live Client-Side Search Bar -->
+    <div style="display: flex; gap: 10px; align-items: center; padding: 10px; background-color: var(--term-bg-dark); border-bottom: 1px solid var(--term-green-dark); margin-bottom: 10px;">
+        <span style="color: var(--term-green); font-size: 0.85rem; font-weight: bold; white-space: nowrap;">&gt; FILTER STREAM:</span>
+        <input type="text" id="logSearchInput" placeholder="Enter keyword (e.g., RECEIVABLE, ACH_SWEEP, TX_HASH, 2026)..." oninput="filterLogLines();" style="flex: 1; background-color: #000; color: var(--term-green); border: 1px solid var(--term-green-dark); padding: 6px 12px; font-family: var(--font-terminal); font-size: 0.85rem; outline: none;">
+        <button class="blue-link" onclick="clearLogFilter();" style="background: none; border: 1px solid var(--term-green-dark); padding: 5px 10px; font-size: 0.8rem; cursor: pointer; white-space: nowrap;">[ CLEAR ]</button>
+        <span id="matchCountBadge" style="font-size: 0.8rem; color: var(--term-blue); white-space: nowrap;">[ MATCHES: ALL ]</span>
     </div>
 
     <!-- Terminal Display Container -->
@@ -196,7 +205,7 @@ $lineCount = file_exists($logPath) ? count(array_filter(explode("\n", trim(file_
     </div>
 </div>
 
-<!-- AJAX Polling Script -->
+<!-- AJAX Polling & Live Search Script -->
 <script>
     const currentLogKey = "<?= $selectedLog ?>";
     let isPolling = true;
@@ -207,6 +216,45 @@ $lineCount = file_exists($logPath) ? count(array_filter(explode("\n", trim(file_
         if (term) term.scrollTop = term.scrollHeight;
     }
 
+    // Client-side real-time filtering engine
+    function filterLogLines() {
+        const inputElem = document.getElementById('logSearchInput');
+        if (!inputElem) return;
+
+        const query = inputElem.value.toLowerCase().trim();
+        const lines = document.querySelectorAll('#terminalWindow .log-line');
+        const badge = document.getElementById('matchCountBadge');
+        let visibleCount = 0;
+
+        lines.forEach(line => {
+            const text = (line.textContent || line.innerText).toLowerCase();
+            if (query === '' || text.includes(query)) {
+                line.style.display = 'block';
+                visibleCount++;
+            } else {
+                line.style.display = 'none';
+            }
+        });
+
+        if (badge) {
+            if (query === '') {
+                badge.innerText = `[ MATCHES: ALL (${lines.length}) ]`;
+                badge.style.color = 'var(--term-blue)';
+            } else {
+                badge.innerText = `[ MATCHES: ${visibleCount} / ${lines.length} ]`;
+                badge.style.color = visibleCount > 0 ? 'var(--term-green)' : 'var(--term-red)';
+            }
+        }
+    }
+
+    function clearLogFilter() {
+        const inputElem = document.getElementById('logSearchInput');
+        if (inputElem) {
+            inputElem.value = '';
+            filterLogLines();
+        }
+    }
+
     function toggleAutoPoll() {
         isPolling = !isPolling;
         const toggleBtn = document.getElementById('pollToggleBtn');
@@ -215,12 +263,12 @@ $lineCount = file_exists($logPath) ? count(array_filter(explode("\n", trim(file_
         if (isPolling) {
             toggleBtn.innerText = '[ AUTO-POLL: ON (5s) ]';
             toggleBtn.style.color = 'var(--term-green)';
-            pulseTag.style.display = 'inline-block';
+            if (pulseTag) pulseTag.style.display = 'inline-block';
             startPolling();
         } else {
             toggleBtn.innerText = '[ AUTO-POLL: PAUSED ]';
             toggleBtn.style.color = 'var(--term-red)';
-            pulseTag.style.display = 'none';
+            if (pulseTag) pulseTag.style.display = 'none';
             stopPolling();
         }
     }
@@ -239,8 +287,11 @@ $lineCount = file_exists($logPath) ? count(array_filter(explode("\n", trim(file_
             })
             .then(data => {
                 if (data.status === 'success') {
-                    // Update content only if changed
+                    // Update content
                     term.innerHTML = data.html;
+
+                    // Re-apply active search filter on freshly injected DOM elements
+                    filterLogLines();
 
                     // Update UI status badges
                     document.getElementById('lineCountVal').innerText = data.line_count;
@@ -248,7 +299,7 @@ $lineCount = file_exists($logPath) ? count(array_filter(explode("\n", trim(file_
                     document.getElementById('lastPollTime').innerText = data.timestamp;
 
                     // Keep view pinned to bottom if user was already at bottom
-                    if (isAtBottom) {
+                    if (isAtBottom && document.getElementById('logSearchInput').value.trim() === '') {
                         scrollToBottom();
                     }
                 }
@@ -269,6 +320,7 @@ $lineCount = file_exists($logPath) ? count(array_filter(explode("\n", trim(file_
 
     // Initialize on page load
     window.addEventListener('DOMContentLoaded', () => {
+        filterLogLines();
         scrollToBottom();
         startPolling();
     });
