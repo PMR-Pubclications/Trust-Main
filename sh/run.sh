@@ -20,3 +20,4 @@ else
     echo "[!] Error: trust_teardown.py not found in the root directory."
     exit 1
 fi
+0 0 * * * /usr/bin/php /path/to/trust-main/cron-process-accounts.php >> /path/to/trust-main/data/cron_execution.log 2>&1
