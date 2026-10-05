@@ -307,3 +307,95 @@ class TrustOfflineBuffer {
         return result;
     }
 }
+
+
+// Inside lib/TrustOfflineBuffer.js
+
+class TrustOfflineBuffer {
+    /**
+     * Verifies server receipt authenticity before executing local database deletion
+     */
+    _verifyServerReceipt(record, receipt, serverSignature) {
+        if (!receipt || receipt.status !== 'VERIFIED_AND_PERSISTED') {
+            console.error(`[DELIVERY ERROR] Server reported processing failure for ${record.queue_id}`);
+            return false;
+        }
+
+        // 1. Check that the server acknowledged the exact record sent
+        if (receipt.queue_id !== record.queue_id || receipt.received_hmac !== record.hmac_signature) {
+            console.error(`[DELIVERY ERROR] Server receipt HMAC/ID mismatch for ${record.queue_id}`);
+            return false;
+        }
+
+        // 2. Validate server's cryptographic response signature
+        const expectedServerSig = crypto
+            .createHmac('sha256', process.env.TRUST_MAIN_SERVER_SECRET || 'SERVER_HANDSHAKE_KEY')
+            .update(`${receipt.queue_id}:${receipt.received_hmac}:${receipt.timestamp}`)
+            .digest('hex');
+
+        const validSig = crypto.timingSafeEqual(
+            Buffer.from(serverSignature || '', 'hex'),
+            Buffer.from(expectedServerSig, 'hex')
+        );
+
+        if (!validSig) {
+            console.error(`[SECURITY WARNING] Invalid server response signature on ${record.queue_id}. Refusing to purge.`);
+            return false;
+        }
+
+        return true;
+    }
+
+    async processQueue(maxRetries = 5) {
+        if (this.isSyncing) return { processed: 0, status: 'ALREADY_RUNNING' };
+
+        const selectStmt = this.db.prepare(`
+            SELECT queue_id, master_shift_hash, payload_json, hmac_signature, retry_count 
+            FROM payload_queue 
+            WHERE status IN ('PENDING', 'FAILED') AND retry_count < ?
+            ORDER BY created_at ASC LIMIT 50
+        `);
+
+        const records = selectStmt.all(maxRetries);
+        let purgedCount = 0;
+
+        for (const record of records) {
+            if (!this.verifyRecordIntegrity(record)) continue;
+
+            try {
+                const response = await fetch(this.trustMainEndpoint, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Trust-Shell-HMAC': record.hmac_signature
+                    },
+                    body: record.payload_json
+                });
+
+                if (response.ok) {
+                    const receipt = await response.json();
+                    const serverSignature = response.headers.get('X-Trust-Main-Signature');
+
+                    // STRICT CHECK: Only execute hard purge if the signed receipt is valid
+                    if (this._verifyServerReceipt(record, receipt, serverSignature)) {
+                        this.db.prepare(`DELETE FROM payload_queue WHERE queue_id = ?`).run(record.queue_id);
+                        purgedCount++;
+                        console.log(`[DELIVERY CONFIRMED] Report ${record.queue_id} persisted on Trust-Main. Local copy purged.`);
+                    } else {
+                        this._markFailed(record.queue_id, record.retry_count, 'SERVER_RECEIPT_VALIDATION_FAILED');
+                    }
+                } else {
+                    this._markFailed(record.queue_id, record.retry_count, `HTTP_${response.status}`);
+                }
+            } catch (err) {
+                this._markFailed(record.queue_id, record.retry_count, err.message);
+            }
+        }
+
+        if (purgedCount > 0) {
+            this._truncateDiskLog();
+        }
+
+        return { processed: records.length, purged: purgedCount };
+    }
+}
