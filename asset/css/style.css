@@ -1,0 +1,321 @@
+/**
+ * Trust-Main Terminal Theme
+ * Path: /css/style.css
+ * 
+ * Aesthetic: 1980s Phosphor CRT Terminal (Green, Black, Electric Blue)
+ */
+
+/* ==========================================================================
+   1. Root Variables & System Setup
+   ========================================================================== */
+:root {
+    /* Color Palette */
+    --term-black: #000000;
+    --term-bg-dark: #020b02;
+    --term-bg-card: #041204;
+    --term-green: #00ff66;
+    --term-green-dim: #009933;
+    --term-green-dark: #003311;
+    --term-blue: #00a8ff;
+    --term-blue-hover: #66c7ff;
+    --term-red: #ff3333;
+    --term-yellow: #facc15;
+
+    /* Glows & Borders */
+    --term-border: #00ff66;
+    --term-border-dim: #004d1a;
+    --term-glow: rgba(0, 255, 102, 0.25);
+    --term-blue-glow: rgba(0, 168, 255, 0.35);
+
+    /* Typography */
+    --font-terminal: "Courier New", Courier, "Lucida Console", Monaco, monospace;
+}
+
+/* ==========================================================================
+   2. Global Resets & CRT Scanline Effects
+   ========================================================================== */
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+html {
+    background-color: var(--term-black);
+    color-scheme: dark;
+}
+
+body {
+    margin: 0;
+    padding: 20px;
+    background-color: var(--term-black);
+    color: var(--term-green);
+    font-family: var(--font-terminal);
+    font-size: 14px;
+    line-height: 1.5;
+    text-shadow: 0 0 4px var(--term-glow);
+    overflow-x: hidden;
+}
+
+/* 1980s CRT Scanline Overlay */
+body::before {
+    content: " ";
+    display: block;
+    position: fixed;
+    top: 0; left: 0; bottom: 0; right: 0;
+    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%);
+    background-size: 100% 4px;
+    z-index: 9999;
+    pointer-events: none;
+    opacity: 0.6;
+}
+
+/* Custom Phosphor Green Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+::-webkit-scrollbar-track {
+    background: var(--term-black);
+    border: 1px solid var(--term-green-dark);
+}
+::-webkit-scrollbar-thumb {
+    background: var(--term-green-dim);
+}
+::-webkit-scrollbar-thumb:hover {
+    background: var(--term-green);
+    box-shadow: 0 0 8px var(--term-green);
+}
+
+/* ==========================================================================
+   3. Typography, Links & Interactive Elements
+   ========================================================================== */
+h1, h2, h3, h4, h5, h6 {
+    color: var(--term-green);
+    font-weight: 700;
+    text-transform: uppercase;
+    margin-top: 0;
+    letter-spacing: 1px;
+}
+
+/* Blue Links & Stream Tags */
+a, .blue-link {
+    color: var(--term-blue) !important;
+    text-decoration: underline;
+    cursor: pointer;
+    font-weight: bold;
+    transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+a:hover, .blue-link:hover {
+    color: var(--term-blue-hover) !important;
+    background-color: var(--term-green-dark);
+    text-shadow: 0 0 6px var(--term-blue-glow);
+}
+
+.live-stream-tag {
+    color: var(--term-blue);
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    animation: pulse-blue 1.5s infinite alternate;
+}
+
+@keyframes pulse-blue {
+    0% { opacity: 0.5; }
+    100% { opacity: 1.0; text-shadow: 0 0 8px var(--term-blue); }
+}
+
+/* ==========================================================================
+   4. Header & Admin Navigation Panels
+   ========================================================================== */
+.admin-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    background-color: var(--term-bg-dark);
+    border: 2px solid var(--term-green);
+    padding: 16px;
+    margin-bottom: 24px;
+    box-shadow: 0 0 10px var(--term-glow);
+}
+
+.admin-meta-box {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.admin-name {
+    font-size: 1.2rem;
+    font-weight: 900;
+    color: var(--term-green);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.admin-badge {
+    color: var(--term-black);
+    background-color: var(--term-green);
+    font-size: 0.75rem;
+    padding: 1px 6px;
+    font-weight: bold;
+    margin-left: 8px;
+}
+
+.session-stats {
+    font-size: 0.85rem;
+    color: var(--term-green-dim);
+}
+
+.session-timer {
+    color: var(--term-blue);
+    font-weight: bold;
+}
+
+/* ==========================================================================
+   5. Grid & Card Container Layouts
+   ========================================================================== */
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+    gap: 20px;
+}
+
+.card {
+    background-color: var(--term-bg-card);
+    border: 1px solid var(--term-green);
+    padding: 16px;
+    position: relative;
+    box-shadow: inset 0 0 6px rgba(0, 255, 102, 0.05);
+}
+
+.card::before {
+    content: "[ MODULE ]";
+    position: absolute;
+    top: -10px;
+    left: 12px;
+    background-color: var(--term-black);
+    padding: 0 6px;
+    font-size: 0.75rem;
+    color: var(--term-green-dim);
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px dashed var(--term-green-dim);
+    padding-bottom: 10px;
+    margin-bottom: 14px;
+}
+
+.card-title {
+    font-size: 1rem;
+    font-weight: bold;
+    margin: 0;
+    color: var(--term-green);
+    text-transform: uppercase;
+}
+
+/* Data & Metric Rows */
+.metric-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--term-green-dark);
+    font-size: 0.85rem;
+}
+
+.metric-label {
+    color: var(--term-green-dim);
+}
+
+.metric-val {
+    font-weight: bold;
+    color: var(--term-green);
+}
+
+/* ==========================================================================
+   6. Buttons & Terminal Controls
+   ========================================================================== */
+.btn-terminal {
+    width: 100%;
+    background-color: var(--term-black);
+    color: var(--term-blue);
+    border: 1px solid var(--term-blue);
+    padding: 10px;
+    font-family: inherit;
+    font-size: 0.85rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    cursor: pointer;
+    margin-top: 15px;
+    transition: all 0.2s;
+}
+
+.btn-terminal:hover {
+    background-color: var(--term-blue);
+    color: var(--term-black);
+    box-shadow: 0 0 10px var(--term-blue);
+}
+
+.btn-terminal:active {
+    transform: translateY(1px);
+}
+
+/* ==========================================================================
+   7. Voice Activation Banner Integration
+   ========================================================================== */
+.voice-marquee-container {
+    width: 100%;
+    overflow: hidden;
+    background-color: var(--term-black);
+    color: var(--term-yellow);
+    padding: 8px 0;
+    margin: 20px 0;
+    border-top: 2px solid var(--term-yellow);
+    border-bottom: 2px solid var(--term-yellow);
+    box-shadow: 0 0 10px rgba(250, 204, 21, 0.2);
+    white-space: nowrap;
+}
+
+.voice-marquee-text {
+    display: inline-block;
+    padding-left: 100%;
+    animation: marquee-scroll 18s linear infinite;
+    font-family: var(--font-terminal);
+    font-size: 0.95rem;
+    font-weight: 800;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+@keyframes marquee-scroll {
+    0%   { transform: translate(0, 0); }
+    100% { transform: translate(-100%, 0); }
+}
+
+.voice-marquee-container:hover .voice-marquee-text {
+    animation-play-state: paused;
+}
+
+/* ==========================================================================
+   8. Form Inputs & Command Line Elements
+   ========================================================================== */
+input[type="text"], input[type="password"], textarea, select {
+    width: 100%;
+    background-color: var(--term-black);
+    border: 1px solid var(--term-green-dim);
+    color: var(--term-green);
+    padding: 8px 12px;
+    font-family: var(--font-terminal);
+    font-size: 0.9rem;
+    margin-bottom: 10px;
+    outline: none;
+}
+
+input[type="text"]:focus, input[type="password"]:focus, textarea:focus, select:focus {
+    border-color: var(--term-blue);
+    box-shadow: 0 0 8px var(--term-blue-glow);
+    color: var(--term-green);
+}
