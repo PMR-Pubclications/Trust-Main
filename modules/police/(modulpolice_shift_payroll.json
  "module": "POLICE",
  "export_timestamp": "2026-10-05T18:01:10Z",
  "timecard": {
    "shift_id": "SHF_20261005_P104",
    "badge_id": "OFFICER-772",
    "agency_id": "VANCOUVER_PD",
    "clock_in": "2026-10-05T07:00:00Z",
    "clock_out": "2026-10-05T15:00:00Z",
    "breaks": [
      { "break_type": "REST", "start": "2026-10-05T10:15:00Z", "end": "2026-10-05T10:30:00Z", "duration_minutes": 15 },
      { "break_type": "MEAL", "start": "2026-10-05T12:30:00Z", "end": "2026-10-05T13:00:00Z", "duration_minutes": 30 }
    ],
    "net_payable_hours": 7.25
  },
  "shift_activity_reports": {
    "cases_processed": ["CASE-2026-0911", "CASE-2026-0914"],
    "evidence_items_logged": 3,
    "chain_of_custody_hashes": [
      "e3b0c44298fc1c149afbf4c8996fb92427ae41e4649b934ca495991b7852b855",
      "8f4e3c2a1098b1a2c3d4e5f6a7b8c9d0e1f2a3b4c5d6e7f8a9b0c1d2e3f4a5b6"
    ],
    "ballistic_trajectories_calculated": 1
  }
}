@@ -1,0 +1,25 @@
+{
+  "module": "POLICE",
+  "export_timestamp": "2026-10-05T18:01:10Z",
+  "timecard": {
+    "shift_id": "SHF_20261005_P104",
+    "badge_id": "OFFICER-772",
+    "agency_id": "VANCOUVER_PD",
+    "clock_in": "2026-10-05T07:00:00Z",
+    "clock_out": "2026-10-05T15:00:00Z",
+    "breaks": [
+      { "break_type": "REST", "start": "2026-10-05T10:15:00Z", "end": "2026-10-05T10:30:00Z", "duration_minutes": 15 },
+      { "break_type": "MEAL", "start": "2026-10-05T12:30:00Z", "end": "2026-10-05T13:00:00Z", "duration_minutes": 30 }
+    ],
+    "net_payable_hours": 7.25
+  },
+  "shift_activity_reports": {
+    "cases_processed": ["CASE-2026-0911", "CASE-2026-0914"],
+    "evidence_items_logged": 3,
+    "chain_of_custody_hashes": [
+      "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "8f4e3c2a1098b1a2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6"
+    ],
+    "ballistic_trajectories_calculated": 1
+  }
+}
