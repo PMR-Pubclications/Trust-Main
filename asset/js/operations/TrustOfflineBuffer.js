@@ -399,3 +399,24 @@ class TrustOfflineBuffer {
         return { processed: records.length, purged: purgedCount };
     }
 }
+
+// Inside lib/TrustOfflineBuffer.js
+const TrustAuditLogger = require('./TrustAuditLogger');
+
+// ... inside processQueue loop ...
+if (response.ok) {
+    const receipt = await response.json();
+    const serverSignature = response.headers.get('X-Trust-Main-Signature');
+
+    if (this._verifyServerReceipt(record, receipt, serverSignature)) {
+        // 1. Commit immutable audit entry to systemd journald before purge
+        TrustAuditLogger.logDeliveryReceipt(receipt);
+
+        // 2. Hard purge local record from SQLite database
+        this.db.prepare(`DELETE FROM payload_queue WHERE queue_id = ?`).run(record.queue_id);
+        purgedCount++;
+    } else {
+        TrustAuditLogger.logDeliveryFailure(record.queue_id, 'INVALID_SERVER_RECEIPT_SIGNATURE');
+        this._markFailed(record.queue_id, record.retry_count, 'SERVER_RECEIPT_VALIDATION_FAILED');
+    }
+}
