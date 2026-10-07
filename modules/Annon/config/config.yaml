@@ -1,0 +1,26 @@
+# config/config.yaml
+system:
+  lab_id: "MOBILE_LAB_01"
+  mode: "active_incident"
+
+audio:
+  sample_rate: 16000
+  wake_word: "Anon"
+  stt_model: "whisper-medium"
+  tts_voice: "en_US-tactical"
+
+models:
+  llm_path: "models/saved_models/forensic_llm.gguf"
+  vector_db_path: "models/checkpoints/vector_store"
+
+agencies:
+  police:
+    endpoint: "http://localhost:5001/api/police"
+  fire:
+    endpoint: "http://localhost:5002/api/fire"
+  ems:
+    endpoint: "http://localhost:5003/api/ems"
+  dot:
+    endpoint: "http://localhost:5004/api/dot"
+  hospital:
+    endpoint: "http://localhost:5005/api/health_records"
