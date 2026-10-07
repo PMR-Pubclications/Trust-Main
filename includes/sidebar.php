@@ -1,13 +1,24 @@
 <?php
 /**
- * Role & Credentials Setup
+ * DYNAMIC SIDEBAR NAVIGATION
  */
-$activeRole = strtolower($activeRole ?? $_SESSION['role'] ?? 'standard');
 
-// Define clearance levels
-$isTrustAdmin = in_array($activeRole, ['trust_admin', 'admin', 'sysadmin']);
-$isResponder  = in_array($activeRole, ['first_responder', 'first_responder_admin', 'responder']);
-$isStandard   = !$isTrustAdmin && !$isResponder;
+// 1. Resolve Active Credentials
+$activeRole = strtolower($activeRole ?? $_SESSION['role'] ?? 'standard');
+$isStandard = !in_array($activeRole, ['trust_admin', 'admin', 'first_responder', 'responder']);
+
+// 2. Load Capabilities Registry (falls back to manifest if file missing)
+$capabilities = file_exists(__DIR__ . '/config/modules.php') 
+    ? require __DIR__ . '/config/modules.php' 
+    : ($manifest['capabilities'] ?? []);
+
+// 3. Filter Capabilities by User Credentials
+$userCapabilities = array_filter($capabilities, function($item) use ($activeRole) {
+    if (empty($item['allowed_roles'])) return true;
+    return in_array($activeRole, $item['allowed_roles']);
+});
+
+$currentPage = basename($_SERVER['PHP_SELF']);
 ?>
 
 <!-- Sidebar Navigation (Left Panel) -->
@@ -20,71 +31,54 @@ $isStandard   = !$isTrustAdmin && !$isResponder;
         <span class="version-badge">v<?= htmlspecialchars($appVersion ?? '1.0') ?></span>
     </div>
 
-    <!-- Search box only visible to Admins and Responders -->
     <?php if (!$isStandard): ?>
-    <form method="GET" class="search-box" action="<?= htmlspecialchars(basename($_SERVER['PHP_SELF'])) ?>">
+    <form method="GET" class="search-box" action="<?= htmlspecialchars($currentPage) ?>">
         <input type="hidden" name="role" value="<?= htmlspecialchars($activeRole) ?>">
         <input type="text" name="q" placeholder="Search roster or guide..." value="<?= htmlspecialchars($searchQuery ?? '') ?>">
     </form>
     <?php endif; ?>
 
-    <!-- System Navigation based on Credentials -->
+    <!-- Dynamically Rendered Capabilities -->
     <div>
         <div class="nav-group-title">
-            <?= $isTrustAdmin ? 'SYSTEM ADMIN CONSOLE' : ($isResponder ? 'RESPONDER SYSTEM' : 'VOICE INTERFACE') ?>
+            <?= $activeRole === 'trust_admin' ? 'TRUST ADMIN CONSOLE' : ($isStandard ? 'VOICE INTERFACE' : 'RESPONDER SYSTEM') ?>
         </div>
-        
+
         <nav class="nav-links">
-            <!-- Duty Roster / Main Screen -->
-            <a href="index.php?role=<?= $activeRole ?>" class="nav-link <?= basename($_SERVER['PHP_SELF']) === 'index.php' ? 'active' : '' ?>">
-                &#128100; <?= $isStandard ? 'Voice Control Screen' : 'Duty Roster' ?>
-            </a>
+            <?php foreach ($userCapabilities as $cap): ?>
+                <?php $isActive = ($currentPage === $cap['url']); ?>
+                <a href="<?= htmlspecialchars($cap['url']) ?>?role=<?= urlencode($activeRole) ?>" 
+                   class="nav-link <?= $isActive ? 'active' : '' ?>">
+                    <?= $cap['icon'] ?> <?= htmlspecialchars($cap['title']) ?>
+                </a>
+            <?php endforeach; ?>
 
-            <!-- 1. TRUST ADMIN EXCLUSIVE LINKS -->
-            <?php if ($isTrustAdmin): ?>
-                <a href="app_status.php?role=<?= $activeRole ?>" class="nav-link <?= basename($_SERVER['PHP_SELF']) === 'app_status.php' ? 'active' : '' ?>">
-                    &#128187; App Behavior & Health
-                </a>
-                <a href="payroll.php?role=<?= $activeRole ?>" class="nav-link <?= basename($_SERVER['PHP_SELF']) === 'payroll.php' ? 'active' : '' ?>">
-                    &#128178; Payroll Maintenance
-                </a>
-                <a href="onboarding.php?role=<?= $activeRole ?>" class="nav-link <?= basename($_SERVER['PHP_SELF']) === 'onboarding.php' ? 'active' : '' ?>">
-                    &#128221; Admin Onboarding
-                </a>
-
-            <!-- 2. FIRST RESPONDER EXCLUSIVE LINKS -->
-            <?php elseif ($isResponder): ?>
-                <a href="guide.php?role=<?= $activeRole ?>" class="nav-link <?= basename($_SERVER['PHP_SELF']) === 'guide.php' ? 'active' : '' ?>">
-                    &#128216; User's Guide
-                </a>
-                <a href="responder_onboarding.php?role=<?= $activeRole ?>" class="nav-link <?= basename($_SERVER['PHP_SELF']) === 'responder_onboarding.php' ? 'active' : '' ?>">
-                    &#128657; Responder Onboarding
-                </a>
-
-            <!-- 3. STANDARD USER (VOICE MODE) -->
-            <?php else: ?>
+            <!-- Voice Control Banner for Standard Mode -->
+            <?php if ($isStandard): ?>
                 <div class="voice-mode-indicator">
                     <span class="mic-icon">&#127908;</span> Hands-Free Voice Active
                 </div>
             <?php endif; ?>
 
-            <!-- External Link (All Users) -->
+            <!-- External Releases Link -->
             <a href="https://www.magcloud.com/user/YOUR_MAGCLOUD_HANDLE_HERE" target="_blank" rel="noopener noreferrer" class="nav-link" style="color: var(--code-text);">
                 &#128279; MagCloud Releases &rarr;
             </a>
         </nav>
     </div>
 
-    <!-- Guide Categories (Active for Admins & Responders only) -->
+    <!-- Guide Categories (Dynamic Loop) -->
     <?php if (!$isStandard && !empty($manifest['categories'])): ?>
     <div>
         <div class="nav-group-title">Guide Categories</div>
         <nav class="nav-links">
-            <a href="guide.php?role=<?= $activeRole ?>&category=all" class="nav-link <?= ($selectedCategory === 'all' && basename($_SERVER['PHP_SELF']) === 'guide.php') ? 'active' : '' ?>">
+            <a href="guide.php?role=<?= urlencode($activeRole) ?>&category=all" 
+               class="nav-link <?= (($selectedCategory ?? '') === 'all' && $currentPage === 'guide.php') ? 'active' : '' ?>">
                 All Modules
             </a>
             <?php foreach ($manifest['categories'] as $cat): ?>
-                <a href="guide.php?role=<?= $activeRole ?>&category=<?= $cat['id'] ?>" class="nav-link <?= ($selectedCategory === $cat['id'] && basename($_SERVER['PHP_SELF']) === 'guide.php') ? 'active' : '' ?>">
+                <a href="guide.php?role=<?= urlencode($activeRole) ?>&category=<?= urlencode($cat['id']) ?>" 
+                   class="nav-link <?= (($selectedCategory ?? '') === $cat['id'] && $currentPage === 'guide.php') ? 'active' : '' ?>">
                     <?= htmlspecialchars($cat['title']) ?>
                 </a>
             <?php endforeach; ?>
@@ -93,7 +87,6 @@ $isStandard   = !$isTrustAdmin && !$isResponder;
     <?php endif; ?>
 </aside>
 
-<!-- Styles for Live Clock -->
 <style>
     .os-clock {
         font-family: var(--font-main, -apple-system, sans-serif);
@@ -115,7 +108,6 @@ $isStandard   = !$isTrustAdmin && !$isResponder;
     }
 </style>
 
-<!-- Script for Device Clock -->
 <script>
     (function syncDeviceClock() {
         const clockEl = document.getElementById('os-live-clock');
