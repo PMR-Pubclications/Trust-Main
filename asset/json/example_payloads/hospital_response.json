@@ -1,0 +1,19 @@
+{
+  "status": "success",
+  "data_format": "HL7_FHIR_COMPLIANT",
+  "facility": "Level 1 Trauma Center",
+  "patient": {
+    "patient_id": "9981-A",
+    "name_redacted": true,
+    "demographics": {
+      "age": 34,
+      "gender": "M"
+    },
+    "critical_indicators": {
+      "blood_type": "O-Negative",
+      "known_allergies": ["Penicillin", "Latex"],
+      "existing_conditions": ["Hypertension"]
+    }
+  },
+  "clearance_level_required": "ems, hospital, first_responder_admin"
+}
