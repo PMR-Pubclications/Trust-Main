@@ -2,17 +2,29 @@
 """EMS Clinical Decision Support & Pre-Hospital Medication Safety System.
 
 Mapped to: modules/Annon/scripts/utils/ems_medication_checker.py
-Cross-checks proposed emergency field medications against hospital EHR records,
-active prescriptions, and known patient allergies to flag fatal contraindications.
+Features real-time text-to-speech (TTS) voice alerts ("Good to go" vs "Don't administer that")
+optimized for noisy field conditions and immediate paramedic decision support.
 """
 
 from __future__ import annotations
 
 import json
+import os
+import subprocess
+import sys
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
+
+# Initialize Text-to-Speech Engine (pyttsx3 or System Voice Fallback)
+try:
+    import pyttsx3  # type: ignore
+    TTS_ENGINE = pyttsx3.init()
+    TTS_ENGINE.setProperty('rate', 160)  # Paced speaking rate for high-noise field environments
+    TTS_ENGINE.setProperty('volume', 1.0)
+except Exception:
+    TTS_ENGINE = None
 
 
 class AlertSeverity(Enum):
@@ -41,8 +53,6 @@ class SafetyAlert:
     clinical_risk: str
 
 
-# Common EMS Emergency Drugs & Clinical Knowledge Base
-# Standardized against RxNorm / NEMSIS clinical safety protocols
 EMERGENCY_DRUG_DATABASE: Dict[str, dict] = {
     "nitroglycerin": {
         "rxnorm_id": "7052",
@@ -96,6 +106,41 @@ EMERGENCY_DRUG_DATABASE: Dict[str, dict] = {
 }
 
 
+def speak_alert(alerts: List[SafetyAlert], target_medication: str) -> None:
+    """Triggers instant audible voice alerts through system audio."""
+    has_critical = any(a.severity == AlertSeverity.CRITICAL_CONTRAINDICATION for a in alerts)
+
+    if has_critical:
+        phrase = f"Stop! Don't administer that! Critical contraindication detected for {target_medication}."
+    elif any(a.severity == AlertSeverity.WARNING for a in alerts):
+        phrase = f"Caution. Review warning for {target_medication}."
+    else:
+        phrase = f"Good to go! {target_medication} is clear."
+
+    print(f"\n🔊 AUDIBLE ALERT: \"{phrase}\"\n")
+
+    # Primary TTS via pyttsx3
+    if TTS_ENGINE:
+        try:
+            TTS_ENGINE.say(phrase)
+            TTS_ENGINE.runAndWait()
+            return
+        except Exception:
+            pass
+
+    # Native OS fallback voice commands (macOS say, Linux espeak, Windows PowerShell SAPI)
+    try:
+        if sys.platform == "darwin":
+            subprocess.run(["say", phrase], check=False)
+        elif sys.platform.startswith("linux"):
+            subprocess.run(["espeak", phrase], stderr=subprocess.DEVNULL, check=False)
+        elif sys.platform == "win32":
+            ps_cmd = f'Add-Type -AssemblyName System.Speech; (New-Object System.Speech.Synthesis.SpeechSynthesizer).Speak("{phrase}");'
+            subprocess.run(["powershell", "-Command", ps_cmd], check=False)
+    except Exception as e:
+        print(f"⚠️ Unable to render audio alert: {e}")
+
+
 class PreHospitalMedicationChecker:
     """Evaluates field drug administration against patient records in real-time."""
 
@@ -112,13 +157,12 @@ class PreHospitalMedicationChecker:
                 return primary_name, data
         return None
 
-    def evaluate_safety(self, proposed_medication: str, patient: PatientEHR) -> List[SafetyAlert]:
+    def evaluate_safety(self, proposed_medication: str, patient: PatientEHR, speak: bool = True) -> List[SafetyAlert]:
         alerts: List[SafetyAlert] = []
         target_info = self.find_drug_entry(proposed_medication)
-
         norm_target = self.normalize_name(proposed_medication)
-        
-        # 1. Direct & Class Allergy Check
+
+        # 1. Direct Allergy Check
         for allergy in patient.allergies:
             norm_allergy = self.normalize_name(allergy)
             if norm_target in norm_allergy or norm_allergy in norm_target:
@@ -145,11 +189,13 @@ class PreHospitalMedicationChecker:
                         clinical_risk="Proceed with caution. Verify manually with On-Duty Medical Control."
                     )
                 )
+            if speak:
+                speak_alert(alerts, proposed_medication)
             return alerts
 
         primary_name, drug_data = target_info
 
-        # 2. Drug-Drug Interaction Check against Hospital EHR Active Meds
+        # 2. Drug-Drug Interaction Check
         active_meds = [self.normalize_name(m) for m in patient.active_medications]
         for contraindicated_drug, risk_desc in drug_data.get("contraindicated_drugs", {}).items():
             for active_med in active_meds:
@@ -193,11 +239,15 @@ class PreHospitalMedicationChecker:
                 )
             )
 
+        # Trigger Audio Output
+        if speak:
+            speak_alert(alerts, proposed_medication)
+
         return alerts
 
 
 def format_field_display(alerts: List[SafetyAlert], patient: PatientEHR) -> str:
-    """Renders high-visibility terminal alerts for paramedics in field conditions."""
+    """Renders high-visibility terminal text for field tablet screens."""
     output = []
     output.append("================================================================================")
     output.append(f" 🚨 PRE-HOSPITAL MEDICATION SAFETY CHECK | PATIENT: {patient.name.upper()} (ID: {patient.patient_id})")
@@ -223,20 +273,23 @@ def format_field_display(alerts: List[SafetyAlert], patient: PatientEHR) -> str:
 
 
 if __name__ == "__main__":
-    # Example Hospital EHR Record (Retrieved via HL7 FHIR / Health Information Exchange)
     sample_ehr = PatientEHR(
         patient_id="EHR-88392",
         name="John Doe",
         age=58,
         allergies=["Penicillin", "Salicylate Allergy"],
-        active_medications=["Sildenafil 50mg", "Lisinopril 10mg", "Warfarin 5mg"],
-        medical_conditions=["Coronary Artery Disease", "Severe Asthma"]
+        active_medications=["Sildenafil 50mg", "Lisinopril 10mg"],
+        medical_conditions=["Coronary Artery Disease"]
     )
 
     checker = PreHospitalMedicationChecker()
 
-    # Scenario 1: Paramedic prepares to give Nitroglycerin for chest pain (CONFLICT: Sildenafil)
-    print(format_field_display(checker.evaluate_safety("Nitroglycerin", sample_ehr), sample_ehr))
+    # TEST 1: Dangerous Call -> Triggers "Stop! Don't administer that!"
+    print("--- SCENARIO 1: NITROGLYCERIN CHECK ---")
+    alerts_1 = checker.evaluate_safety("Nitroglycerin", sample_ehr, speak=True)
+    print(format_field_display(alerts_1, sample_ehr))
 
-    # Scenario 2: Paramedic prepares to give Aspirin for chest pain (CONFLICT: Salicylate Allergy & Warfarin)
-    print(format_field_display(checker.evaluate_safety("Aspirin", sample_ehr), sample_ehr))
+    # TEST 2: Safe Call -> Triggers "Good to go!"
+    print("\n--- SCENARIO 2: EPINEPHRINE CHECK ---")
+    alerts_2 = checker.evaluate_safety("Epinephrine", sample_ehr, speak=True)
+    print(format_field_display(alerts_2, sample_ehr))
