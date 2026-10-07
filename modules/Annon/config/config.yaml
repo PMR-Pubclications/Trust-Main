@@ -24,3 +24,27 @@ agencies:
     endpoint: "http://localhost:5004/api/dot"
   hospital:
     endpoint: "http://localhost:5005/api/health_records"
+
+# config/config.yaml
+system:
+  lab_id: "MOBILE_LAB_01"
+  mode: "active_incident"
+  safety_override: true
+
+audio:
+  sample_rate: 16000
+  wake_word: "Anon"
+  stt_model: "whisper-medium"
+  tts_voice: "en_US-tactical"
+
+monitoring:
+  audio_continuous: true
+  camera_feed_active: true
+  threat_keywords: ["gun", "help", "shots fired", "drop the weapon", "officer down", "cover"]
+  decibel_threshold: 110  # Trigger for gunshots/explosions
+
+models:
+  llm_path: "models/saved_models/forensic_llm.gguf"
+  vector_db_path: "models/checkpoints/vector_store"
+  vision_model_path: "models/saved_models/yolov8_tactical.pt"
+
