@@ -92,3 +92,68 @@ body.theme-admin .sidebar {
     font-weight: bold;
     text-shadow: 0 0 5px var(--accent-color); /* Subtle 80s glow effect */
 }
+
+/* ==========================================================
+   ROLE-BASED THEMES (Trust Admin, First Responder, Standard)
+   ========================================================== */
+
+/* ----------------------------------------------------------
+   1. TRUST ADMIN THEME: 1980s Retro Green Terminal on Pitch Black
+   ---------------------------------------------------------- */
+body.theme-admin {
+    --bg-main: #000000;              /* Pitch black CRT screen */
+    --sidebar-bg: #050505;          /* Deep black sidebar */
+    --text-primary: #00ff66;        /* Bright 80s phosphor green */
+    --text-muted: #009933;          /* Dimmer phosphor green */
+    --accent-color: #33ff33;        /* Glowing green highlight */
+    --badge-bg: #002200;            /* Dark green badge fill */
+    --badge-text: #00ff66;          /* Bright green badge text */
+    --font-main: 'Courier New', Courier, 'Fira Code', monospace; /* Monospace CRT font */
+}
+
+body.theme-admin .sidebar {
+    border-right: 2px solid #00ff66; /* Retro terminal boundary line */
+}
+
+body.theme-admin .nav-link.active {
+    color: #33ff33;
+    text-shadow: 0 0 6px #00ff66; /* Phosphor glow effect */
+    font-weight: bold;
+}
+
+/* ----------------------------------------------------------
+   2. FIRST RESPONDER THEME: High-Contrast Tactical
+   ---------------------------------------------------------- */
+body.theme-responder {
+    --bg-main: #18181b;
+    --sidebar-bg: #09090b;
+    --text-primary: #ffffff;
+    --text-muted: #a1a1aa;
+    --accent-color: #ef4444;        /* Tactical Red Accent */
+    --badge-bg: #dc2626;
+    --badge-text: #ffffff;
+    --font-main: system-ui, -apple-system, sans-serif;
+}
+
+/* ----------------------------------------------------------
+   3. STANDARD USER THEME: High-Legibility Voice Mode
+   ---------------------------------------------------------- */
+body.theme-standard {
+    --bg-main: #0f172a;
+    --sidebar-bg: #1e293b;
+    --text-primary: #f8fafc;
+    --text-muted: #94a3b8;
+    --accent-color: #38bdf8;
+    --badge-bg: #0284c7;
+    --badge-text: #ffffff;
+    --font-main: system-ui, -apple-system, sans-serif;
+}
+
+/* Base Body Application */
+body {
+    background-color: var(--bg-main);
+    color: var(--text-primary);
+    font-family: var(--font-main);
+    margin: 0;
+}
+
