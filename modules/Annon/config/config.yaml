@@ -48,3 +48,36 @@ models:
   vector_db_path: "models/checkpoints/vector_store"
   vision_model_path: "models/saved_models/yolov8_tactical.pt"
 
+# config/config.yaml
+system:
+  lab_id: "MOBILE_LAB_01"
+  mode: "active_incident"
+
+audio:
+  sample_rate: 16000
+  wake_word: "Assistant"
+  stt_model: "whisper-medium"
+  tts_voice: "en_US-police-tactical"
+
+models:
+  llm_path: "models/saved_models/forensic_llm.gguf"
+  vector_db_path: "models/checkpoints/vector_store"
+
+agencies:
+  police:
+    endpoint: "http://localhost:5001/api/police"
+    report_format: "NIBRS_COMPLIANT"
+  fire:
+    endpoint: "http://localhost:5002/api/fire"
+    report_format: "NFIRS_COMPLIANT"
+  ems:
+    endpoint: "http://localhost:5003/api/ems"
+    report_format: "ePCR_COMPLIANT"
+  dot:
+    endpoint: "http://localhost:5004/api/dot"
+    report_format: "MUTCD_TRAFFIC_ALERT"
+  hospital:
+    endpoint: "http://localhost:5005/api/health_records"
+    report_format: "HL7_FHIR_COMPLIANT"
+
+
