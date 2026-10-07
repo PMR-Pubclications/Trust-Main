@@ -2,8 +2,10 @@
 """Unified, noise-resilient voice command router for Annon AI.
 
 Mapped to: modules/Annon/scripts/utils/voice_command_router.py
-Includes support for Java ballistic video analysis (Trust-Main/asset/java/ballisticVideoAnalysis),
-basic forensics modules, and persistent dynamic vocabulary learning.
+Integrates:
+- Java Ballistic Video Analysis (Trust-Main/asset/java/ballisticVideoAnalysis)
+- Python Forensic & Scene Physics Engine (Trust-Main/asset/py/ferensics-ai)
+- Local Annon Pipeline Scripts & Dynamic Persistent Vocabulary Learning
 """
 
 from __future__ import annotations
@@ -17,20 +19,25 @@ import sys
 from functools import lru_cache
 from pathlib import Path
 
+# ==============================================================================
 # Directory Anchor Resolution (modules/Annon/scripts/utils/)
+# ==============================================================================
 UTILS_DIR = Path(__file__).resolve().parent           # modules/Annon/scripts/utils/
 SCRIPTS_DIR = UTILS_DIR.parent                         # modules/Annon/scripts/
 ANNON_ROOT = SCRIPTS_DIR.parent                        # modules/Annon/
 MODULES_ROOT = ANNON_ROOT.parent                       # modules/
 
-# External Forensics Asset Path (Trust-Main Repository)
+# External Forensics Asset Paths (Trust-Main Repository)
 TRUST_MAIN_DIR = MODULES_ROOT / "Trust-Main"
 BALLISTIC_JAVA_DIR = TRUST_MAIN_DIR / "asset" / "java" / "ballisticVideoAnalysis"
+FORENSICS_PY_DIR = TRUST_MAIN_DIR / "asset" / "py" / "ferensics-ai"
 
 # Dynamic Learning Storage File
 LEARNED_VOCAB_FILE = UTILS_DIR / "learned_vocab.json"
 
+# ==============================================================================
 # Core Alias Map: (Aliases) -> Relative Path String
+# ==============================================================================
 RAW_ALIAS_MAP: dict[tuple[str, ...], str] = {
     # Core Annon Pipeline
     ("main", "run main"): "../main.py",
@@ -41,17 +48,24 @@ RAW_ALIAS_MAP: dict[tuple[str, ...], str] = {
     ("clean data", "clean"): "preprocessing/clean_data.py",
     ("augment data", "augment"): "preprocessing/augment.py",
     ("agent loop", "run agent", "agent"): "agent_loop.py",
-    
-    # Forensic & Ballistic Analysis (Python & Java)
-    ("ballistic video analysis", "java ballistics", "trust ballistics"): "../../Trust-Main/asset/java/ballisticVideoAnalysis",
-    ("video ballistics", "ballistics"): "ferensics-ai/video_ballistics.py",
-    ("ballistics comparator",): "ferensics-ai/ballistics_comparator.py",
-    ("basic forensics", "forensic physics", "physics"): "ferensics-ai/ferensics _physcs.py",
-    ("annon ai server", "forensic server"): "ferensics-ai/ferensicAIserver.py",
-    ("train forensic slm", "train slm"): "ferensics-ai/train_forensic_slm.py",
-    ("sft trainer", "trainer"): "ferensics-ai/SFTTrainer.py",
 
-    # Field Operations & Integrations
+    # Java Ballistics Module (Trust-Main)
+    ("ballistic video analysis", "java ballistics", "trust ballistics"): "../../Trust-Main/asset/java/ballisticVideoAnalysis",
+
+    # Non-Ballistic Forensic AI, Scene Analysis & Physics (Trust-Main / asset / py / ferensics-ai)
+    ("scene analysis", "forensic scene analysis", "scene reconstruction"): "../../Trust-Main/asset/py/ferensics-ai",
+    ("forensic physics", "scene physics", "basic forensics", "physics"): "../../Trust-Main/asset/py/ferensics-ai/ferensics _physcs.py",
+    ("forensic server", "annon ai server", "ferensics ai server"): "../../Trust-Main/asset/py/ferensics-ai/ferensicAIserver.py",
+    ("video ballistics", "ballistics"): "../../Trust-Main/asset/py/ferensics-ai/video_ballistics.py",
+    ("ballistics comparator",): "../../Trust-Main/asset/py/ferensics-ai/ballistics_comparator.py",
+    ("train forensic slm", "train slm"): "../../Trust-Main/asset/py/ferensics-ai/train_forensic_slm.py",
+    ("sft trainer", "trainer"): "../../Trust-Main/asset/py/ferensics-ai/SFTTrainer.py",
+
+    # Local Fallback Forensics (Annon/scripts/ferensics-ai)
+    ("local physics",): "ferensics-ai/ferensics _physcs.py",
+    ("local forensic server",): "ferensics-ai/ferensicAIserver.py",
+
+    # Field Operations & Web Integrations
     ("opensea", "open sea"): "opensea-agent-access.py",
     ("google drive", "drive"): "access-google-drive.py",
     ("secure google drive", "secure google"): "secure-googledive-access.py",
@@ -87,7 +101,7 @@ def save_learned_phrase(heard_phrase: str, target_rel_path: str) -> None:
     vocab = load_learned_vocab()
     cleaned = normalize(heard_phrase)
     vocab[cleaned] = target_rel_path
-    
+
     try:
         with open(LEARNED_VOCAB_FILE, "w", encoding="utf-8") as f:
             json.dump(vocab, f, indent=2)
@@ -99,7 +113,7 @@ def save_learned_phrase(heard_phrase: str, target_rel_path: str) -> None:
 
 @lru_cache(maxsize=1)
 def build_script_index() -> dict[str, Path]:
-    """Indexes Annon scripts, external Java ballistic assets, and learned vocabulary into memory."""
+    """Indexes Annon scripts, Trust-Main Python physics/scene assets, Java ballistics, and dynamic vocabulary."""
     index: dict[str, Path] = {}
 
     # 1. Dynamically Learned Vocabulary (Highest Priority)
@@ -124,7 +138,7 @@ def build_script_index() -> dict[str, Path]:
                 if norm_stem not in index:
                     index[norm_stem] = child
 
-    # 4. Java Ballistic Analysis Scan (Trust-Main repository)
+    # 4. Java Ballistic Analysis Directory Scan (Trust-Main/asset/java/ballisticVideoAnalysis)
     if BALLISTIC_JAVA_DIR.exists():
         index["ballistic video analysis"] = BALLISTIC_JAVA_DIR
         index["java ballistics"] = BALLISTIC_JAVA_DIR
@@ -132,6 +146,16 @@ def build_script_index() -> dict[str, Path]:
         for child in BALLISTIC_JAVA_DIR.iterdir():
             if child.is_file() and child.suffix.lower() in {".java", ".jar", ".class", ".py", ".sh"}:
                 index[normalize(child.stem)] = child
+
+    # 5. Non-Ballistic Python Forensics & Scene Physics Scan (Trust-Main/asset/py/ferensics-ai)
+    if FORENSICS_PY_DIR.exists():
+        index["scene analysis"] = FORENSICS_PY_DIR
+        index["forensic scene analysis"] = FORENSICS_PY_DIR
+        index["scene reconstruction"] = FORENSICS_PY_DIR
+        for child in FORENSICS_PY_DIR.iterdir():
+            if child.is_file() and child.suffix.lower() in {".py", ".sh"}:
+                norm_stem = normalize(child.stem)
+                index[norm_stem] = child
 
     return index
 
@@ -167,14 +191,21 @@ def list_scripts() -> str:
 
 
 def run_target(target_path: Path) -> int:
-    """Executes Python scripts, Shell scripts, or launches Java Ballistic Analysis modules."""
+    """Executes Python scripts, Shell scripts, or launches Java/Physics Forensic modules."""
     if not target_path.exists():
         print(f"❌ Target path not found: {target_path}")
         return 1
 
-    # Handle Java Ballistic Video Analysis directory/files
+    # Handle directory execution (e.g., Java Ballistics or Python Scene Analysis Directory)
     if target_path.is_dir():
+        py_files = list(target_path.glob("*.py"))
         java_files = list(target_path.glob("*.java")) + list(target_path.glob("*.jar"))
+
+        if py_files:
+            main_py = next((f for f in py_files if "server" in f.name.lower() or "physc" in f.name.lower()), py_files[0])
+            print(f"⚡ Launching Forensic Scene Analysis Module: {main_py.relative_to(MODULES_ROOT)}")
+            return subprocess.run([sys.executable, str(main_py)], cwd=str(target_path)).returncode
+
         if java_files:
             print(f"⚡ Launching Java Ballistic Video Analysis: {target_path.relative_to(MODULES_ROOT)}")
             main_target = next((f for f in java_files if "Main" in f.name or "Analysis" in f.name), java_files[0])
@@ -200,11 +231,11 @@ def learn_interactive(last_heard: str) -> None:
     print(f"\n🎓 TEACH ANNON: What script or tool should '{last_heard}' run?")
     index = build_script_index()
     unique_paths = sorted(set(index.values()))
-    
+
     for idx, path in enumerate(unique_paths, 1):
         rel = path.relative_to(MODULES_ROOT).as_posix() if MODULES_ROOT in path.parents else path.name
         print(f"  [{idx}] {rel}")
-        
+
     choice = input("Enter number to link (or press Enter to cancel): ").strip()
     if choice.isdigit() and 1 <= int(choice) <= len(unique_paths):
         selected_path = unique_paths[int(choice) - 1]
@@ -220,7 +251,12 @@ def handle_command(command: str) -> int:
 
     lowered = raw.lower()
     if lowered in {"help", "--help", "?"}:
-        print("Commands: list | run <script_or_alias> | learn | quit\nShortcuts: ballistic video analysis, basic forensics, train, api, agent")
+        print(
+            "Commands:\n"
+            "  list | run <script_or_alias> | learn | quit\n"
+            "Forensic Shortcuts:\n"
+            "  'scene analysis', 'forensic physics', 'ballistic video analysis', 'forensic server', 'train slm'"
+        )
         return 0
     if lowered in {"list", "list scripts", "ls", "show scripts"}:
         print(list_scripts())
