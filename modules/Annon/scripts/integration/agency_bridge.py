@@ -40,3 +40,24 @@ class AgencyBridge:
             return {"error": "Data not found or access denied"}
         except Exception as e:
             return {"error": str(e)}
+# scripts/integration/agency_bridge.py
+import requests
+import logging
+
+class AgencyBridge:
+    def __init__(self):
+        self.endpoints = {
+            "POLICE": "http://localhost:5001/api/police",
+            "FIRE": "http://localhost:5002/api/fire",
+            "EMS": "http://localhost:5003/api/ems"
+        }
+
+    def broadcast_emergency_distress(self, alert_data: dict):
+        """Highest priority override: instantly broadcasts critical alerts across all responder interfaces."""
+        logging.warning(f"CRITICAL SAFETY OVERRIDE TRIGGERED: {alert_data['trigger']}")
+        for agency, endpoint in self.endpoints.items():
+            try:
+                # Pushes a 10-33 / Officer Needs Assistance alert to all connected apps
+                requests.post(f"{endpoint}/emergency_alert", json=alert_data, timeout=2)
+            except Exception as e:
+                logging.error(f"Failed to broadcast distress to {agency}: {e}")
