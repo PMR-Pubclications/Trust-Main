@@ -3,6 +3,7 @@
 
 Mapped to: modules/Annon/scripts/utils/voice_command_router.py
 Integrates:
+- Badge Assignment & Authentication Controller (Trust-Main/asset/java/BadgeAssignmentController.java)
 - Java Ballistic Video Analysis (Trust-Main/asset/java/ballisticVideoAnalysis)
 - Python Forensic & Scene Physics Engine (Trust-Main/asset/py/ferensics-ai)
 - Local Annon Pipeline Scripts & Dynamic Persistent Vocabulary Learning
@@ -27,9 +28,11 @@ SCRIPTS_DIR = UTILS_DIR.parent                         # modules/Annon/scripts/
 ANNON_ROOT = SCRIPTS_DIR.parent                        # modules/Annon/
 MODULES_ROOT = ANNON_ROOT.parent                       # modules/
 
-# External Forensics Asset Paths (Trust-Main Repository)
+# External Forensics & Authentication Asset Paths (Trust-Main Repository)
 TRUST_MAIN_DIR = MODULES_ROOT / "Trust-Main"
-BALLISTIC_JAVA_DIR = TRUST_MAIN_DIR / "asset" / "java" / "ballisticVideoAnalysis"
+JAVA_ASSET_DIR = TRUST_MAIN_DIR / "asset" / "java"
+BALLISTIC_JAVA_DIR = JAVA_ASSET_DIR / "ballisticVideoAnalysis"
+BADGE_CONTROLLER_FILE = JAVA_ASSET_DIR / "BadgeAssignmentController.java"
 FORENSICS_PY_DIR = TRUST_MAIN_DIR / "asset" / "py" / "ferensics-ai"
 
 # Dynamic Learning Storage File
@@ -39,6 +42,9 @@ LEARNED_VOCAB_FILE = UTILS_DIR / "learned_vocab.json"
 # Core Alias Map: (Aliases) -> Relative Path String
 # ==============================================================================
 RAW_ALIAS_MAP: dict[tuple[str, ...], str] = {
+    # Security, Access Control & Badge Login
+    ("badge validation", "validate badge", "badge assignment", "badge controller", "login badge", "authenticate badge", "badge check"): "../../Trust-Main/asset/java/BadgeAssignmentController.java",
+
     # Core Annon Pipeline
     ("main", "run main"): "../main.py",
     ("train model", "train"): "training/train.py",
@@ -113,7 +119,7 @@ def save_learned_phrase(heard_phrase: str, target_rel_path: str) -> None:
 
 @lru_cache(maxsize=1)
 def build_script_index() -> dict[str, Path]:
-    """Indexes Annon scripts, Trust-Main Python physics/scene assets, Java ballistics, and dynamic vocabulary."""
+    """Indexes Annon scripts, Trust-Main Java controllers/ballistics, Python physics/scene assets, and dynamic vocabulary."""
     index: dict[str, Path] = {}
 
     # 1. Dynamically Learned Vocabulary (Highest Priority)
@@ -138,14 +144,13 @@ def build_script_index() -> dict[str, Path]:
                 if norm_stem not in index:
                     index[norm_stem] = child
 
-    # 4. Java Ballistic Analysis Directory Scan (Trust-Main/asset/java/ballisticVideoAnalysis)
-    if BALLISTIC_JAVA_DIR.exists():
-        index["ballistic video analysis"] = BALLISTIC_JAVA_DIR
-        index["java ballistics"] = BALLISTIC_JAVA_DIR
-        index["trust ballistics"] = BALLISTIC_JAVA_DIR
-        for child in BALLISTIC_JAVA_DIR.iterdir():
-            if child.is_file() and child.suffix.lower() in {".java", ".jar", ".class", ".py", ".sh"}:
-                index[normalize(child.stem)] = child
+    # 4. Java Assets & Security Scan (Trust-Main/asset/java)
+    if JAVA_ASSET_DIR.exists():
+        for child in JAVA_ASSET_DIR.rglob("*"):
+            if child.is_file() and child.suffix.lower() in {".java", ".jar", ".class"}:
+                norm_stem = normalize(child.stem)
+                if norm_stem not in index:
+                    index[norm_stem] = child
 
     # 5. Non-Ballistic Python Forensics & Scene Physics Scan (Trust-Main/asset/py/ferensics-ai)
     if FORENSICS_PY_DIR.exists():
@@ -181,17 +186,17 @@ def get_best_match(query: str, cutoff: float = 0.45) -> Path | None:
 
 
 def list_scripts() -> str:
-    """Lists indexed scripts and external forensic directories."""
+    """Lists indexed scripts and external forensic/security tools."""
     unique_paths = sorted(set(build_script_index().values()))
     names = [
         p.relative_to(MODULES_ROOT).as_posix() if MODULES_ROOT in p.parents else p.name
         for p in unique_paths
     ]
-    return "Available Annon Executables & Forensic Tools:\n- " + "\n- ".join(names)
+    return "Available Annon Executables & Security/Forensic Tools:\n- " + "\n- ".join(names)
 
 
 def run_target(target_path: Path) -> int:
-    """Executes Python scripts, Shell scripts, or launches Java/Physics Forensic modules."""
+    """Executes Python scripts, Shell scripts, or launches Java controllers and modules."""
     if not target_path.exists():
         print(f"❌ Target path not found: {target_path}")
         return 1
@@ -227,7 +232,7 @@ def run_target(target_path: Path) -> int:
 
 
 def learn_interactive(last_heard: str) -> None:
-    """Teaches Annon new vocal variations for forensic or system scripts."""
+    """Teaches Annon new vocal variations for security, forensic, or system scripts."""
     print(f"\n🎓 TEACH ANNON: What script or tool should '{last_heard}' run?")
     index = build_script_index()
     unique_paths = sorted(set(index.values()))
@@ -254,8 +259,8 @@ def handle_command(command: str) -> int:
         print(
             "Commands:\n"
             "  list | run <script_or_alias> | learn | quit\n"
-            "Forensic Shortcuts:\n"
-            "  'scene analysis', 'forensic physics', 'ballistic video analysis', 'forensic server', 'train slm'"
+            "Shortcuts:\n"
+            "  'validate badge', 'badge controller', 'scene analysis', 'forensic physics', 'ballistic video analysis', 'train slm'"
         )
         return 0
     if lowered in {"list", "list scripts", "ls", "show scripts"}:
@@ -306,7 +311,7 @@ def listen_for_voice() -> str | None:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Adaptive Voice Router for Annon & Trust Forensics")
+    parser = argparse.ArgumentParser(description="Adaptive Voice Router for Annon Security & Trust Forensics")
     parser.add_argument("--command", help="Direct text command")
     parser.add_argument("--voice", action="store_true", help="Listen for voice input")
     args = parser.parse_args()
