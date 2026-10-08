@@ -62,3 +62,74 @@ def main():
 if __name__ == "__main__":
     main()
 
+import json
+import sys
+import os
+from scripts.research_engine.pipeline_orchestrator import GroundTruthResearchEngine
+from scripts.research_engine.query_decomposer import QueryDecomposer
+from scripts.research_engine.multi_tier_crawler import MultiTierCrawler
+
+def main():
+    if len(sys.argv) < 2:
+        print("Usage: python main.py \"<Research Question or Policy Claim>\"")
+        sys.exit(1)
+
+    user_query = sys.argv[1]
+    
+    # 1. Load physical constraints config
+    config_path = "config/physical_constraints.json"
+    if not os.path.exists(config_path):
+        print(f"[ERROR] Missing physical constraints file at {config_path}")
+        sys.exit(1)
+
+    with open(config_path, "r", encoding="utf-8") as f:
+        physical_constraints = json.load(f)
+
+    print(f"\n==================================================")
+    print(f"[ANNON RESEARCH ENGINE INITIATED]")
+    print(f"Target Query: \"{user_query}\"")
+    print(f"==================================================\n")
+
+    # 2. Decompose query into mechanistic parameters
+    decomposed = QueryDecomposer.decompose(user_query)
+    print(f"[1/4] Decomposed Queries Generated:")
+    for q in decomposed["tier_0_1_queries"]:
+        print(f"  - {q}")
+
+    # 3. Fetch web/API search payloads
+    print(f"\n[2/4] Executing Multi-Tier Data Crawler...")
+    raw_hits = MultiTierCrawler.fetch_raw_hits(decomposed)
+    print(f"  - Retained {len(raw_hits)} search payloads for verification.")
+
+    # 4. Instantiate and execute the pipeline orchestrator
+    print(f"\n[3/4] Running Epistemic Pipeline & Cross-Validation...")
+    engine = GroundTruthResearchEngine(physical_constraints=physical_constraints)
+    results = engine.execute_research(user_query, raw_hits)
+
+    # 5. Output Results
+    print(f"\n[4/4] RESEARCH EXECUTION COMPLETE")
+    print(f"--------------------------------------------------")
+    
+    consensus = results.get("consensus_validation_report", {})
+    verified = consensus.get("verified_truth_findings", [])
+    unverified = consensus.get("unverified_hypotheses", [])
+
+    print(f"\nVERIFIED TRUTH FINDINGS ({len(verified)} Clusters Passed 5-Source Rule):")
+    for v in verified:
+        print(f"  [STATUS]: {v.get('verification_status')}")
+        print(f"  [SOURCES]: {v.get('sources_list')}")
+
+    print(f"\nUNVERIFIED / DROPPED HYPOTHESES ({len(unverified)} Clusters Failed):")
+    for u in unverified:
+        print(f"  [STATUS]: {u.get('verification_status')}")
+
+    audit = results.get("contradiction_audit", {})
+    if audit.get("contradiction_detected"):
+        print(f"\n[CONTRADICTION AUDIT FAULT DETECTED]:")
+        for violation in audit.get("physical_violations", []):
+            print(f"  ! {violation}")
+    else:
+        print(f"\n[CONTRADICTION AUDIT]: No physical boundary violations detected in top policy claims.")
+
+if __name__ == "__main__":
+    main()
