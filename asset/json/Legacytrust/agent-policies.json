@@ -1,0 +1,81 @@
+{
+  "description": "Agent policy configuration defining exactly what each AI trading agent is permitted to do. Enforced in addition to, and never looser than, the global riskPolicy in ai-trading-protocol.json.",
+  "protocolRef": "ai-trading-protocol.json",
+  "version": "1.0.0",
+  "defaultPolicy": {
+    "autonomyLevel": "assisted",
+    "allowedSymbols": [],
+    "maxPerTradeNotionalUSD": 100.0,
+    "maxDailyAggregateNotionalUSD": 250.0,
+    "restrictedActions": [
+      "options",
+      "shorting",
+      "margin",
+      "leverage",
+      "futures",
+      "crypto_derivatives"
+    ]
+  },
+  "agents": {
+    "robinhood-agent": {
+      "venue": "robinhood-trading",
+      "autonomyLevel": "supervised-autonomy",
+      "allowedSymbols": [
+        "AAPL",
+        "MSFT",
+        "GOOGL",
+        "AMZN"
+      ],
+      "maxPerTradeNotionalUSD": 250.0,
+      "maxDailyAggregateNotionalUSD": 1000.0,
+      "restrictedActions": [
+        "options",
+        "shorting",
+        "margin",
+        "leverage"
+      ],
+      "approvalWorkflow": {
+        "belowAutoExecuteThreshold": "auto-execute",
+        "aboveAutoExecuteThreshold": "requires-human-approval",
+        "approvers": [
+          "account-owner"
+        ],
+        "minimumApprovals": 1
+      }
+    },
+    "gemini-agent": {
+      "venue": "gemini-trading",
+      "autonomyLevel": "assisted",
+      "allowedSymbols": [
+        "BTC-USD",
+        "ETH-USD"
+      ],
+      "maxPerTradeNotionalUSD": 100.0,
+      "maxDailyAggregateNotionalUSD": 250.0,
+      "restrictedActions": [
+        "options",
+        "shorting",
+        "margin",
+        "leverage",
+        "crypto_derivatives"
+      ],
+      "approvalWorkflow": {
+        "belowAutoExecuteThreshold": "requires-human-approval",
+        "aboveAutoExecuteThreshold": "requires-human-approval",
+        "approvers": [
+          "account-owner"
+        ],
+        "minimumApprovals": 1
+      }
+    }
+  },
+  "approvalWorkflowRules": {
+    "description": "General rules governing who must sign off on which trades, applied on top of per-agent approvalWorkflow blocks.",
+    "rules": [
+      "Trades at or below an agent's maxPerTradeNotionalUSD and within its autonomy level's auto-execute threshold may proceed without human approval.",
+      "Trades exceeding maxPerTradeNotionalUSD or maxDailyAggregateNotionalUSD always require approval from at least one listed approver.",
+      "Any restrictedAction (options, shorting, margin, leverage, futures, crypto_derivatives) is blocked outright and cannot be approved by agent policy alone; it requires an explicit protocol/policy change.",
+      "An agent that is rejected twice consecutively has its approvalWorkflow forced to 'requires-human-approval' for all subsequent trades until manually reset."
+    ]
+  }
+}
