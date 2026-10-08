@@ -10,7 +10,9 @@ public class Vector3D {
     }
 
     public Vector3D normalize() {
-        double mag = Math.sqrt(x * x + y * y + z * z);
-        return new Vector3D(x / mag, y / mag, z / mag);
+        double mag = Math.hypot(Math.hypot(x, y), z);
+        return !Double.isFinite(mag) || mag == 0
+                ? new Vector3D(0, 0, 0)
+                : new Vector3D(x / mag, y / mag, z / mag);
     }
 }

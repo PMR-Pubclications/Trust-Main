@@ -8,16 +8,17 @@ public class DropletMetrics {
     private final Vector3D trajectoryRay;
 
     public DropletMetrics(double width, double length, double orientationDegrees, Vector3D cameraPos) {
-        this.width = width;
-        this.length = Math.max(length, width + 1e-5); // Prevent division by zero
-        this.orientationDegrees = orientationDegrees;
+        this.width = Double.isFinite(width) ? Math.max(0, width) : 0;
+        double safeLength = Double.isFinite(length) && length > 0 ? length : this.width + 1e-5;
+        this.length = Math.max(safeLength, this.width + 1e-5);
+        this.orientationDegrees = Double.isFinite(orientationDegrees) ? orientationDegrees : 0;
         
         // Impact Angle alpha = arcsin(W / L)
-        double ratio = Math.min(1.0, this.width / this.length);
+        double ratio = Math.max(0, Math.min(1.0, this.width / this.length));
         this.impactAngleRad = Math.asin(ratio);
         
         // Calculate 3D unit direction ray pointing back along the line of flight
-        double gammaRad = Math.toRadians(orientationDegrees);
+        double gammaRad = Math.toRadians(this.orientationDegrees);
         double dx = Math.cos(gammaRad) * Math.cos(this.impactAngleRad);
         double dy = Math.sin(gammaRad) * Math.cos(this.impactAngleRad);
         double dz = -Math.sin(this.impactAngleRad);
