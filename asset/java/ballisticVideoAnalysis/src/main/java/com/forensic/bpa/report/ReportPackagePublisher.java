@@ -95,8 +95,17 @@ public class ReportPackagePublisher {
         String jsonPayload = mapper.writeValueAsString(reportPackage);
 
         // 6. Push via HTTP POST to Report Package API
+        URI endpoint = URI.create(reportPackageEndpointUrl);
+        String scheme = endpoint.getScheme();
+        if (!endpoint.isAbsolute()
+                || endpoint.getHost() == null
+                || endpoint.getUserInfo() != null
+                || !("http".equalsIgnoreCase(scheme) || "https".equalsIgnoreCase(scheme))) {
+            throw new IllegalArgumentException("Report package endpoint must be an absolute HTTP(S) URL.");
+        }
+
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(reportPackageEndpointUrl))
+                .uri(endpoint)
                 .header("Content-Type", "application/json")
                 .header("Accept", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(jsonPayload))
