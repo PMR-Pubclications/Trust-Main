@@ -1,0 +1,7 @@
+{
+  "max_spinal_vibration_hz": 20.0,
+  "min_blood_oxygen_saturation_pct": 88.0,
+  "max_cabin_pressure_altitude_ft": 8000,
+  "max_acoustic_spl_db": 85.0,
+  "ephaptic_coupling_vibration_range_hz": [20.0, 100.0]
+}
