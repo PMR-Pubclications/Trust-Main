@@ -55,3 +55,6 @@ python3 modules/fire/fire_service.py &
 
 # Start Police service independently
 python3 modules/police/police_service.py &
+
+
+mkdir -p Annon/data/Raw/images Annon/data/Raw/texts Annon/data/Raw/csv Annon/data/Processed/train Annon/data/Processed/val Annon/data/Processed/test Annon/data/Annotations/labels Annon/data/Annotations/masks Annon/config Annon/scripts/preprocessing Annon/scripts/models Annon/scripts/training Annon/scripts/utils Annon/scripts/deploy Annon/notebooks Annon/models/saved_models Annon/models/checkpoints Annon/models/export/onnx Annon/logs/training_logs Annon/logs/results/plots Annon/logs/results/reports
