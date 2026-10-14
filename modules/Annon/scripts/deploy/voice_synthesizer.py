@@ -36,9 +36,9 @@ class AnnonVoiceSynthesizer:
 if __name__ == "__main__":
     synthesizer = AnnonVoiceSynthesizer()
     
-    # Paths mapped to your project structure
-    reference_voice = "Annon/models/saved_models/voice_cloning/reference_sample.wav"
-    output_audio = "Annon/logs/results/anon_response_output.wav"
+    # Updated reference source path for voice samples
+    reference_voice = "modules/Annon/wav/voice_samples.wav"
+    output_audio = "modules/Annon/logs/results/anon_response_output.wav"
     
     response_text = "Attention unit: perimeter secure. Proceeding with forensic telemetry analysis."
     
