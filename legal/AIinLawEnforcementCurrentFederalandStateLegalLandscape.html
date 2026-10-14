@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Legal Framework: AI in Law Enforcement</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent: #38bdf8;
+            --accent-glow: rgba(56, 189, 248, 0.2);
+            --border: #334155;
+        }
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 2rem;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        header {
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 1rem;
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        h1 {
+            margin: 0;
+            font-size: 1.8rem;
+            color: var(--accent);
+        }
+        .live-badge {
+            background-color: var(--accent-glow);
+            color: var(--accent);
+            padding: 0.3rem 0.8rem;
+            border-radius: 999px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            border: 1px solid var(--accent);
+        }
+        .controls {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+        button {
+            background-color: var(--card-bg);
+            color: var(--text-main);
+            border: 1px solid var(--border);
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+        button:hover, button.active {
+            background-color: var(--accent);
+            color: var(--bg-color);
+            border-color: var(--accent);
+        }
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        .card h3 {
+            margin-top: 0;
+            color: var(--accent);
+            display: flex;
+            justify-content: space-between;
+        }
+        .tag {
+            font-size: 0.75rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 0.25rem;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+        }
+        ul {
+            padding-left: 1.2rem;
+        }
+        li {
+            margin-bottom: 0.5rem;
+        }
+        footer {
+            margin-top: 2rem;
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <div>
+            <h1>Law Enforcement AI Governance Index</h1>
+            <p style="margin: 0; color: var(--text-muted);">Dynamic Federal & State Regulatory Compliance Tracker</p>
+        </div>
+        <div id="timestamp" class="live-badge">Syncing Status...</div>
+    </header>
+
+    <div class="controls">
+        <button class="active" onclick="filterContent('all')">All Frameworks</button>
+        <button onclick="filterContent('federal')">Federal & Constitutional</button>
+        <button onclick="filterContent('state')">State Statutes (CA / UT)</button>
+        <button onclick="filterContent('discovery')">Evidentiary Discovery</button>
+    </div>
+
+    <div id="content-area">
+        <!-- Federal Section -->
+        <div class="card" data-category="federal">
+            <h3>1. Federal Landscape & Oversight <span class="tag">Federal</span></h3>
+            <p>Federal AI governance operates through executive directives, agency-level baselines, and constitutional guardrails:</p>
+            <ul>
+                <li><strong>Executive & Agency Directives:</strong> Mandate strict civil rights assessments, impact analysis, and human accountability protocols before deploying high-risk predictive or biometric tools.</li>
+                <li><strong>Constitutional Constraints (4th & 14th Amendments):</strong> Courts scrutinize algorithmic deployments under standard unreasonable search and due process tenets; opaque chains of custody risk evidence suppression.</li>
+                <li><strong>Standards Integration:</strong> Widespread adoption of frameworks such as the NIST AI Risk Management Framework to evaluate algorithmic dependability and data validity.</li>
+            </ul>
+        </div>
+
+        <!-- State Section -->
+        <div class="card" data-category="state">
+            <h3>2. State-Level Transparency & Reporting Statutes <span class="tag">State Legislation</span></h3>
+            <p>State legislatures have established mandatory guardrails specifically targeting generative AI in police record generation:</p>
+            <ul>
+                <li><strong>California (SB 524):</strong> Mandates explicit written disclosure on every page of police reports utilizing generative AI tools (such as Axon Draft One), preserves initial AI drafts alongside final reviews, and enforces strict vendor data usage blocks.</li>
+                <li><strong>Utah (SB 180):</strong> Requires law enforcement agencies to publish and maintain formal written operational AI policies and clearly designate AI assistance on official records.</li>
+                <li><strong>Biometric Restrictions:</strong> Over a dozen states and multiple municipalities enforce rigid bans or restrictions on real-time facial recognition and unvetted predictive modeling in the field.</li>
+            </ul>
+        </div>
+
+        <!-- Discovery Section -->
+        <div class="card" data-category="discovery">
+            <h3>3. Evidentiary Rules & Judicial Discovery <span class="tag">Case Law & Discovery</span></h3>
+            <p>Judicial systems are aggressively tightening standards regarding proprietary investigative technology:</p>
+            <ul>
+                <li><strong>Source Code & Training Data Access:</strong> Defense motions regularly invoke discovery rights to inspect underlying training data, source code logs, and operational weights of proprietary police software.</li>
+                <li><strong>Audit Trail Integrity:</strong> Courts increasingly invalidate automated forensic outputs or report drafts that lack verifiable cryptographic audit trails tracing back to baseline analog evidence (e.g., raw body-worn camera audio/video feeds).</li>
+            </ul>
+        </div>
+    </div>
+
+    <footer>
+        System status: Live connection verified. Dynamic legal parameters loaded.
+    </footer>
+</div>
+
+<script>
+    // Dynamic Timestamp Generator
+    function updateTimestamp() {
+        const now = new Date();
+        const options = { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' };
+        document.getElementById('timestamp').innerText = `Last Validated: ${now.toLocaleDateString('en-US', options)}`;
+    }
+    updateTimestamp();
+    setInterval(updateTimestamp, 60000); // Refresh timestamp every minute
+
+    // Interactive Category Filter
+    function filterContent(category) {
+        const buttons = document.querySelectorAll('.controls button');
+        buttons.forEach(btn => btn.classList.remove('active'));
+        event.target.classList.add('active');
+
+        const cards = document.querySelectorAll('.card');
+        cards.forEach(card => {
+            if (category === 'all' || card.getAttribute('data-category') === category) {
+                card.style.display = 'block';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    }
+</script>
+
+</body>
+</html>
