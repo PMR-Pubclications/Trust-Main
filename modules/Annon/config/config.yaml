@@ -29,3 +29,54 @@ agencies:
   hospital:
     endpoint: "http://localhost:5005/api/health_records"
     report_format: "HL7_FHIR_COMPLIANT"
+
+app_name: "Trust-Shell"
+version: "1.2"
+
+# Navigation Categories & Access Rules
+categories:
+  - id: "trustadmin"
+    title: "TRUST ADMIN CONSOLE"
+    parent_title: "TrustAdmin"
+    restricted: true
+  - id: "firstresponder"
+    title: "FIRST RESPONDER DISPATCH"
+    parent_title: "FirstResponder"
+    restricted: false
+  - id: "legal"
+    title: "LEGAL & REGULATORY"
+    parent_title: "Public"
+    restricted: false
+
+# Capabilities & Agency Dispatch Endpoints
+capabilities:
+  - title: "Accounts Liable & Billing"
+    url: "accounts_liable.php"
+    icon: "&#128184;"
+    parent_title: "TrustAdmin"
+    allowed_roles: ["trustadmin", "admin"]
+
+  - title: "Police Dispatch (PD)"
+    url: "dispatch_pd.php"
+    icon: "&#128119;"
+    parent_title: "FirstResponder"
+    allowed_roles: ["trustadmin", "first_responder", "responder"]
+
+  - title: "Fire & Rescue"
+    url: "dispatch_fire.php"
+    icon: "&#128293;"
+    parent_title: "FirstResponder"
+    allowed_roles: ["trustadmin", "first_responder", "responder"]
+
+  - title: "DOT Operations"
+    url: "dispatch_dot.php"
+    icon: "&#128663;"
+    parent_title: "FirstResponder"
+    allowed_roles: ["trustadmin", "first_responder", "responder"]
+
+  - title: "Water Safety & Lifeguards"
+    url: "dispatch_lifeguard.php"
+    icon: "&#127946;"
+    parent_title: "FirstResponder"
+    allowed_roles: ["trustadmin", "first_responder", "responder"]
+
