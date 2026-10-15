@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>First Responder & Hospital Leadership Directory</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen font-sans antialiased">
+
+    <!-- Header Section -->
+    <header class="bg-slate-800 border-b border-slate-700 p-6 shadow-md">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+            <div>
+                <h1 class="text-2xl font-bold flex items-center gap-3">
+                    <i class="fa-solid fa-shield-halved text-blue-500"></i> Emergency & Leadership Directory
+                </h1>
+                <p class="text-slate-400 text-sm mt-1">Real-time secure communication and contact repository for first responders and hospital administration.</p>
+            </div>
+            <div class="flex items-center gap-3">
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                    <span class="w-2 h-2 mr-2 bg-emerald-500 rounded-full animate-pulse"></span> System Active
+                </span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-7xl mx-auto p-6 space-y-6">
+
+        <!-- Controls Toolbar (Search & Filters) -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 bg-slate-800 p-4 rounded-xl border border-slate-700 shadow-sm">
+            <!-- Search Input -->
+            <div class="md:col-span-2 relative">
+                <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3.5 text-slate-400"></i>
+                <input type="text" id="searchInput" placeholder="Search by name, role, department, or facility..." 
+                    class="w-full bg-slate-900 border border-slate-700 rounded-lg pl-10 pr-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-blue-500 transition-colors">
+            </div>
+            
+            <!-- Category Filter -->
+            <div>
+                <select id="categoryFilter" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-blue-500 transition-colors">
+                    <option value="all">All Categories</option>
+                    <option value="Hospital Leadership">Hospital Leadership</option>
+                    <option value="Emergency Services">Emergency Services</option>
+                    <option value="First Responders">First Responders</option>
+                    <option value="Dispatch / Command">Dispatch / Command</option>
+                </select>
+            </div>
+
+            <!-- Priority Filter -->
+            <div>
+                <select id="priorityFilter" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-blue-500 transition-colors">
+                    <option value="all">All Priority Levels</option>
+                    <option value="Critical">Critical / 24-7</option>
+                    <option value="High">High Priority</option>
+                    <option value="Standard">Standard</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Contact Cards Grid -->
+        <div id="contactGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Dynamically populated by JavaScript -->
+        </div>
+
+        <!-- Empty State (Hidden by default) -->
+        <div id="emptyState" class="hidden text-center py-16">
+            <i class="fa-solid fa-folder-open text-4xl text-slate-600 mb-3"></i>
+            <h3 class="text-lg font-medium text-slate-300">No contacts found</h3>
+            <p class="text-slate-500 text-sm">Try adjusting your search terms or filter criteria.</p>
+        </div>
+
+    </main>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        // Mock Database of Contacts (Easily bound to initDb.js or REST endpoints)
+        const contacts = [
+            {
+                id: 1,
+                name: "Dr. Aris Thorne",
+                role: "Chief Medical Officer",
+                category: "Hospital Leadership",
+                facility: "Metro General Hospital",
+                phone: "+1 (555) 019-2834",
+                secureRadio: "Channel 4 - MedComm",
+                email: "a.thorne@metrohealth.org",
+                priority: "Critical",
+                status: "On Duty"
+            },
+            {
+                id: 2,
+                name: "Capt. Marcus Vance",
+                role: "Battalion Commander",
+                category: "First Responders",
+                facility: "District 3 Fire & Rescue",
+                phone: "+1 (555) 014-8821",
+                secureRadio: "TAC-2 (Encrypted)",
+                email: "m.vance@district3fd.gov",
+                priority: "Critical",
+                status: "On Duty"
+            },
+            {
+                id: 3,
+                name: "Sarah Lin, RN",
+                role: "Emergency Department Director",
+                category: "Hospital Leadership",
+                facility: "St. Jude Medical Center",
+                phone: "+1 (555) 012-9933",
+                secureRadio: "ED-Direct-1",
+                email: "slin@stjudemed.org",
+                priority: "High",
+                status: "On Duty"
+            },
+            {
+                id: 4,
+                name: "Lt. Elena Rostova",
+                role: "EMS Field Supervisor",
+                category: "Dispatch / Command",
+                facility: "County Emergency Dispatch",
+                phone: "+1 (555) 017-4410",
+                secureRadio: "EMS-Main-Dispatch",
+                email: "erostova@countyems.gov",
+                priority: "Critical",
+                status: "On Call"
+            },
+            {
+                id: 5,
+                name: "Director Robert Chen",
+                role: "Facility & Security Operations",
+                category: "Hospital Leadership",
+                facility: "Metro General Hospital",
+                phone: "+1 (555) 018-3322",
+                secureRadio: "Sec-Command-Alpha",
+                email: "rchen@metrohealth.org",
+                priority: "Standard",
+                status: "Off Duty"
+            },
+            {
+                id: 6,
+                name: "Chief David Kincaid",
+                role: "Emergency Management Director",
+                category: "Emergency Services",
+                facility: "Regional EOC",
+                phone: "+1 (555) 013-1199",
+                secureRadio: "EOC-Command-1",
+                email: "dkincaid@regionaleoc.org",
+                priority: "Critical",
+                status: "On Duty"
+            }
+        ];
+
+        // DOM Elements
+        const contactGrid = document.getElementById('contactGrid');
+        const searchInput = document.getElementById('searchInput');
+        const categoryFilter = document.getElementById('categoryFilter');
+        const priorityFilter = document.getElementById('priorityFilter');
+        const emptyState = document.getElementById('emptyState');
+
+        // Render Function
+        function renderContacts(data) {
+            contactGrid.innerHTML = '';
+            
+            if (data.length === 0) {
+                emptyState.classList.remove('hidden');
+                return;
+            } else {
+                emptyState.classList.add('hidden');
+            }
+
+            data.forEach(contact => {
+                const priorityColor = 
+                    contact.priority === 'Critical' ? 'bg-red-500/10 text-red-400 border-red-500/20' :
+                    contact.priority === 'High' ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' : 
+                    'bg-blue-500/10 text-blue-400 border-blue-500/20';
+
+                const statusColor = contact.status === 'On Duty' ? 'text-emerald-400' : 'text-slate-500';
+
+                const card = document.createElement('div');
+                card.className = "bg-slate-800 border border-slate-700 rounded-xl p-5 flex flex-col justify-between hover:border-slate-600 transition-all shadow-sm";
+                card.innerHTML = `
+                    <div>
+                        <div class="flex justify-between items-start gap-2 mb-3">
+                            <div>
+                                <span class="text-xs font-semibold uppercase tracking-wider text-blue-400">${contact.category}</span>
+                                <h3 class="text-lg font-bold text-slate-100 mt-0.5">${contact.name}</h3>
+                            </div>
+                            <span class="px-2.5 py-1 rounded-full text-xs font-medium border ${priorityColor}">
+                                ${contact.priority}
+                            </span>
+                        </div>
+                        
+                        <p class="text-sm font-medium text-slate-300 mb-1">${contact.role}</p>
+                        <p class="text-xs text-slate-400 flex items-center gap-1.5 mb-4">
+                            <i class="fa-solid fa-hospital text-slate-500"></i> ${contact.facility}
+                        </p>
+
+                        <div class="space-y-2 text-xs bg-slate-900/60 p-3 rounded-lg border border-slate-700/50 mb-4">
+                            <div class="flex justify-between items-center">
+                                <span class="text-slate-400">Direct Phone:</span>
+                                <a href="tel:${contact.phone}" class="font-mono text-slate-200 hover:text-blue-400">${contact.phone}</a>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-slate-400">Secure Radio:</span>
+                                <span class="font-mono text-slate-200">${contact.secureRadio}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-between pt-3 border-t border-slate-700/60">
+                        <span class="text-xs flex items-center gap-1.5 ${statusColor}">
+                            <i class="fa-solid fa-circle text-[8px]"></i> ${contact.status}
+                        </span>
+                        <div class="flex items-center gap-2">
+                            <button onclick="navigator.clipboard.writeText('${contact.phone}'); alert('Copied ${contact.name} direct line.');" 
+                                class="p-2 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-lg transition-colors text-xs" title="Copy Contact Details">
+                                <i class="fa-solid fa-copy"></i>
+                            </button>
+                            <a href="mailto:${contact.email}" 
+                                class="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition-colors text-xs font-medium flex items-center gap-1.5">
+                                <i class="fa-solid fa-envelope"></i> Email
+                            </a>
+                        </div>
+                    </div>
+                `;
+                contactGrid.appendChild(card);
+            });
+        }
+
+        // Filtering Logic
+        function filterContacts() {
+            const query = searchInput.value.toLowerCase();
+            const category = categoryFilter.value;
+            const priority = priorityFilter.value;
+
+            const filtered = contacts.filter(contact => {
+                const matchesSearch = 
+                    contact.name.toLowerCase().includes(query) ||
+                    contact.role.toLowerCase().includes(query) ||
+                    contact.facility.toLowerCase().includes(query) ||
+                    contact.category.toLowerCase().includes(query);
+
+                const matchesCategory = category === 'all' || contact.category === category;
+                const matchesPriority = priority === 'all' || contact.priority === priority;
+
+                return matchesSearch && matchesCategory && matchesPriority;
+            });
+
+            renderContacts(filtered);
+        }
+
+        // Event Listeners
+        searchInput.addEventListener('input', filterContacts);
+        categoryFilter.change = categoryFilter.addEventListener('change', filterContacts);
+        priorityFilter.addEventListener('change', filterContacts);
+
+        // Initial Load
+        renderContacts(contacts);
+    </script>
+</body>
+</html>
