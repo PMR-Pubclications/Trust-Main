@@ -65,6 +65,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 break;
             }
         }
+        unset($acc); // Clear reference
+
         if ($updated) {
             saveDatabase($dbPath, $dbData);
             $message = "Account #{$accountNumber} balance of $" . number_format($amount, 2) . " settled successfully. Database updated.";
@@ -117,7 +119,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <p><strong>Balance Owed:</strong> <span style="color: #10b981; font-size: 1.2rem;">$<?= number_format($accountData['balance'], 2) ?></span></p>
         </div>
 
-        <form method="POST">
+        <form method="POST" action="accounts_liable.php?role=<?= urlencode($activeRole) ?>">
             <input type="hidden" name="account_number" value="<?= htmlspecialchars($accountData['account_number']) ?>">
             <input type="hidden" name="payment_amount" value="<?= htmlspecialchars($accountData['balance']) ?>">
             <label>Payment Method</label>
@@ -130,38 +132,42 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <?php elseif ($searchAccount): ?>
         <p style="color: #94a3b8;">Account is either fully settled or inactive.</p>
     <?php endif; ?>
-</div>
-<script src="https://cdn.plaid.com/link/v2/stable/link-initialize.js"></script>
-<button id="link-wells-fargo-btn" style="background: red; color: white; font-weight: bold; padding: 0.75rem; border:none; border-radius:4px; width:100%; margin-top:0.5rem;">
-    Link Wells Fargo Account (Plaid)
-</button>
 
+    <!-- Plaid Link Integration for Wells Fargo -->
+    <hr style="border-color: #334155; margin: 2rem 0;">
+    <button id="link-wells-fargo-btn" style="background: #b91c1c; color: white; font-weight: bold; padding: 0.75rem; border:none; border-radius:4px; width:100%;">
+        Link Wells Fargo Account (Plaid)
+    </button>
+</div>
+
+<script src="https://cdn.plaid.com/link/v2/stable/link-initialize.js"></script>
 <script>
 document.getElementById('link-wells-fargo-btn').addEventListener('click', async function () {
-    // 1. Request a link_token from your backend server
-    const response = await fetch('/create_link_token.php', { method: 'POST' });
-    const data = await response.json();
+    try {
+        const response = await fetch('/create_link_token.php', { method: 'POST' });
+        const data = await response.json();
 
-    // 2. Initialize Plaid Link
-    const handler = Plaid.create({
-        token: data.link_token,
-        onSuccess: async function (public_token, metadata) {
-            // 3. Send public_token to backend to exchange for an access_token
-            const exchangeRes = await fetch('/exchange_public_token.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ public_token: public_token, institution: metadata.institution })
-            });
-            const result = await exchangeRes.json();
-            if (result.success) {
-                alert('Wells Fargo successfully linked for automated billing settlement.');
+        const handler = Plaid.create({
+            token: data.link_token,
+            onSuccess: async function (public_token, metadata) {
+                const exchangeRes = await fetch('/exchange_public_token.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ public_token: public_token, institution: metadata.institution })
+                });
+                const result = await exchangeRes.json();
+                if (result.success) {
+                    alert('Wells Fargo successfully linked for automated billing settlement.');
+                }
+            },
+            onExit: function (err, metadata) {
+                if (err) console.error("Plaid Link exited with error:", err);
             }
-        },
-        onExit: function (err, metadata) {
-            if (err) console.error("Plaid Link exited with error:", err);
-        }
-    });
-    handler.open();
+        });
+        handler.open();
+    } catch (e) {
+        console.error("Error initializing Plaid Link:", e);
+    }
 });
 </script>
 
