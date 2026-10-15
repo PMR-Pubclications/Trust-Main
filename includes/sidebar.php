@@ -126,4 +126,27 @@ $currentPage = basename($_SERVER['PHP_SELF']);
 
         tick();
     })();
+
+
 </script>
+    <!-- First Responder Emergency & Agency Dispatch Directory -->
+    <?php if ($activeRole === 'first_responder' || $isAdmin): ?>
+    <div>
+        <div class="nav-group-title">FIRST RESPONDER DISPATCH</div>
+        <nav class="nav-links">
+            <a href="dispatch.php?role=<?= urlencode($activeRole) ?>&agency=pd" class="nav-link">
+                &#128119; Police Department (PD) &rarr;
+            </a>
+            <a href="dispatch.php?role=<?= urlencode($activeRole) ?>&agency=fire" class="nav-link">
+                &#128293; Fire & Rescue Services &rarr;
+            </a>
+            <a href="dispatch.php?role=<?= urlencode($activeRole) ?>&agency=dot" class="nav-link">
+                &#128663; Department of Transportation (DOT) &rarr;
+            </a>
+            <a href="dispatch.php?role=<?= urlencode($activeRole) ?>&agency=lifeguard" class="nav-link">
+                &#127946; Lifeguard & Water Rescue &rarr;
+            </a>
+        </nav>
+    </div>
+    <?php endif; ?>
+
