@@ -131,5 +131,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <p style="color: #94a3b8;">Account is either fully settled or inactive.</p>
     <?php endif; ?>
 </div>
+<script src="https://cdn.plaid.com/link/v2/stable/link-initialize.js"></script>
+<button id="link-wells-fargo-btn" style="background: red; color: white; font-weight: bold; padding: 0.75rem; border:none; border-radius:4px; width:100%; margin-top:0.5rem;">
+    Link Wells Fargo Account (Plaid)
+</button>
+
+<script>
+document.getElementById('link-wells-fargo-btn').addEventListener('click', async function () {
+    // 1. Request a link_token from your backend server
+    const response = await fetch('/create_link_token.php', { method: 'POST' });
+    const data = await response.json();
+
+    // 2. Initialize Plaid Link
+    const handler = Plaid.create({
+        token: data.link_token,
+        onSuccess: async function (public_token, metadata) {
+            // 3. Send public_token to backend to exchange for an access_token
+            const exchangeRes = await fetch('/exchange_public_token.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ public_token: public_token, institution: metadata.institution })
+            });
+            const result = await exchangeRes.json();
+            if (result.success) {
+                alert('Wells Fargo successfully linked for automated billing settlement.');
+            }
+        },
+        onExit: function (err, metadata) {
+            if (err) console.error("Plaid Link exited with error:", err);
+        }
+    });
+    handler.open();
+});
+</script>
+
 </body>
 </html>
