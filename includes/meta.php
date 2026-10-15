@@ -129,3 +129,44 @@ $themeColor = ($activeRole === 'trust_admin') ? '#000000' : (($activeRole === 'f
   "description": "<?= $metaDescEsc ?>"
 }
 </script>
+
+<!-- Schema.org JSON-LD Structured Data for Search Engines -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "<?= htmlspecialchars($appName) ?>",
+  "alternateName": "TrustAdmin Forensic Ecosystem",
+  "operatingSystem": "Cross-Platform Web, PWA, Mobile, Linux",
+  "applicationCategory": "SecurityApplication",
+  "genre": "Forensic Investigation & Law Enforcement Administration",
+  "isAccessibleForFree": true,
+  "offers": {
+    "@type": "Offer",
+    "price": "0.00",
+    "priceCurrency": "USD",
+    "description": "Complimentary open-source deployment for authorized law enforcement and municipal agencies."
+  },
+  "author": {
+    "@type": "Organization",
+    "name": "<?= htmlspecialchars($appAuthor) ?>",
+    "url": "https://patriotsmustrise.org"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "<?= htmlspecialchars($appAuthor) ?>",
+    "url": "https://patriotsmustrise.org"
+  },
+  "description": "<?= $metaDescEsc ?>",
+  "softwareVersion": "<?= htmlspecialchars($appVersion) ?>",
+  "featureList": [
+    "ISO/IEC 17025 Compliant Evidence Transmittal",
+    "Blockchain-Backed Forensic Reporting Engine",
+    "Dynamic First Responder Dispatch (Police, Fire, DOT, Water Rescue)",
+    "Accounts Liable Ledger & Automated Creditor Billing"
+  ],
+  "downloadUrl": "https://github.com/PMR-Pubclications/Trust-Main",
+  "releaseNotes": "https://github.com/PMR-Pubclications/Trust-Main/releases"
+}
+</script>
+
