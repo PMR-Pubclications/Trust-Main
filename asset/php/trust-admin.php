@@ -89,6 +89,17 @@ require_once __DIR__ . '/includes/adminHeader.php';
     </div>
 
 </div>
+require_once __DIR__ . '/includes/AuditLedger.php';
+$ledger = new AuditLedger();
+
+// Log the outreach event to the immutable chain
+$auditHash = $ledger->logEvent('ANNUAL_OUTREACH_TRANSMISSION', [
+    'version' => $appVersion,
+    'recipients_notified' => $successCount,
+    'status' => 'COMPLETED'
+]);
+
+
 
 <?php
 require_once __DIR__ . '/includes/adminFooter.php';
