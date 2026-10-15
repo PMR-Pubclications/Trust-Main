@@ -25,3 +25,14 @@ function dispatchSecurityWebhook($webhookUrl, $version, $labId) {
 
 // Example usage triggered during deployment
 // dispatchSecurityWebhook('https://discord.com/api/webhooks/YOUR_WEBHOOK_ID', '1.2', 'MOBILE_LAB_01');
+
+require_once __DIR__ . '/includes/AuditLedger.php';
+$ledger = new AuditLedger();
+
+// Log the outreach event to the immutable chain
+$auditHash = $ledger->logEvent('ANNUAL_OUTREACH_TRANSMISSION', [
+    'version' => $appVersion,
+    'recipients_notified' => $successCount,
+    'status' => 'COMPLETED'
+]);
+
