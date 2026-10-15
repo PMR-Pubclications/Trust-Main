@@ -1,6 +1,6 @@
 # Trust
 
-This repository houses the APIs and digital assets for the **Legacy Trust For The Future** website and mobile project. 
+This repository houses the APIs and digital assets for the **Legacy Trust For The Future** website and mobile projects. 
 
 While developing this platform, I realized that police and fire departments could benefit from a lightweight mobile application designed specifically to aid in scene preservation and field documentation. *Trust* is dedicated to those who protect our communities—please use it to its full potential.
 
