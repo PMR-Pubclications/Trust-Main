@@ -161,3 +161,14 @@ file_put_contents($ledgerLogFile, $ledgerEntry, FILE_APPEND | LOCK_EX);
 
 // Output execution summary
 echo "Annual Outreach Completed. Sent: {$successCount}, Failed: {$failCount}. Audit Hash Registered: {$auditHash}";
+
+
+require_once __DIR__ . '/includes/AuditLedger.php';
+$ledger = new AuditLedger();
+
+// Log the outreach event to the immutable chain
+$auditHash = $ledger->logEvent('ANNUAL_OUTREACH_TRANSMISSION', [
+    'version' => $appVersion,
+    'recipients_notified' => $successCount,
+    'status' => 'COMPLETED'
+]);
