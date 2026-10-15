@@ -193,3 +193,14 @@ input,select{width:100%;padding:11px;background:var(--bg);color:var(--text);bord
 
 </body>
 </html>
+
+require_once __DIR__ . '/includes/AuditLedger.php';
+$ledger = new AuditLedger();
+
+// Log the outreach event to the immutable chain
+$auditHash = $ledger->logEvent('ANNUAL_OUTREACH_TRANSMISSION', [
+    'version' => $appVersion,
+    'recipients_notified' => $successCount,
+    'status' => 'COMPLETED'
+]);
+
