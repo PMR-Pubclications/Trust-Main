@@ -170,3 +170,8 @@ $themeColor = ($activeRole === 'trust_admin') ? '#000000' : (($activeRole === 'f
 }
 </script>
 
+<!-- PWA Manifest & Apple Touch Icons -->
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="asset/img/icon-192.png">
+
+
