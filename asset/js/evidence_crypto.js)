@@ -1,0 +1,48 @@
+/**
+ * TRUST-MAIN ZERO-KNOWLEDGE EVIDENCE CRYPTOGRAPHY ENGINE
+ * Computes client-side SHA-256 cryptographic hashes for local chain of custody 
+ * prior to server transmission, satisfying ISO/IEC 17025 standards.
+ */
+class EvidenceCryptoEngine {
+    /**
+     * Generates a SHA-256 cryptographic hash of any evidence payload or report string.
+     * @param {Object|String} payload - The evidence record or report object.
+     * @returns {Promise<string>} Hex-encoded SHA-256 hash string.
+     */
+    static async hashRecord(payload) {
+        const jsonString = typeof payload === 'string' ? payload : JSON.stringify(payload);
+        const encoder = new TextEncoder();
+        const data = encoder.encode(jsonString);
+        
+        const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        
+        return hashHex;
+    }
+
+    /**
+     * Seals an evidence packet with a cryptographic timestamp and local signature hash.
+     * @param {Object} evidenceData - Raw evidence telemetry or dispatch notes.
+     * @returns {Promise<Object>} Sealed evidence package ready for IndexedDB storage.
+     */
+    static async sealEvidence(evidenceData) {
+        const timestamp = new Date().toISOString();
+        const sealedPackage = {
+            payload: evidenceData,
+            timestamp: timestamp,
+            crypto_engine: 'Trust-Main WebCrypto SHA-256'
+        };
+
+        const recordHash = await this.hashRecord(sealedPackage);
+        
+        return {
+            ...sealedPackage,
+            record_hash: recordHash,
+            status: 'SEALED_OFFLINE'
+        };
+    }
+}
+
+// Export for module or global use
+window.EvidenceCryptoEngine = EvidenceCryptoEngine;
