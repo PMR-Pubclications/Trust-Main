@@ -65,6 +65,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <input type="email" name="agency_email" required placeholder="admin@agency.gov">
         <button type="submit">Send Deployment Packet</button>
     </form>
+require_once __DIR__ . '/includes/AuditLedger.php';
+$ledger = new AuditLedger();
+
+// Log the outreach event to the immutable chain
+$auditHash = $ledger->logEvent('ANNUAL_OUTREACH_TRANSMISSION', [
+    'version' => $appVersion,
+    'recipients_notified' => $successCount,
+    'status' => 'COMPLETED'
+]);
+
 </div>
 </body>
 </html>
