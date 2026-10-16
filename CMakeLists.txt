@@ -14,4 +14,8 @@ add_executable(trust_main_server
 )
 
 # Link the high-performance C++ engine libraries
+
+add_subdirectory(vendor/AudioVideoEngine-CPP)
+target_link_libraries(trust_main_server PRIVATE AudioVideoEngineCore)
+
 target_link_libraries(trust_main_server PRIVATE AudioVideoEngineCore)
