@@ -23,3 +23,19 @@
     }
   ]
 }
+
+# The Ingestion Bridge entry point
+def ingest_trust_packet(binary_data: bytes):
+    # 1. Unpack Protobuf and decompress JSON
+    packet = pb.TrustPacket.FromString(binary_data)
+    json_data = json.loads(zstd.decompress(packet.payload_json))
+    
+    # 2. Consult your Manifest to route to the correct legacy handler
+    handler_function = system_manifest.get_handler_for_schema(packet.schema_type)
+    
+    if handler_function:
+        # Pass the plain JSON dict straight to your existing code
+        handler_function(json_data)
+    else:
+        print(f"Unknown schema type: {packet.schema_type}")
+
