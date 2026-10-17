@@ -34,10 +34,10 @@ class AnnonVoiceSynthesizer:
         """
         # You can now use .mp3 files here instead of just .wav files!
         emotion_sources = {
-            "neutral": "modules/Annon/wav/voice_samples.mp3", # Can be .mp3 or .wav
-            "urgent": "modules/Annon/wav/urgent_sample.mp3",
-            "authoritative": "modules/Annon/wav/authoritative_sample.mp3",
-            "calm": "modules/Annon/wav/calm_sample.mp3"
+            "neutral": "modules/Annon/audio/voice_samples.mp3", # Can be .mp3 or .wav
+            "urgent": "modules/Annon/audio/urgent_sample.mp3",
+            "authoritative": "modules/Annon/audio/authoritative_sample.mp3",
+            "calm": "modules/Annon/audio/calm_sample.mp3"
         }
         
         raw_source_path = emotion_sources.get(emotion, emotion_sources["neutral"])
