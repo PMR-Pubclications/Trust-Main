@@ -1,12 +1,11 @@
 #include <Arduino.h>
 #include <WiFi.h>
+#include <esp_now.h>
 
-// --- Annon Subsystem: Tactical AI & Agency Bridge Integration ---
-// Replaces mock routines with active integration into the Trust-Main Annon 
-// architecture for real-time vector processing, suggestion engines, and dispatch.
-
+// --- Annon Subsystem: Tactical AI, Agency Bridge & Collision-Resistant Mesh ---
 struct TacticalVector {
     uint8_t unitID;
+    uint32_t sequenceNum;
     float latitude;
     float longitude;
     float bearing;
@@ -14,7 +13,6 @@ struct TacticalVector {
     float confidence;
 };
 
-// Annon Suggestion Engine: Processes live telemetry against mission profiles
 class AnnonSuggestionEngine {
 public:
     String evaluateTacticalContext(const TacticalVector &vector) {
@@ -34,65 +32,88 @@ public:
     }
 };
 
-// Annon Agency Bridge: Handles multi-agency telemetry routing and logging
 class AnnonAgencyBridge {
 public:
     bool transmitTelemetryToDispatch(const TacticalVector &vector, const String &aiPrompt) {
-        // Formulate JSON or secure payload for local mesh / agency relay
         Serial.println("[AGENCY BRIDGE] Transmitting packet to tactical network...");
         Serial.print("[DISPATCH PAYLOAD] Unit: ");
         Serial.print(vector.unitID);
-        Serial.print(" | Lat: ");
-        Serial.print(vector.latitude, 6);
-        Serial.print(" | Lon: ");
-        Serial.print(vector.longitude, 6);
+        Serial.print(" | Seq: ");
+        Serial.print(vector.sequenceNum);
         Serial.print(" | AI Directive: ");
         Serial.println(aiPrompt);
-        
-        // Return true on successful transmission over ESP-NOW or local socket
         return true;
     }
 };
 
-// Global Annon Subsystem Instances
 AnnonSuggestionEngine suggestionEngine;
 AnnonAgencyBridge agencyBridge;
 
+// Mesh state tracking
+uint32_t localSequenceCounter = 0;
+float lastBroadcastBearing = 0.0;
+unsigned long lastTransmissionTime = 0;
+const unsigned long MIN_TRANSMISSION_INTERVAL_MS = 2500; // Rate limit
+
 void initAnnonTacticalBridge() {
-    Serial.println("Annon Tactical Bridge Initialized [Active Integration].");
+    Serial.println("Annon Tactical Bridge Initialized [Collision Guard Active].");
 }
 
-// Main execution hook called when new mesh triangulation data is verified
 void processIncomingTacticalData(const TacticalVector &incomingVector) {
-    // Step 1: Run through Annon AI Suggestion Engine
     String tacticalBrief = suggestionEngine.evaluateTacticalContext(incomingVector);
     
-    // Step 2: Output hands-free voice synthesis directive
     Serial.print("[SPEECH SYNTHESIZER AUDIO OUT]: \"");
     Serial.print(tacticalBrief);
     Serial.println("\"");
     
-    // Step 3: Dispatch telemetry across the Agency Bridge
     agencyBridge.transmitTelemetryToDispatch(incomingVector, tacticalBrief);
 }
 
 void setup() {
     Serial.begin(115200);
+    WiFi.mode(WIFI_STA);
+    
+    if (esp_now_init() != ESP_OK) {
+        Serial.println("ESP-NOW Init Failed.");
+        return;
+    }
+    
     initAnnonTacticalBridge();
 }
 
 void loop() {
-    // Real-time telemetry ingestion from the acoustic mesh node and triangulation engine
-    TacticalVector liveTelemetry;
-    liveTelemetry.unitID = 1;
-    liveTelemetry.latitude = 45.6387;
-    liveTelemetry.longitude = -122.6614;
-    liveTelemetry.bearing = -18.4;
-    liveTelemetry.distance = 28.5;
-    liveTelemetry.confidence = 0.91;
+    // Simulated live telemetry reading
+    float liveBearing = -18.4;
+    float liveDistance = 28.5;
+    float liveConfidence = 0.91;
 
-    // Process live data through the Annon subsystem
-    processIncomingTacticalData(liveTelemetry);
+    unsigned long currentTime = millis();
+    
+    // Collision Prevention Check 1: Rate Limiting & Significant Change Threshold
+    bool significantChange = abs(liveBearing - lastBroadcastBearing) > 5.0;
+    bool timeWindowPassed = (currentTime - lastTransmissionTime) > MIN_TRANSMISSION_INTERVAL_MS;
 
-    delay(5000); // Event polling cycle
+    if (significantChange || timeWindowPassed) {
+        // Collision Prevention Check 2: Randomized Backoff Jitter (Stagger transmissions)
+        unsigned long jitterDelay = random(50, 400);
+        delay(jitterDelay);
+
+        TacticalVector liveTelemetry;
+        liveTelemetry.unitID = 1;
+        liveTelemetry.sequenceNum = ++localSequenceCounter;
+        liveTelemetry.latitude = 45.6387;
+        liveTelemetry.longitude = -122.6614;
+        liveTelemetry.bearing = liveBearing;
+        liveTelemetry.distance = liveDistance;
+        liveTelemetry.confidence = liveConfidence;
+
+        // Process locally & broadcast
+        processIncomingTacticalData(liveTelemetry);
+
+        // Update state markers
+        lastBroadcastBearing = liveBearing;
+        lastTransmissionTime = millis();
+    }
+
+    delay(500); // Main loop check frequency
 }
