@@ -1,0 +1,28 @@
+{
+  "platform": "Trust Forensics Mobile Lab (TFML)",
+  "registry_version": "1.0",
+  "success_cases": [
+    {
+      "case_id": "TFML-2026-042",
+      "agency": "Metro Police Department",
+      "module_type": "Law Enforcement & Ballistics",
+      "initial_human_assumption": "Suspect charged with discharge of firearm based on conflicting eyewitness panic statements.",
+      "ground_truth_evidence": "Hardware acoustic transient logs and 3D LiDAR trajectory mapping proved weapon discharge originated 45 meters away behind a structural concrete barrier.",
+      "case_outcome": "Full Exoneration / Case Dismissed Prior to Trial",
+      "municipal_impact": "Prevented wrongful conviction and eliminated projected multi-million dollar civil rights litigation payout.",
+      "court_admissibility_verified": true,
+      "merkle_root_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "case_id": "TFML-2026-118",
+      "agency": "County Fire & Rescue",
+      "module_type": "Fire & Technical Rescue",
+      "initial_human_assumption": "Structure fire ruled accidental electrical fault by preliminary visual sweep.",
+      "ground_truth_evidence": "Radiometric thermal wall gradient analysis and automated hazmat OCR placard scanning recorded volatile accelerant signature bounds.",
+      "case_outcome": "Arson Conviction Secured",
+      "municipal_impact": "Accelerated prosecution timeline by 8 months with zero chain-of-custody defense challenges.",
+      "court_admissibility_verified": true,
+      "merkle_root_hash": "8f434346648f6b96df89dda901c5176b10a6d83961dd3c1ac88b59b2dc327aa4"
+    }
+  ]
+}
