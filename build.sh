@@ -80,3 +80,6 @@ run https://github.com/PMR-Pubclications/Trust-Main/tree/main/sh
 
 run
 https://github.com/PMR-Pubclications/Trust-Main/tree/main/asset%2Fsh
+
+run
+https://github.com/PMR-Pubclications/Trust-Main/tree/main/asset%2Fsh%2FOpenSea
