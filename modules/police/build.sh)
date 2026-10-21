@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+# ==============================================================================
+# Trust-Main: Police Module Build & Compilation Script
+# Installs dependencies and generates Law Enforcement operational reports.
+# ==============================================================================
+
+set -e
+
+echo "--------------------------------------------------"
+echo "[POLICE BUILD] Initializing Police Module Build Sequence..."
+echo "--------------------------------------------------"
+
+# Step 1: Install Python Requirements for Police / Evidence Services
+if [ -f "requirements.txt" ]; then
+    echo "[POLICE BUILD STEP 1/2] Installing Police Python dependencies..."
+    python3 -m pip install -r requirements.txt --quiet
+else
+    echo "[POLICE BUILD STEP 1/2] No requirements.txt found. Skipping dependency installation."
+fi
+
+# Step 2: Compile Local Police Operational Impact Report
+echo "[POLICE BUILD STEP 2/2] Compiling Police operational success metrics..."
+python3 police_compiler.py
+
+echo "--------------------------------------------------"
+echo "[POLICE BUILD SUCCESS] Police module build complete. Operational report generated."
+echo "--------------------------------------------------"
