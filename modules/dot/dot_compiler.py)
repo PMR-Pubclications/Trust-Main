@@ -1,0 +1,63 @@
+#!/usr/bin/env python3
+"""
+TFML DOT Module Compiler & Operational Impact Generator
+Validates roadway incident management logs, traffic control metrics, 
+and infrastructure recovery successes for WSDOT/ODOT/Caltrans executive reviews.
+"""
+
+import json
+import os
+from datetime import datetime
+
+# Path points to root-level or local registry storage
+DOT_DB = "../../dot_success_registry.json"
+LOCAL_DOT_DB = "dot_success_registry.json"
+OUTPUT_REPORT = "DOT_Operational_Impact_Report.md"
+
+def compile_dot_operational_report():
+    """Aggregates DOT operational successes into an executive transportation briefing report."""
+    target_db = DOT_DB if os.path.exists(DOT_DB) else LOCAL_DOT_DB
+    
+    dot_data = {"dot_operational_successes": []}
+    if os.path.exists(target_db):
+        with open(target_db, "r") as f:
+            dot_data = json.load(f)
+
+    report_content = f"""# Trust Forensics Mobile Lab (TFML) - DOT Module
+## Executive Briefing & Roadway Incident Management (RIM) Report
+
+### Operational Overview
+The TFML DOT module equips Transportation Department Incident Response Teams (IRT) with zero-touch telemetry, roadway protection metrics, and automated structural assessment tools for high-speed freeway corridors and heavy vehicle recovery operations[span_1](start_span)[span_1](end_span).
+
+---
+
+## 🛣️ Verified Roadway Incident Management & Infrastructure Impact
+*Tracked via lane reopening times, secondary crash prevention metrics, and bridge/infrastructure integrity checks.*
+"""
+
+    successes = dot_data.get("dot_operational_successes", [])
+    if successes:
+        for dot in successes:
+            report_content += f"""
+- **Incident ID {dot.get('incident_id')}** -> **{dot.get('corridor_location')}**[span_2](start_span)[span_2](end_span)
+  - **Operation Type:** {dot.get('operation_type')}[span_3](start_span)[span_3](end_span)
+  - **System Action:** {dot.get('system_action')}[span_4](start_span)[span_4](end_span)
+  - **Incident Finalization:** {dot.get('incident_finalization_status')}[span_5](start_span)[span_5](end_span)
+  - **Operational Impact:** {dot.get('operational_impact')}[span_6](start_span)[span_6](end_span)
+"""
+    else:
+        report_content += "\n*No DOT operational success logs recorded in the registry yet.*[span_7](start_span)[span_7](end_span)\n"
+
+    report_content += f"""
+---
+*Compiled on: {datetime.utcnow().isoformat()} UTC*  
+*Technical Architecture & Repository:* [Trust-Main DOT Directory](https://github.com/PMR-Pubclications/Trust-Main/tree/main/modules%2Fdot)[span_8](start_span)[span_8](end_span)
+"""
+
+    with open(OUTPUT_REPORT, "w") as f:
+        f.write(report_content)
+        
+    print(f"[DOT COMPILER] Operational impact report successfully compiled to '{OUTPUT_REPORT}'.")
+
+if __name__ == "__main__":
+    compile_dot_operational_report()
