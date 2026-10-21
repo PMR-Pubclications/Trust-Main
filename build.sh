@@ -76,3 +76,4 @@ echo "--------------------------------------------------"
 echo "[TFML BUILD SUCCESS] Build complete. Marketing package updated at asset/PressRelease/TFML_Master_Marketing_Package.md[span_20](start_span)[span_20](end_span)."
 echo "--------------------------------------------------"
 
+run https://github.com/PMR-Pubclications/Trust-Main/tree/main/sh
