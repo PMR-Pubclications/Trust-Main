@@ -77,3 +77,6 @@ echo "[TFML BUILD SUCCESS] Build complete. Marketing package updated at asset/Pr
 echo "--------------------------------------------------"
 
 run https://github.com/PMR-Pubclications/Trust-Main/tree/main/sh
+
+run
+https://github.com/PMR-Pubclications/Trust-Main/tree/main/asset%2Fsh
