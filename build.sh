@@ -78,3 +78,32 @@ echo "--------------------------------------------------"
 
 run https://github.com/PMR-Pubclications/Trust-Main/tree/main/sh
 
+#!/usr/bin/env bash
+# ==============================================================================
+# Trust-Main: EMS Module Build & Compilation Script
+# Installs dependencies, validates thermal/voice services, and generates reports.
+# ==============================================================================
+
+set -e
+
+echo "--------------------------------------------------"
+echo "[EMS BUILD] Initializing EMS Module Build Sequence..."
+echo "--------------------------------------------------"
+
+# Step 1: Install Python Requirements for EMS AI & Thermal Analyzer
+if [ -f "requirements.txt" ]; then
+    echo "[EMS BUILD STEP 1/2] Installing EMS Python dependencies..."
+    python3 -m pip install -r requirements.txt --quiet
+else
+    echo "[EMS BUILD STEP 1/2] No requirements.txt found. Skipping dependency installation."
+fi
+
+# Step 2: Compile Local EMS Clinical Impact Report
+echo "[EMS BUILD STEP 2/2] Compiling de-identified EMS clinical success metrics..."
+python3 ems_compiler.py
+
+echo "--------------------------------------------------"
+echo "[EMS BUILD SUCCESS] EMS module build complete. Clinical report generated."
+echo "--------------------------------------------------"
+
+
