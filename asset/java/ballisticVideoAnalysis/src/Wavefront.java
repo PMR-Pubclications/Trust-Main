@@ -17,6 +17,18 @@ public class Scene3DObjExporter {
             Ray3D shooterVector,
             double maxShooterDistanceMeters
     ) throws IOException {
+        if (filepath == null || filepath.isBlank()) {
+            throw new IllegalArgumentException("A non-empty OBJ filepath is required.");
+        }
+        if (!isFinite(areaOfOrigin)) {
+            areaOfOrigin = new Point3D(0, 0, 0);
+        }
+        if (shooterVector == null || shooterVector.direction() == null) {
+            shooterVector = new Ray3D(areaOfOrigin, new Point3D(0, 0, -1));
+        }
+        if (!Double.isFinite(maxShooterDistanceMeters) || maxShooterDistanceMeters < 0) {
+            maxShooterDistanceMeters = 0;
+        }
 
         try (PrintWriter writer = new PrintWriter(new FileWriter(filepath))) {
             writer.println("# Forensic 3D Scene Trajectory Map");
@@ -26,7 +38,10 @@ public class Scene3DObjExporter {
 
             // 1. Export Spatter Anchor Points and Trajectory Lines
             writer.println("o Spatter_Rays");
-            for (Ray3D ray : spatterRays) {
+            for (Ray3D ray : spatterRays == null ? List.<Ray3D>of() : spatterRays) {
+                if (ray == null || !isFinite(ray.anchor()) || !isFinite(ray.direction())) {
+                    continue;
+                }
                 Point3D p1 = ray.anchor();
                 Point3D p2 = p1.add(ray.direction().multiply(1.5)); // 1.5m ray representation
 
@@ -47,9 +62,20 @@ public class Scene3DObjExporter {
             // 3. Export Line of Fire (Extrapolated Shooter Ray)
             writer.println("\no Shooter_Line_Of_Fire");
             Point3D shooterTargetPos = areaOfOrigin.add(shooterVector.direction().multiply(maxShooterDistanceMeters));
+            if (!isFinite(shooterTargetPos)) {
+                shooterTargetPos = areaOfOrigin;
+            }
             
             writer.printf("v %.4f %.4f %.4f%n", shooterTargetPos.x(), shooterTargetPos.y(), shooterTargetPos.z());
             writer.printf("l %d %d%n", originIndex, vertexIndex);
+            if (writer.checkError()) {
+                throw new IOException("Failed to write OBJ scene.");
+            }
         }
+    }
+
+    private static boolean isFinite(Point3D point) {
+        return point != null && Double.isFinite(point.x())
+                && Double.isFinite(point.y()) && Double.isFinite(point.z());
     }
 }

@@ -20,29 +20,46 @@ public class BloodSpatterAnalyzer {
     }
 
     public ForensicAnalysisResult analyzeVideo(File videoFile) throws Exception {
-        FFmpegFrameGrabber grabber = new FFmpegFrameGrabber(videoFile);
-        grabber.start();
-
-        OpenCVFrameConverter.ToMat converter = new OpenCVFrameConverter.ToMat();
-        org.bytedeco.javacv.Frame frame;
-
-        List<DropletMetrics> detectedDroplets = new ArrayList<>();
-        int frameCount = 0;
-
-        while ((frame = grabber.grabImage()) != null) {
-            frameCount++;
-            // Sample every Nth frame to optimize processing
-            if (frameCount % 5 != 0) continue;
-
-            Mat matFrame = converter.convert(frame);
-            if (matFrame == null || matFrame.empty()) continue;
-
-            List<DropletMetrics> frameDroplets = extractBloodstains(matFrame);
-            detectedDroplets.addAll(frameDroplets);
+        if (videoFile == null || !videoFile.isFile()) {
+            throw new IllegalArgumentException("A readable video file is required.");
         }
+        FFmpegFrameGrabber grabber = new FFmpegFrameGrabber(videoFile);
+        List<DropletMetrics> detectedDroplets = new ArrayList<>();
+        boolean started = false;
+        try {
+            grabber.start();
+            started = true;
 
-        grabber.stop();
-        grabber.release();
+            OpenCVFrameConverter.ToMat converter = new OpenCVFrameConverter.ToMat();
+            org.bytedeco.javacv.Frame frame;
+            int frameCount = 0;
+
+            while ((frame = grabber.grabImage()) != null) {
+                frameCount++;
+                // Sample every Nth frame to optimize processing
+                if (frameCount % 5 != 0) continue;
+
+                Mat matFrame = converter.convert(frame);
+                try {
+                    if (matFrame == null || matFrame.empty()) continue;
+
+                    List<DropletMetrics> frameDroplets = extractBloodstains(matFrame);
+                    detectedDroplets.addAll(frameDroplets);
+                } finally {
+                    if (matFrame != null) {
+                        matFrame.release();
+                    }
+                }
+            }
+        } finally {
+            try {
+                if (started) {
+                    grabber.stop();
+                }
+            } finally {
+                grabber.release();
+            }
+        }
 
         // Compute 3D Area of Origin via ray convergence
         Vector3D areaOfOrigin = calculateAreaOfOrigin(detectedDroplets);
@@ -55,55 +72,85 @@ public class BloodSpatterAnalyzer {
 
     private List<DropletMetrics> extractBloodstains(Mat src) {
         List<DropletMetrics> droplets = new ArrayList<>();
+        if (src == null || src.empty()) {
+            return droplets;
+        }
 
         Mat hsv = new Mat();
         Mat mask1 = new Mat();
         Mat mask2 = new Mat();
         Mat redMask = new Mat();
-
-        // Convert to HSV for red blood color segmentation
-        opencv_imgproc.cvtColor(src, hsv, opencv_imgproc.COLOR_BGR2HSV);
-
-        // Red hue spans two ranges in HSV space
-        opencv_core.inRange(hsv, new Mat(1, 1, opencv_core.CV_8UC3, new Scalar(0, 70, 50, 0)),
-                                 new Mat(1, 1, opencv_core.CV_8UC3, new Scalar(10, 255, 255, 0)), mask1);
-        opencv_core.inRange(hsv, new Mat(1, 1, opencv_core.CV_8UC3, new Scalar(170, 70, 50, 0)),
-                                 new Mat(1, 1, opencv_core.CV_8UC3, new Scalar(180, 255, 255, 0)), mask2);
-        opencv_core.add(mask1, mask2, redMask);
-
-        // Find stain contours
+        Mat lowerRed1 = new Mat(1, 1, opencv_core.CV_8UC3, new Scalar(0, 70, 50, 0));
+        Mat upperRed1 = new Mat(1, 1, opencv_core.CV_8UC3, new Scalar(10, 255, 255, 0));
+        Mat lowerRed2 = new Mat(1, 1, opencv_core.CV_8UC3, new Scalar(170, 70, 50, 0));
+        Mat upperRed2 = new Mat(1, 1, opencv_core.CV_8UC3, new Scalar(180, 255, 255, 0));
         MatVector contours = new MatVector();
         Mat hierarchy = new Mat();
-        opencv_imgproc.findContours(redMask, contours, hierarchy, opencv_imgproc.RETR_EXTERNAL, opencv_imgproc.CHAIN_APPROX_SIMPLE);
 
-        for (long i = 0; i < contours.size(); i++) {
-            Mat contour = contours.get(i);
-            double area = opencv_imgproc.contourArea(contour);
+        try {
+            // Convert to HSV for red blood color segmentation
+            opencv_imgproc.cvtColor(src, hsv, opencv_imgproc.COLOR_BGR2HSV);
 
-            // Filter out noise and massive pools (require single-droplet area thresholds)
-            if (area > 5 && area < 1500 && contour.rows() >= 5) {
-                RotatedRect ellipse = opencv_imgproc.fitEllipse(contour);
+            // Red hue spans two ranges in HSV space
+            opencv_core.inRange(hsv, lowerRed1, upperRed1, mask1);
+            opencv_core.inRange(hsv, lowerRed2, upperRed2, mask2);
+            opencv_core.add(mask1, mask2, redMask);
 
-                double width = Math.min(ellipse.size().width(), ellipse.size().height());
-                double length = Math.max(ellipse.size().width(), ellipse.size().height());
-                double angle = ellipse.angle(); // Orientation angle
+            // Find stain contours
+            opencv_imgproc.findContours(redMask, contours, hierarchy, opencv_imgproc.RETR_EXTERNAL, opencv_imgproc.CHAIN_APPROX_SIMPLE);
 
-                DropletMetrics metrics = new DropletMetrics(width, length, angle, new Vector3D(0, 0, 0));
-                droplets.add(metrics);
+            for (long i = 0; i < contours.size(); i++) {
+                Mat contour = contours.get(i);
+                if (contour == null || contour.empty()) continue;
+                double area = opencv_imgproc.contourArea(contour);
+
+                // Filter out noise and massive pools (require single-droplet area thresholds)
+                if (area > 5 && area < 1500 && contour.rows() >= 5) {
+                    try {
+                        RotatedRect ellipse = opencv_imgproc.fitEllipse(contour);
+                        if (ellipse == null || ellipse.size() == null) continue;
+
+                        double width = Math.min(ellipse.size().width(), ellipse.size().height());
+                        double length = Math.max(ellipse.size().width(), ellipse.size().height());
+                        double angle = ellipse.angle(); // Orientation angle
+                        if (!Double.isFinite(width) || !Double.isFinite(length) || width <= 0 || length <= 0) {
+                            continue;
+                        }
+
+                        DropletMetrics metrics = new DropletMetrics(width, length, angle, new Vector3D(0, 0, 0));
+                        droplets.add(metrics);
+                    } catch (RuntimeException ignored) {
+                        // Ignore contours that OpenCV cannot fit reliably.
+                    }
+                }
             }
+        } finally {
+            hsv.release();
+            mask1.release();
+            mask2.release();
+            redMask.release();
+            lowerRed1.release();
+            upperRed1.release();
+            lowerRed2.release();
+            upperRed2.release();
+            hierarchy.release();
+            contours.close();
         }
 
         return droplets;
     }
 
     private Vector3D calculateAreaOfOrigin(List<DropletMetrics> droplets) {
-        if (droplets.isEmpty()) return new Vector3D(0, 0, 0);
+        if (droplets == null || droplets.isEmpty()) return new Vector3D(0, 0, 0);
 
         // Least-Squares Line Intersection Algorithm for 3D Ray Convergence
         double sumX = 0, sumY = 0, sumZ = 0;
         int validRays = 0;
 
         for (DropletMetrics d : droplets) {
+            if (d == null || d.getTrajectoryRay() == null) {
+                continue;
+            }
             Vector3D ray = d.getTrajectoryRay();
             // Simple spatial back-projection estimate
             sumX += ray.x;
@@ -112,13 +159,20 @@ public class BloodSpatterAnalyzer {
             validRays++;
         }
 
-        return new Vector3D(sumX / validRays, sumY / validRays, sumZ / validRays);
+        return validRays == 0
+                ? new Vector3D(0, 0, 0)
+                : new Vector3D(sumX / validRays, sumY / validRays, sumZ / validRays);
     }
 
     private String classifyEnergyRegime(List<DropletMetrics> droplets) {
-        if (droplets.isEmpty()) return "INSUFFICIENT_DATA";
+        if (droplets == null || droplets.isEmpty()) return "INSUFFICIENT_DATA";
 
-        double avgWidth = droplets.stream().mapToDouble(DropletMetrics::getWidth).average().orElse(0);
+        double avgWidth = droplets.stream()
+                .filter(java.util.Objects::nonNull)
+                .mapToDouble(DropletMetrics::getWidth)
+                .filter(Double::isFinite)
+                .average().orElse(Double.NaN);
+        if (!Double.isFinite(avgWidth)) return "INSUFFICIENT_DATA";
 
         // High-Velocity Impact Spatter (HVIS) typically yields micro-droplets (< 1mm)
         if (avgWidth < 15.0) { // Pixel threshold scaled to resolution

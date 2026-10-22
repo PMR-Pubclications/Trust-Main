@@ -14,8 +14,12 @@ public class Trajectory3DSolver {
 
         double[][] sumMatrix = new double[3][3];
         double[] sumVector = new double[3];
+        int validRays = 0;
 
         for (Ray3D ray : rays) {
+            if (ray == null || !isFinite(ray.anchor()) || !isUsableDirection(ray.direction())) {
+                continue;
+            }
             Point3D a = ray.anchor();
             Point3D d = ray.direction();
 
@@ -32,8 +36,12 @@ public class Trajectory3DSolver {
                 }
                 sumVector[r] += P[r][0] * a.x() + P[r][1] * a.y() + P[r][2] * a.z();
             }
+            validRays++;
         }
 
+        if (validRays == 0) {
+            return new Point3D(0, 0, 0);
+        }
         return invert3x3AndMultiply(sumMatrix, sumVector);
     }
 
@@ -41,14 +49,31 @@ public class Trajectory3DSolver {
      * Projects shooter trajectory line backward from impact point along mean vector.
      */
     public static Ray3D extrapolateShooterVector(Point3D areaOfOrigin, List<Ray3D> rays) {
+        if (!isFinite(areaOfOrigin)) {
+            areaOfOrigin = new Point3D(0, 0, 0);
+        }
+        if (rays == null || rays.isEmpty()) {
+            return new Ray3D(areaOfOrigin, new Point3D(0, 0, -1));
+        }
+
         double avgDx = 0, avgDy = 0, avgDz = 0;
+        int validRays = 0;
         for (Ray3D r : rays) {
+            if (r == null || !isUsableDirection(r.direction())) {
+                continue;
+            }
             avgDx += r.direction().x();
             avgDy += r.direction().y();
             avgDz += r.direction().z();
+            validRays++;
         }
-        int count = rays.size();
-        Point3D meanImpactDir = new Point3D(avgDx / count, avgDy / count, avgDz / count).normalize();
+        if (validRays == 0) {
+            return new Ray3D(areaOfOrigin, new Point3D(0, 0, -1));
+        }
+        Point3D meanImpactDir = new Point3D(avgDx / validRays, avgDy / validRays, avgDz / validRays).normalize();
+        if (meanImpactDir.magnitude() == 0) {
+            return new Ray3D(areaOfOrigin, new Point3D(0, 0, -1));
+        }
 
         // Reverse direction to vector back to shooter location
         Point3D shooterDirection = meanImpactDir.multiply(-1.0);
@@ -85,5 +110,14 @@ public class Trajectory3DSolver {
         double z = inv[2][0] * V[0] + inv[2][1] * V[1] + inv[2][2] * V[2];
 
         return new Point3D(x, y, z);
+    }
+
+    private static boolean isFinite(Point3D point) {
+        return point != null && Double.isFinite(point.x())
+                && Double.isFinite(point.y()) && Double.isFinite(point.z());
+    }
+
+    private static boolean isUsableDirection(Point3D direction) {
+        return isFinite(direction) && direction.magnitude() > 0;
     }
 }

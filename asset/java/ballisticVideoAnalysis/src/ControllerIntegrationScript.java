@@ -26,8 +26,15 @@ public class ForensicPipelineController {
             @RequestParam("file") MultipartFile file,
             @RequestParam("reportServiceUrl") String reportServiceUrl
     ) {
+        if (file == null || file.isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of(
+                    "status", "ERROR",
+                    "message", "A non-empty video file is required."
+            ));
+        }
+        File tempVideo = null;
         try {
-            File tempVideo = File.createTempFile("upload_vid_", ".mp4");
+            tempVideo = File.createTempFile("upload_vid_", ".mp4");
             file.transferTo(tempVideo);
 
             // Run video processing
@@ -44,8 +51,6 @@ public class ForensicPipelineController {
                     result,
                     reportServiceUrl
             );
-
-            tempVideo.delete();
 
             if (success) {
                 return ResponseEntity.ok(Map.of(
@@ -65,6 +70,10 @@ public class ForensicPipelineController {
                     "status", "FAILURE",
                     "error", e.getMessage()
             ));
+        } finally {
+            if (tempVideo != null) {
+                tempVideo.delete();
+            }
         }
     }
 }

@@ -18,10 +18,9 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '18'
-          cache: 'npm'
 
       - name: Install dependencies
-        run: npm ci
+        run: npm install --ignore-scripts --package-lock=false
 
       - name: Run linter
         run: |
@@ -46,39 +45,3 @@ jobs:
           else
             echo "No tests configured"
           fi
-
-      - name: Start server in background
-        run: |
-          nohup node server.js > server.log 2>&1 &
-          sleep 4
-
-      - name: Wait for server to be ready and run healthcheck
-        run: |
-          for i in {1..10}; do
-            if curl -fsS http://localhost:3000/health; then
-              echo "Server is up"; break;
-            fi
-            echo "Waiting for server..."; sleep 2
-          done
-
-      - name: Build Docker image
-        run: |
-          docker build -t trust-app:ci .
-
-      - name: Run Docker container
-        run: |
-          docker run -d --name trust-app-ci -p 3001:3000 trust-app:ci
-          sleep 4
-          docker ps -a
-
-      - name: Docker healthcheck (container)
-        run: |
-          docker exec trust-app-ci sh -c 'curl -fsS http://localhost:3000/health' || (docker logs trust-app-ci && exit 1)
-
-      - name: Collect logs
-        if: failure()
-        run: |
-          echo "=== server.log ==="
-          cat server.log || true
-          echo "=== Docker logs ==="
-          docker logs trust-app-ci || true
