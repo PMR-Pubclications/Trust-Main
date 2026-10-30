@@ -1,0 +1,7 @@
+{
+  "run diagnostics": "execute_diagnostic_pipeline",
+  "annon, how are you feeling?": "status_check",
+  "how are you feeling": "status_check",
+  "diagnostic track": "track_telemetry_logs",
+  "check hardware": "hardware_stream_status"
+}
