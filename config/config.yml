@@ -1,6 +1,34 @@
-# config.yaml (inside Trust-Main, Trust-Shell, etc.)
+# ==========================================
+# TRUST-MAIN CONFIGURATION FILE
+# ==========================================
+
+project:
+  name: "Trust-Main"
+  version: "1.0.0"
+  role: "Core Trust & Ledger Management"
+
+# Security & Handshake Settings (Links with Diagnostic Core & other repos)
 security:
   handshake_protocol: "HMAC-SHA256"
   target_diagnostic_repo: "my_diagnostic_project"
   shared_secret_env_var: "REPO_SHARED_SECRET"
   token_expiration_seconds: 300
+
+# Path Mappings for Internal Modules & Assets
+paths:
+  modules_dir: "modules/"
+  annon_audio_script: "modules/Annon/audio/generate_annon_audio.py"
+  ledger_dir: "data/ledger/"
+  logs_dir: "logs/"
+
+# Ledger & Transaction Settings
+ledger:
+  double_entry_enabled: true
+  audit_chain_type: "Merkle"
+  auto_sync: true
+
+# Logging Configuration
+logging:
+  level: "INFO"
+  format: "%(asctime)s [%(levelname)s] %(name)s: %(message)s"
+  save_to_file: true
