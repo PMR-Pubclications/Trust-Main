@@ -181,5 +181,26 @@ input,select{width:100%;padding:11px;background:var(--bg);color:var(--text);bord
 
 </main>
 <script src="assets/js/api_bridge.js"></script>
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js')
+        .then((reg) => console.log('Trust-Main PWA ServiceWorker registered successfully.', reg.scope))
+        .catch((err) => console.log('PWA ServiceWorker registration failed:', err));
+    });
+  }
+</script>
+
 </body>
 </html>
+
+require_once __DIR__ . '/includes/AuditLedger.php';
+$ledger = new AuditLedger();
+
+// Log the outreach event to the immutable chain
+$auditHash = $ledger->logEvent('ANNUAL_OUTREACH_TRANSMISSION', [
+    'version' => $appVersion,
+    'recipients_notified' => $successCount,
+    'status' => 'COMPLETED'
+]);
+

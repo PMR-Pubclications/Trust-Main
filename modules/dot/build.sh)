@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+# ==============================================================================
+# Trust-Main: DOT Module Build & Compilation Script
+# Installs dependencies and generates Transportation Department reports.
+# ==============================================================================
+
+set -e
+
+echo "--------------------------------------------------"
+echo "[DOT BUILD] Initializing DOT Module Build Sequence..."
+echo "--------------------------------------------------"
+
+# Step 1: Install Python Requirements for DOT IRT Services
+if [ -f "requirements.txt" ]; then
+    echo "[DOT BUILD STEP 1/2] Installing DOT Python dependencies..."
+    python3 -m pip install -r requirements.txt --quiet
+else
+    echo "[DOT BUILD STEP 1/2] No requirements.txt found. Skipping dependency installation."
+fi
+
+# Step 2: Compile Local DOT Operational Impact Report
+echo "[DOT BUILD STEP 2/2] Compiling DOT roadway incident metrics..."
+python3 dot_compiler.py
+
+echo "--------------------------------------------------"
+echo "[DOT BUILD SUCCESS] DOT module build complete. Operational report generated."
+echo "--------------------------------------------------"

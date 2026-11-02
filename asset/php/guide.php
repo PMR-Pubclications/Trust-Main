@@ -77,6 +77,26 @@ require_once __DIR__ . '/includes/header.php';
     <?php endforeach; ?>
 <?php endif; ?>
 
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js')
+        .then((reg) => console.log('Trust-Main PWA ServiceWorker registered successfully.', reg.scope))
+        .catch((err) => console.log('PWA ServiceWorker registration failed:', err));
+    });
+  }
+</script>
+require_once __DIR__ . '/includes/AuditLedger.php';
+$ledger = new AuditLedger();
+
+// Log the outreach event to the immutable chain
+$auditHash = $ledger->logEvent('ANNUAL_OUTREACH_TRANSMISSION', [
+    'version' => $appVersion,
+    'recipients_notified' => $successCount,
+    'status' => 'COMPLETED'
+]);
+
+
 <?php
 // 2. INCLUDE FOOTER
 require_once __DIR__ . '/includes/footer.php';

@@ -1,0 +1,31 @@
+name: Shared API Pipeline
+
+on:
+  workflow_call:
+    secrets:
+      SCRAMBLED_API_KEY:
+        required: true
+
+jobs:
+  execute-api:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Run Python Script with Unlocked Key
+        env:
+          SCRAMBLED_API_KEY: ${{ secrets.SCRAMBLED_API_KEY }}
+        run: |
+          python -c '
+          import os, base64, requests
+
+          # 1. Receive and descramble the key in memory
+          scrambled = os.environ.get("SCRAMBLED_API_KEY")
+          raw_key = base64.b64decode(scrambled.encode("utf-8")[::-1]).decode("utf-8")
+
+          # 2. Make the API call using the unlocked key
+          headers = {"Authorization": f"Bearer {raw_key}", "Accept": "application/vnd.github+json"}
+          response = requests.get("https://api.github.com/user", headers=headers)
+          print("API Status Code:", response.status_code)
+          '
