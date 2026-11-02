@@ -1,0 +1,160 @@
+{
+  "protocol": "AI-Trading-Protocol",
+  "version": "1.0.0",
+  "description": "Master protocol specification governing how AI agents (e.g. Robinhood, Gemini) may submit, approve, execute, and audit market trades on behalf of a principal. This document is the source of truth for the companion files in this folder: mcp-server-config.json, trading-schema.json, agent-policies.json, and audit-config.json.",
+  "metadata": {
+    "owner": "Legacytrust",
+    "relatedFiles": [
+      "mcp-server-config.json",
+      "trading-schema.json",
+      "agent-policies.json",
+      "audit-config.json"
+    ]
+  },
+  "authentication": {
+    "description": "No credentials may ever be committed to version control. All secrets are injected at runtime via environment variables and referenced here only by placeholder syntax.",
+    "strategy": "env-var-injection",
+    "placeholderSyntax": "${VAR_NAME}",
+    "requiredEnvVars": [
+      "ROBINHOOD_API_KEY",
+      "ROBINHOOD_API_SECRET",
+      "GEMINI_API_KEY",
+      "GEMINI_API_SECRET"
+    ],
+    "rules": [
+      "Never hardcode API keys, tokens, or secrets in any file under version control.",
+      "Secrets must be resolved from the process environment or a secrets manager at process start.",
+      "If a required environment variable is missing, the MCP server connection must fail closed (refuse to start) rather than fall back to an unauthenticated or placeholder mode.",
+      "Rotate credentials immediately if ever found committed to source control history."
+    ]
+  },
+  "riskPolicy": {
+    "description": "Hard limits enforced on every trade intent prior to execution, regardless of agent autonomy level.",
+    "maxPositionSizeUSD": 5000.0,
+    "maxSinglePositionPercentOfPortfolio": 10,
+    "maxDailyLossUSD": 250.0,
+    "maxDailyLossPercentOfPortfolio": 2,
+    "maxOrdersPerDay": 20,
+    "maxOpenOrdersConcurrent": 5,
+    "allowedSymbols": [
+      "AAPL",
+      "MSFT",
+      "GOOGL",
+      "AMZN",
+      "BTC-USD",
+      "ETH-USD"
+    ],
+    "deniedSymbols": [],
+    "concentrationLimits": {
+      "maxPercentPerSymbol": 20,
+      "maxPercentPerSector": 35,
+      "maxPercentCrypto": 15
+    },
+    "volatilityControls": {
+      "haltOnCircuitBreaker": true,
+      "maxSlippagePercent": 1.0,
+      "minimumLiquidityUSD": 1000000
+    },
+    "onViolation": "reject-and-log"
+  },
+  "agentAutonomy": {
+    "description": "Defines which trade actions an AI agent may execute without human intervention versus which require human approval.",
+    "levels": [
+      {
+        "level": "observe-only",
+        "description": "Agent may read market data and portfolio state but cannot submit any orders.",
+        "requiresHumanApproval": true
+      },
+      {
+        "level": "assisted",
+        "description": "Agent may draft trade intents but every order requires explicit human approval before submission.",
+        "requiresHumanApproval": true,
+        "autoExecuteThresholdUSD": 0
+      },
+      {
+        "level": "supervised-autonomy",
+        "description": "Agent may auto-execute trades below a notional threshold and within risk policy; trades above the threshold require human approval.",
+        "requiresHumanApproval": "conditional",
+        "autoExecuteThresholdUSD": 250.0
+      },
+      {
+        "level": "full-autonomy",
+        "description": "Agent may auto-execute any trade that passes risk policy validation. Reserved for highly trusted, extensively audited agents.",
+        "requiresHumanApproval": false,
+        "autoExecuteThresholdUSD": 5000.0
+      }
+    ],
+    "defaultLevel": "assisted",
+    "escalationRules": [
+      "Any trade exceeding maxPositionSizeUSD always requires human approval, regardless of autonomy level.",
+      "Any new/unlisted symbol not present in allowedSymbols always requires human approval.",
+      "Any order type other than 'market' or 'limit' (e.g. options, margin) always requires human approval.",
+      "Two consecutive rejected trades from the same agent suspend that agent's auto-execute privileges pending human review."
+    ]
+  },
+  "tradeLifecycle": {
+    "description": "Ordered states a trade intent passes through from creation to settlement.",
+    "states": [
+      "created",
+      "validated",
+      "pending_approval",
+      "approved",
+      "rejected",
+      "submitted",
+      "partially_filled",
+      "filled",
+      "cancelled",
+      "failed",
+      "settled"
+    ],
+    "terminalStates": [
+      "rejected",
+      "cancelled",
+      "failed",
+      "settled"
+    ],
+    "transitions": {
+      "created": [
+        "validated",
+        "rejected"
+      ],
+      "validated": [
+        "pending_approval",
+        "approved",
+        "rejected"
+      ],
+      "pending_approval": [
+        "approved",
+        "rejected"
+      ],
+      "approved": [
+        "submitted",
+        "cancelled"
+      ],
+      "submitted": [
+        "partially_filled",
+        "filled",
+        "cancelled",
+        "failed"
+      ],
+      "partially_filled": [
+        "filled",
+        "cancelled",
+        "failed"
+      ],
+      "filled": [
+        "settled"
+      ]
+    }
+  },
+  "auditAndCompliance": {
+    "description": "Every state transition and risk decision must be logged for compliance and post-trade review. See audit-config.json for the full logging specification.",
+    "requirements": [
+      "Every trade intent must be assigned a unique, immutable trade ID at creation.",
+      "Every state transition must emit an audit event including timestamp, actor (agent or human), and reason.",
+      "All risk policy evaluations (pass/fail) must be recorded, including which rule was evaluated and the computed values.",
+      "Audit logs must be tamper-evident (append-only) and retained per audit-config.json retention policy.",
+      "Human approvals/rejections must capture the approver identity and rationale."
+    ]
+  }
+}

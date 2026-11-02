@@ -1,0 +1,179 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://legacytrust.local/schemas/trading-schema.json",
+  "title": "AI Trading Protocol — Trade Data Schemas",
+  "description": "JSON Schema definitions for trade intents, order execution responses, trade confirmations, and standardized error/rejection codes exchanged between an AI trading agent and an MCP trading server. Referenced by ai-trading-protocol.json.",
+  "definitions": {
+    "tradeIntent": {
+      "type": "object",
+      "description": "A proposed trade submitted by an agent, prior to approval or execution.",
+      "required": ["tradeId", "symbol", "side", "orderType", "timeInForce", "createdAt"],
+      "properties": {
+        "tradeId": {
+          "type": "string",
+          "description": "Unique, immutable identifier assigned at creation (e.g. UUID)."
+        },
+        "symbol": {
+          "type": "string",
+          "description": "Ticker or trading pair, e.g. 'AAPL' or 'BTC-USD'."
+        },
+        "side": {
+          "type": "string",
+          "enum": ["buy", "sell"]
+        },
+        "quantity": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Number of shares/units. Mutually exclusive with notional."
+        },
+        "notional": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Dollar amount to trade. Mutually exclusive with quantity."
+        },
+        "orderType": {
+          "type": "string",
+          "enum": ["market", "limit", "stop", "stop_limit"]
+        },
+        "limitPrice": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Required when orderType is 'limit' or 'stop_limit'."
+        },
+        "stopPrice": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Required when orderType is 'stop' or 'stop_limit'."
+        },
+        "timeInForce": {
+          "type": "string",
+          "enum": ["day", "gtc", "ioc", "fok"]
+        },
+        "agentId": {
+          "type": "string",
+          "description": "Identifier of the agent that originated this intent (see agent-policies.json)."
+        },
+        "autonomyLevel": {
+          "type": "string",
+          "enum": ["observe-only", "assisted", "supervised-autonomy", "full-autonomy"]
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "metadata": {
+          "type": "object",
+          "description": "Free-form key/value context (e.g. strategy name, correlation id).",
+          "additionalProperties": true
+        }
+      },
+      "oneOf": [
+        { "required": ["quantity"] },
+        { "required": ["notional"] }
+      ],
+      "allOf": [
+        {
+          "if": { "properties": { "orderType": { "const": "limit" } }, "required": ["orderType"] },
+          "then": { "required": ["limitPrice"] }
+        },
+        {
+          "if": { "properties": { "orderType": { "const": "stop" } }, "required": ["orderType"] },
+          "then": { "required": ["stopPrice"] }
+        },
+        {
+          "if": { "properties": { "orderType": { "const": "stop_limit" } }, "required": ["orderType"] },
+          "then": { "required": ["limitPrice", "stopPrice"] }
+        }
+      ]
+    },
+    "orderExecutionResponse": {
+      "type": "object",
+      "description": "Response returned by the trading server after an order is submitted for execution.",
+      "required": ["tradeId", "orderId", "status", "submittedAt"],
+      "properties": {
+        "tradeId": {
+          "type": "string",
+          "description": "Correlates back to the originating tradeIntent.tradeId."
+        },
+        "orderId": {
+          "type": "string",
+          "description": "Broker/venue-assigned order identifier."
+        },
+        "status": {
+          "type": "string",
+          "enum": ["submitted", "partially_filled", "filled", "cancelled", "failed"]
+        },
+        "filledQuantity": {
+          "type": "number",
+          "minimum": 0
+        },
+        "averageFillPrice": {
+          "type": "number",
+          "minimum": 0
+        },
+        "submittedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "venue": {
+          "type": "string",
+          "description": "Execution venue or broker, e.g. 'robinhood', 'gemini'."
+        }
+      }
+    },
+    "tradeConfirmation": {
+      "type": "object",
+      "description": "Final settlement confirmation for a completed trade.",
+      "required": ["tradeId", "orderId", "symbol", "side", "filledQuantity", "averageFillPrice", "settledAt", "status"],
+      "properties": {
+        "tradeId": { "type": "string" },
+        "orderId": { "type": "string" },
+        "symbol": { "type": "string" },
+        "side": { "type": "string", "enum": ["buy", "sell"] },
+        "filledQuantity": { "type": "number", "minimum": 0 },
+        "averageFillPrice": { "type": "number", "minimum": 0 },
+        "totalFees": { "type": "number", "minimum": 0 },
+        "settledAt": { "type": "string", "format": "date-time" },
+        "status": { "type": "string", "enum": ["filled", "cancelled"], "description": "Terminal settlement status only; partial fills are not final confirmations." }
+      }
+    },
+    "errorResponse": {
+      "type": "object",
+      "description": "Standardized error/rejection payload for any failed or rejected trade intent.",
+      "required": ["tradeId", "code", "reason", "occurredAt"],
+      "properties": {
+        "tradeId": { "type": "string" },
+        "code": {
+          "type": "string",
+          "enum": [
+            "RISK_LIMIT_EXCEEDED",
+            "SYMBOL_NOT_ALLOWED",
+            "INSUFFICIENT_FUNDS",
+            "APPROVAL_REQUIRED",
+            "APPROVAL_DENIED",
+            "AUTHENTICATION_FAILED",
+            "VENUE_UNAVAILABLE",
+            "INVALID_ORDER_PARAMETERS",
+            "DUPLICATE_TRADE_ID",
+            "MARKET_CLOSED",
+            "RATE_LIMITED",
+            "UNKNOWN_ERROR"
+          ],
+          "description": "Machine-readable rejection/error code."
+        },
+        "reason": {
+          "type": "string",
+          "description": "Human-readable explanation of the error/rejection."
+        },
+        "occurredAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "retryable": {
+          "type": "boolean",
+          "default": false
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,79 @@
+{
+  "description": "Unified MCP (Model Context Protocol) server configuration for AI trading agents. Replaces and consolidates the legacy RobbinHood.json and Gemini-connection.json files. All credentials are injected via environment variables at runtime; no secrets are stored in this file.",
+  "protocolRef": "ai-trading-protocol.json",
+  "version": "1.0.0",
+  "mcpServers": {
+    "robinhood-trading": {
+      "url": "https://agent.robinhood.com/mcp/trading",
+      "headers": {
+        "Authorization": "${ROBINHOOD_API_KEY}",
+        "X-API-Secret": "${ROBINHOOD_API_SECRET}"
+      },
+      "auth": {
+        "strategy": "env-var-injection",
+        "requiredEnvVars": [
+          "ROBINHOOD_API_KEY",
+          "ROBINHOOD_API_SECRET"
+        ],
+        "failClosedOnMissingEnv": true,
+        "headerScheme": "raw-value Authorization header: the environment variable value is substituted as-is with no additional prefix"
+      },
+      "risk": {
+        "autoApprove": false,
+        "inheritFrom": [
+          "ai-trading-protocol.json#/riskPolicy",
+          "agent-policies.json#/agents/robinhood-agent/maxPerTradeNotionalUSD"
+        ]
+      },
+      "logging": {
+        "enabled": true,
+        "auditHook": "audit-config.json#/eventTypes",
+        "logLevel": "info"
+      }
+    },
+    "gemini-trading": {
+      "url": "https://agent.gemini.com/mcp/trading",
+      "headers": {
+        "Authorization": "${GEMINI_API_KEY}",
+        "X-API-Secret": "${GEMINI_API_SECRET}"
+      },
+      "auth": {
+        "strategy": "env-var-injection",
+        "requiredEnvVars": [
+          "GEMINI_API_KEY",
+          "GEMINI_API_SECRET"
+        ],
+        "failClosedOnMissingEnv": true,
+        "headerScheme": "raw-value Authorization header: the environment variable value is substituted as-is with no additional prefix"
+      },
+      "risk": {
+        "autoApprove": false,
+        "inheritFrom": [
+          "ai-trading-protocol.json#/riskPolicy",
+          "agent-policies.json#/agents/gemini-agent/maxPerTradeNotionalUSD"
+        ]
+      },
+      "logging": {
+        "enabled": true,
+        "auditHook": "audit-config.json#/eventTypes",
+        "logLevel": "info"
+      }
+    }
+  },
+  "globalSettings": {
+    "description": "Defaults applied to all servers unless overridden per-server above. defaultConnection (timeout/retry/heartbeat) applies to every server in mcpServers unless a server defines its own 'connection' block. Per-server risk limits are not duplicated here; agent-policies.json is the single source of truth for maxPerTradeNotionalUSD/maxDailyAggregateNotionalUSD, referenced via each server's risk.inheritFrom.",
+    "autoApprove": false,
+    "requireAuditLogging": true,
+    "failClosedOnAuthError": true,
+    "defaultConnection": {
+      "timeoutMs": 10000,
+      "retry": {
+        "maxAttempts": 3,
+        "backoffStrategy": "exponential",
+        "initialDelayMs": 500,
+        "maxDelayMs": 5000
+      },
+      "heartbeatIntervalMs": 30000
+    }
+  }
+}
