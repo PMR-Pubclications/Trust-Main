@@ -396,6 +396,16 @@ require_once __DIR__ . '/includes/header.php';
         <?php endforeach; ?>
     <?php endif; ?>
 </div>
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js')
+        .then((reg) => console.log('Trust-Main PWA ServiceWorker registered successfully.', reg.scope))
+        .catch((err) => console.log('PWA ServiceWorker registration failed:', err));
+    });
+  }
+</script>
+
 
 <?php
 // 5. Render Footer

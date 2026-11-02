@@ -1,0 +1,3 @@
+      - name: Publish Dynamic Press Release
+        run: |
+          php publish_press_release.php

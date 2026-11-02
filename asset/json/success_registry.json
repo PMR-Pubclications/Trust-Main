@@ -1,0 +1,18 @@
+{
+  "platform": "Trust Forensics Mobile Lab (TFML)",
+  "registry_version": "1.1",
+  "success_cases": [
+    {
+      "case_id": "TFML-2026-042",
+      "court_case_number": "CR-2026-8891-DC",
+      "agency": "Metro Police Department",
+      "module_type": "Law Enforcement & Ballistics",
+      "initial_human_assumption": "Suspect charged with discharge of firearm based on conflicting eyewitness panic statements.",
+      "ground_truth_evidence": "Hardware acoustic transient logs and 3D LiDAR trajectory mapping proved weapon discharge originated 45 meters away behind a structural concrete barrier.",
+      "judicial_outcome": "Exoneration / Dismissed Prior to Trial",
+      "municipal_impact": "Prevented wrongful conviction and eliminated projected multi-million dollar civil rights litigation payout.",
+      "court_admissibility_verified": true,
+      "da_discovery_receipt_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ]
+}
